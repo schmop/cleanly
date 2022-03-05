@@ -1,0 +1,7 @@
+{
+  "name": "cleanly",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
