@@ -1,9 +1,15 @@
 <template>
   <ion-page>
-    <ion-content> </ion-content>
+    <ion-content>
+      <HouseholdView
+        v-for="(household, index) in households"
+        :household="household"
+        :key="index"
+      />
+    </ion-content>
     <ion-footer>
       <ion-toolbar>
-        <ion-button color="primary">
+        <ion-button color="primary" @click="openCreateHouseholdModal">
           <ion-icon slot="start" :icon="addCircleOutline" />
           Create household
         </ion-button>
@@ -14,9 +20,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { addCircleOutline } from "ionicons/icons";
+import { addCircleOutline, closeCircleOutline } from "ionicons/icons";
 import client from "@/client";
 import toast from "@/toast";
+import router from "@/router";
 import {
   IonPage,
   IonLabel,
@@ -24,14 +31,20 @@ import {
   IonItemGroup,
   IonItem,
   IonContent,
-  IonItemDivider,
+  IonModal,
   IonFooter,
-  IonToggle,
+  IonHeader,
   IonToolbar,
+  IonTitle,
   IonButton,
   IonIcon,
+  modalController,
 } from "@ionic/vue";
-import router from "@/router";
+import { Household } from "@/models/Household";
+import { User } from "@/models/User";
+import { Invite } from "@/models/Invite";
+import CreateHousehold from "@/modals/CreateHousehold.vue";
+import HouseholdView from '@/components/HouseholdView.vue';
 
 export default defineComponent({
   name: "DashBoard",
@@ -42,13 +55,35 @@ export default defineComponent({
     IonToolbar,
     IonButton,
     IonIcon,
+    HouseholdView,
   },
   async beforeMount() {
-    const info = await client.dashboardInfo();
+    await this.updateDashboard();
   },
-  data: () => ({}),
+  data: () => ({
+    households: [] as Household[],
+    user: null as null|User,
+    invites: [] as Invite[],
+    addCircleOutline,
+    closeCircleOutline,
+  }),
   computed: {},
-  methods: {},
+  methods: {
+    async updateDashboard() {
+      const info = await client.dashboardInfo();
+      this.households = info.households;
+      this.user = info.user;
+      this.invites = info.invites;
+    },
+    async openCreateHouseholdModal() {
+      const createHouseholdModal = await modalController.create({
+        component: CreateHousehold,
+      });
+      createHouseholdModal.present();
+      await createHouseholdModal.onDidDismiss();
+      await this.updateDashboard();
+    },
+  },
 });
 </script>
 

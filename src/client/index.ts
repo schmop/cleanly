@@ -1,14 +1,15 @@
 import router from '../router';
 
 class Client {
-    private _token: null|string = null;
-    private _mail: null|string = null;
+    private _token: null | string = null;
+    private _mail: null | string = null;
     private get LOCALSTORAGE_STATE_KEY() {
         return 'Cleanly.State';
     }
 
     get HOST() {
-        return "http://schmoppo.de";
+        //return "https://schmoppo.de";
+        return "https://127.0.0.1:8000";
     }
 
     async restoreState(): Promise<void> {
@@ -17,7 +18,7 @@ class Client {
             const state = JSON.parse(stateString);
             this._token = state.token;
             this._mail = state.mail;
-            const response = await this.request('api/auth_check');
+            const response = await this.request('api/auth_check', {}, false);
             if (response.status !== 200) {
                 this._token = null;
                 this._mail = null;
@@ -85,8 +86,17 @@ class Client {
         return response.status === 200;
     }
 
+    async invite(householdId: number, ...ids: number[]) {
+        const formData = new FormData();
+        formData.append('ids', JSON.stringify(ids));
+        return await this.request(`api/household/invite/${householdId}`, {
+            body: formData,
+            method: 'POST',
+        });
+    }
+
     async fetchInviteLink(householdId: number): Promise<string> {
-        const response = await this.request(`api/household/${householdId}/invite`, {
+        const response = await this.request(`api/household/invite/generate/${householdId}`, {
             method: 'POST',
         });
 
@@ -104,10 +114,14 @@ class Client {
         formData.append('_name', name);
         formData.append('_mail', mail);
         formData.append('_password', password);
-        const response = await this.request('signup', {
-            body: formData,
-            method: 'POST',
-        });
+        const response = await this.request(
+            'signup',
+            {
+                body: formData,
+                method: 'POST',
+            },
+            false
+        );
         if (response.status === 200) {
             return;
         }
@@ -131,13 +145,15 @@ class Client {
             },
             {
                 method: 'POST',
-            }
+            },
+            false
         );
         if (response.status === 200) {
             const data = await response.json();
             if ('token' in data) {
                 this._token = data.token;
-                localStorage.setItem(this.LOCALSTORAGE_STATE_KEY, JSON.stringify({'mail': mail, 'token': data.token}));
+                this._mail = mail;
+                localStorage.setItem(this.LOCALSTORAGE_STATE_KEY, JSON.stringify({ 'mail': mail, 'token': data.token }));
 
                 return;
             }
@@ -153,21 +169,32 @@ class Client {
         return null != this._token;
     }
 
-    getMail(): null|string {
+    getMail(): null | string {
         return this._mail;
     }
 
-    private async sendJson(endpoint: string, data: object, init: any): Promise<Response> {
+    async lookupUsers(search: string) {
+        const formData = new FormData();
+        formData.append('search', search);
+        const response = await this.request('api/user/lookup', {
+            body: formData,
+            method: 'POST',
+        });
+
+        return await response.json();
+    }
+
+    private async sendJson(endpoint: string, data: object, init: RequestInit, allowRetry = true): Promise<Response> {
         if (!(init.headers instanceof Headers)) {
             init.headers = new Headers(init.headers ?? {});
         }
         init.headers.append('Content-Type', 'application/json');
         init.body = JSON.stringify(data);
 
-        return await this.request(endpoint, init);
+        return await this.request(endpoint, init, allowRetry);
     }
 
-    private async request(endpoint: string, init: any = {}): Promise<Response> {
+    private async request(endpoint: string, init: RequestInit = {}, allowRetry = true): Promise<Response> {
         if (!(init.headers instanceof Headers)) {
             init.headers = new Headers(init.headers ?? {});
         }
@@ -176,7 +203,11 @@ class Client {
         }
 
         const response = await fetch(`${this.HOST}/${endpoint}`, init);
-        if (response.status === 401) {
+        if (response.status === 401 && allowRetry) {
+            await this.restoreState();
+            if (this._token != null) {
+                return await this.request(endpoint, init, false);
+            }
             router.replace('/');
         }
 
