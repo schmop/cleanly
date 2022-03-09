@@ -8,7 +8,7 @@
             <ion-icon slot="icon-only" :icon="ellipsisVertical"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-popover :trigger="editButtonId" v-if="isAdmin">
+        <ion-popover :trigger="editButtonId" v-if="isAdmin" ref="popover" dismiss-on-select>
           <ion-content>
             <ion-list>
               <ion-item button>
@@ -117,7 +117,6 @@ export default defineComponent({
         }
       });
       createHouseholdModal.present();
-      await createHouseholdModal.onDidDismiss();
     },
   },
 });

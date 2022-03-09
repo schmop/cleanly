@@ -163,6 +163,8 @@ class Client {
 
     logout(): void {
         localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
+        this._mail = null;
+        this._token = null;
     }
 
     isAuthenticated(): boolean {

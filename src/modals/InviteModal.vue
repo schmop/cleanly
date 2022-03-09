@@ -29,7 +29,7 @@
           @click="add(suggestion)"
           :key="index"
         >
-          <ion-icon slot="start" :icon="addCircleOutline" />
+          <ion-icon slot="start" :icon="personOutline" />
           <ion-label> {{ suggestion.name }} </ion-label>
         </ion-item>
       </ion-list>
@@ -148,14 +148,22 @@ export default defineComponent({
       this.inviteSearch = "";
     },
     async invite() {
-      if (null == this.selection?.id) {
+      if (null == this.household?.id || null == this.selection?.id) {
         return;
       }
-      await client.invite(this.selection?.id);
+      await client.invite(this.household?.id, this.selection?.id);
       this.dismiss();
     },
     async _search() {
-      this.suggestions = await client.lookupUsers(this.inviteSearch);
+      console.log(this.household);
+      let suggestions = await client.lookupUsers(this.inviteSearch);
+      const users = this.household?.users;
+      if (null != users) {
+        suggestions = suggestions.filter((suggestion: LookupResult) =>
+          !users.some((user) => user.id != null && user.id === suggestion.id)
+        );
+      }
+      this.suggestions = suggestions;
     },
   },
 });
