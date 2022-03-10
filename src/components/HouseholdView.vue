@@ -105,9 +105,6 @@ export default defineComponent({
       return `household-button-${this.household?.id}`;
     },
   },
-  mounted() {
-    console.log(this.household);
-  },
   methods: {
     async openInviteModal() {
       const createHouseholdModal = await modalController.create({

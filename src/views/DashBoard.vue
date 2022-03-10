@@ -1,32 +1,32 @@
 <template>
-  <ion-menu content-id="main" menu-id="dashboard-menu" side="end">
-    <ion-header>
-      <ion-toolbar color="primary">
-        <ion-title>
-          Menu
-          <ion-icon
-            :icon="closeCircleOutline"
-            color="dark"
-            @click="close"
-            style="float: right"
-          />
-        </ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content>
-      <ion-list>
-        <ion-item button @click="openCreateHouseholdModal">
-          <ion-icon slot="start" :icon="addCircleOutline" />
-          Create Household
-        </ion-item>
-        <ion-item button @click="logout">
-          <ion-icon slot="start" :icon="logOutOutline" />
-          Logout
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ion-menu>
   <ion-page>
+    <ion-menu content-id="main" menu-id="dashboard-menu" side="end">
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>
+            Menu
+            <ion-icon
+              :icon="closeCircleOutline"
+              color="dark"
+              @click="close"
+              style="float: right"
+            />
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list>
+          <ion-item button @click="openCreateHouseholdModal">
+            <ion-icon slot="start" :icon="addCircleOutline" />
+            Create Household
+          </ion-item>
+          <ion-item button @click="logout">
+            <ion-icon slot="start" :icon="logOutOutline" />
+            Logout
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="primary">

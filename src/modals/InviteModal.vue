@@ -155,7 +155,6 @@ export default defineComponent({
       this.dismiss();
     },
     async _search() {
-      console.log(this.household);
       let suggestions = await client.lookupUsers(this.inviteSearch);
       const users = this.household?.users;
       if (null != users) {
