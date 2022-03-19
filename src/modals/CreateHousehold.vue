@@ -50,11 +50,12 @@ import {
   IonButton,
   IonFooter,
   modalController,
+  menuController,
 } from "@ionic/vue";
 import router from "@/router";
 import { Household } from "@/models/Household";
 
-export default defineComponent({
+const CreateHousehold = defineComponent({
   name: "DashBoard",
   components: {
     IonContent,
@@ -85,6 +86,18 @@ export default defineComponent({
     },
   },
 });
+
+export default CreateHousehold;
+
+export async function openCreateHouseholdModal() {
+  menuController.close("menu");
+  const createHouseholdModal = await modalController.create({
+    component: CreateHousehold,
+  });
+  createHouseholdModal.present();
+  await createHouseholdModal.onDidDismiss();
+  //await this.updateDashboard();
+}
 </script>
 
 <style scoped>

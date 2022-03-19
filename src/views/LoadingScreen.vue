@@ -22,7 +22,7 @@ export default defineComponent({
   async beforeCreate() {
     await client.restoreState();
     if (client.isAuthenticated()) {
-      router.replace("/dashboard");
+      router.replace("/app");
     } else {
       router.replace("/login");
     }

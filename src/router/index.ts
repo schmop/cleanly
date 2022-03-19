@@ -3,6 +3,8 @@ import { RouteRecordRaw } from 'vue-router';
 import Login from '@/views/LoginPage.vue';
 import Dashboard from '@/views/DashBoard.vue';
 import LoadingScreen from '@/views/LoadingScreen.vue';
+import AppRouterOutlet from '@/views/AppRouterOutlet.vue';
+import InviteView from '@/views/InviteView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,9 +16,20 @@ const routes: Array<RouteRecordRaw> = [
     component: Login,
   },
   {
-    path: '/dashboard',
-    component: Dashboard,
-  },
+    path: '/app',
+    component: AppRouterOutlet,
+    redirect: '/app/dashboard',
+    children: [
+      {
+        path: '/app/dashboard',
+        component: Dashboard,
+      },
+      {
+        path: '/app/invites',
+        component: InviteView,
+      },
+    ]
+  }
 ]
 
 const router = createRouter({

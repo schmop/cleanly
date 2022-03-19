@@ -123,7 +123,7 @@ export default defineComponent({
        try {
         await client.signIn(this.mail, this.password);
         toast.info("Login successful!");
-        router.replace('/dashboard');
+        router.replace('/app');
       } catch (error: any) {
         toast.error(error.message);
       }

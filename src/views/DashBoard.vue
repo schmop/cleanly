@@ -1,41 +1,6 @@
 <template>
   <ion-page>
-    <ion-menu content-id="main" menu-id="dashboard-menu" side="end">
-      <ion-header>
-        <ion-toolbar color="primary">
-          <ion-title>
-            Menu
-            <ion-icon
-              :icon="closeCircleOutline"
-              color="dark"
-              @click="close"
-              style="float: right"
-            />
-          </ion-title>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-list>
-          <ion-item button @click="openCreateHouseholdModal">
-            <ion-icon slot="start" :icon="addCircleOutline" />
-            Create Household
-          </ion-item>
-          <ion-item button @click="logout">
-            <ion-icon slot="start" :icon="logOutOutline" />
-            Logout
-          </ion-item>
-        </ion-list>
-      </ion-content>
-    </ion-menu>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="primary">
-          <ion-menu-button auto-hide="false"></ion-menu-button>
-        </ion-buttons>
-        <ion-title size="small"> Cleanly </ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content id="main">
+    <ion-content id="dashboard">
       <ion-loading v-if="loading" spinner="circular" />
       <template v-else>
         <HouseholdView
@@ -66,6 +31,7 @@ import {
   addCircleOutline,
   closeCircleOutline,
   logOutOutline,
+  mailOutline,
 } from "ionicons/icons";
 import client from "@/client";
 import toast from "@/toast";
@@ -99,28 +65,21 @@ import {
 import { Household } from "@/models/Household";
 import { User } from "@/models/User";
 import { Invite } from "@/models/Invite";
-import CreateHousehold from "@/modals/CreateHousehold.vue";
+import {openCreateHouseholdModal} from "@/modals/CreateHousehold.vue";
 import HouseholdView from "@/components/HouseholdView.vue";
+import MenuView from "@/components/MenuView.vue";
 
 export default defineComponent({
   name: "DashBoard",
   components: {
     IonPage,
     IonContent,
-    IonToolbar,
     IonCardHeader,
     IonLoading,
-    IonMenu,
     IonButton,
     IonCard,
-    IonButtons,
     IonCardTitle,
-    IonMenuButton,
     IonCardContent,
-    IonItem,
-    IonList,
-    IonTitle,
-    IonHeader,
     IonIcon,
     HouseholdView,
   },
@@ -135,6 +94,8 @@ export default defineComponent({
     addCircleOutline,
     closeCircleOutline,
     logOutOutline,
+    mailOutline,
+    openCreateHouseholdModal,
   }),
   computed: {},
   methods: {
@@ -145,26 +106,25 @@ export default defineComponent({
       this.invites = info.invites;
       this.loading = false;
     },
-    async openCreateHouseholdModal() {
-      this.close();
-      const createHouseholdModal = await modalController.create({
-        component: CreateHousehold,
-      });
-      createHouseholdModal.present();
-      await createHouseholdModal.onDidDismiss();
-      await this.updateDashboard();
-    },
     logout() {
       this.close();
       client.logout();
       router.push("/login");
     },
     close() {
-      menuController.close("dashboard-menu");
+      menuController.close("menu");
     },
   },
 });
 </script>
 
 <style scoped>
+.button-badge {
+  position: absolute;
+  right: -6px;
+  top: -9px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
 </style>
