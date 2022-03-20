@@ -112,9 +112,6 @@ export default defineComponent({
     IonButton,
     IonFooter,
   },
-  async beforeMount() {
-    const info = await client.dashboardInfo();
-  },
   props: {
     household: Object as () => Household,
   },

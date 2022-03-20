@@ -56,7 +56,7 @@ import {
 import { Household } from "@/models/Household";
 import { User } from "@/models/User";
 import { Invite } from "@/models/Invite";
-import HouseholdView from "@/components/HouseholdView.vue";
+import HouseholdView from "@/components/HouseholdPreview.vue";
 import {openCreateHouseholdModal} from "@/modals/CreateHousehold.vue";
 
 export default defineComponent({

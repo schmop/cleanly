@@ -1,26 +1,24 @@
 <template>
   <ion-page>
     <ion-content id="dashboard">
-      <ion-loading v-if="loading" spinner="circular" />
-      <template v-else>
-        <HouseholdView
-          v-for="(household, index) in households"
-          :household="household"
-          :key="index"
-        />
-        <ion-card v-if="households.length === 0">
-          <ion-card-header>
-            <ion-card-title> No households yet... </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            To start, join a household or create one:
-            <ion-button color="primary" @click="openCreateHouseholdModal">
-              <ion-icon slot="start" :icon="addCircleOutline" />
-              Create household
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      </template>
+      <HouseholdPreview
+        v-for="(household, index) in households"
+        @click="openHousehold(household)"
+        :household="household"
+        :key="index"
+      />
+      <ion-card v-if="households.length === 0">
+        <ion-card-header>
+          <ion-card-title> No households yet... </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          To start, join a household or create one:
+          <ion-button color="primary" @click="openCreateHouseholdModal">
+            <ion-icon slot="start" :icon="addCircleOutline" />
+            Create household
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
     </ion-content>
   </ion-page>
 </template>
@@ -45,7 +43,6 @@ import {
   IonContent,
   IonCardHeader,
   IonModal,
-  IonLoading,
   IonFooter,
   IonCardContent,
   IonMenuButton,
@@ -65,9 +62,10 @@ import {
 import { Household } from "@/models/Household";
 import { User } from "@/models/User";
 import { Invite } from "@/models/Invite";
-import {openCreateHouseholdModal} from "@/modals/CreateHousehold.vue";
-import HouseholdView from "@/components/HouseholdView.vue";
+import { openCreateHouseholdModal } from "@/modals/CreateHousehold.vue";
+import HouseholdPreview from "@/components/HouseholdPreview.vue";
 import MenuView from "@/components/MenuView.vue";
+import { mapState, mapMutations } from "vuex";
 
 export default defineComponent({
   name: "DashBoard",
@@ -75,37 +73,24 @@ export default defineComponent({
     IonPage,
     IonContent,
     IonCardHeader,
-    IonLoading,
     IonButton,
     IonCard,
     IonCardTitle,
     IonCardContent,
     IonIcon,
-    HouseholdView,
-  },
-  async beforeMount() {
-    await this.updateDashboard();
+    HouseholdPreview,
   },
   data: () => ({
-    loading: true,
-    households: [] as Household[],
-    user: null as null | User,
-    invites: [] as Invite[],
     addCircleOutline,
     closeCircleOutline,
     logOutOutline,
     mailOutline,
-    openCreateHouseholdModal,
   }),
-  computed: {},
+  computed: {
+    ...mapState(["user", "households", "invites"]),
+  },
   methods: {
-    async updateDashboard() {
-      const info = await client.dashboardInfo();
-      this.households = info.households;
-      this.user = info.user;
-      this.invites = info.invites;
-      this.loading = false;
-    },
+    openCreateHouseholdModal,
     logout() {
       this.close();
       client.logout();
@@ -113,6 +98,9 @@ export default defineComponent({
     },
     close() {
       menuController.close("menu");
+    },
+    openHousehold(household: Household) {
+      router.push(`/app/household/${household.id}`);
     },
   },
 });

@@ -15,7 +15,7 @@
                 <ion-icon slot="start" :icon="addCircleOutline" />
                 <ion-label> New Task </ion-label>
               </ion-item>
-              <ion-item button @click="openInviteModal">
+              <ion-item button @click.stop="openInviteModal">
                 <ion-icon slot="start" :icon="personAddOutline" />
                 <ion-label> Send invite </ion-label>
               </ion-item>
@@ -71,7 +71,7 @@ import TaskView from "@/components/TaskView.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 
 export default defineComponent({
-  name: "HouseholdView",
+  name: "HouseholdPreview",
   components: {
     TaskView,
     IonButton,

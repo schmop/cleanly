@@ -1,8 +1,12 @@
+import { Store } from 'vuex';
 import router from '../router';
+import { store, State } from '../store';
+import { Invite } from '../models/Invite';
 
 class Client {
     private _token: null | string = null;
     private _mail: null | string = null;
+    private store: Store<State>;
     private get LOCALSTORAGE_STATE_KEY() {
         return 'Cleanly.State';
     }
@@ -10,6 +14,11 @@ class Client {
     get HOST() {
         //return "https://schmoppo.de";
         return "https://127.0.0.1:8000";
+    }
+
+
+    constructor(store: Store<State>) {
+        this.store = store;
     }
 
     async restoreState(): Promise<void> {
@@ -53,10 +62,10 @@ class Client {
 
     async dashboardInfo(): Promise<any> {
         const response = await this.request('api/dashboard');
-        if (response.status === 200) {
-            return await response.json();
+        if (response.status !== 200) {
+            throw new Error('Could not authenticate, code: ' + response.status);
         }
-        throw new Error('Could not authenticate, code: ' + response.status);
+        this.store.commit('dashboard', await response.json());
     }
 
     async setHouseholdColor(householdId: number, color: string): Promise<boolean> {
@@ -71,11 +80,31 @@ class Client {
     }
 
     async joinHousehold(inviteToken: string) {
-        const response = await this.request(`api/household/${inviteToken}/join`, {
+        const response = await this.request(`api/household/join-by-token/${inviteToken}`, {
             method: 'POST',
         });
 
         return response.status === 200;
+    }
+
+    async acceptInvite(invite: Invite) {
+        const response = await this.request(`api/household/accept-invite/${invite.householdId}`, {
+            method: 'POST',
+        });
+        if (response.status !== 200) {
+            throw new Error('Could not accept invite, ' + response.statusText);
+        }
+        const data = await response.json();
+        this.store.commit('joinHousehold', data.household);
+    }
+
+    async declineInvite(invite: Invite) {
+        const response = await this.request(`api/household/decline-invite/${invite.householdId}`, {
+            method: 'POST',
+        });
+        if (response.status !== 200) {
+            throw new Error('Could not decline invite, ' + response.statusText);
+        }
     }
 
     async removeHousehold(householdId: number) {
@@ -217,6 +246,6 @@ class Client {
     }
 }
 
-const client = new Client();
+const client = new Client(store);
 
 export default client;

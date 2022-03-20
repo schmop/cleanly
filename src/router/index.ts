@@ -5,6 +5,7 @@ import Dashboard from '@/views/DashBoard.vue';
 import LoadingScreen from '@/views/LoadingScreen.vue';
 import AppRouterOutlet from '@/views/AppRouterOutlet.vue';
 import InviteView from '@/views/InviteView.vue';
+import HouseholdView from '@/views/HouseholdView.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -27,6 +28,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/app/invites',
         component: InviteView,
+      },
+      {
+        path: '/app/household/:id',
+        component: HouseholdView,
+        props: route => ({id: parseInt(route.params.id as string)})
       },
     ]
   }

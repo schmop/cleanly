@@ -3,6 +3,11 @@
     <MenuView />
     <ion-header>
       <ion-toolbar>
+        <ion-buttons slot="start" v-if="!isDashboard">
+          <ion-button size="large" @click="goHome">
+            <ion-icon size="large" slot="icon-only" :icon="homeOutline" />
+          </ion-button>
+        </ion-buttons>
         <ion-buttons slot="primary">
           <ion-menu-button auto-hide="false"></ion-menu-button>
         </ion-buttons>
@@ -18,7 +23,13 @@
       </ion-toolbar>
     </ion-header>
     <ion-content id="main">
-      <ion-router-outlet />
+      <ion-loading v-if="loading" />
+      <template v-else>
+        <ion-refresher slot="fixed" @ionRefresh="forceReload">
+          <ion-refresher-content />
+        </ion-refresher>
+        <ion-router-outlet />
+      </template>
     </ion-content>
   </ion-page>
 </template>
@@ -29,10 +40,12 @@ import {
   addCircleOutline,
   closeCircleOutline,
   logOutOutline,
+  homeOutline,
   mailOutline,
 } from "ionicons/icons";
 import client from "@/client";
 import toast from "@/toast";
+import {RefresherCustomEvent} from "@ionic/core/components";
 import router from "@/router";
 import {
   IonPage,
@@ -48,7 +61,10 @@ import {
   IonCardContent,
   IonMenuButton,
   IonMenu,
+  IonBackButton,
   IonCard,
+  IonRefresher,
+  IonRefresherContent,
   IonHeader,
   IonButtons,
   IonCardTitle,
@@ -63,6 +79,7 @@ import {
   menuController,
 } from "@ionic/vue";
 import MenuView from "@/components/MenuView.vue";
+import { mapState } from "vuex";
 
 export default defineComponent({
   name: "DashBoard",
@@ -73,6 +90,9 @@ export default defineComponent({
     IonToolbar,
     IonButton,
     IonRouterOutlet,
+    IonLoading,
+    IonRefresher,
+    IonRefresherContent,
     IonButtons,
     IonMenuButton,
     IonTitle,
@@ -82,15 +102,31 @@ export default defineComponent({
   },
   data: () => ({
     mailOutline,
+    loading: true,
+    homeOutline,
   }),
   computed: {
-    invites() {
-      return [1];
+    ...mapState(["invites", "user"]),
+    isDashboard() {
+      return this.$route.path === "/app/dashboard";
     },
   },
+  async beforeCreate() {
+    if (null == this.user) {
+      await client.dashboardInfo();
+    }
+    this.loading = false;
+  },
   methods: {
+    async forceReload(event: RefresherCustomEvent) {
+      await client.dashboardInfo();
+      event.target.complete();
+    },
     showInvites() {
       router.push("/app/invites");
+    },
+    goHome() {
+      router.push("/app/dashboard");
     },
   },
 });

@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-content id="invites">
+    <ion-content id="household">
       <ion-card v-for="(invite, index) in invites" :key="index">
         <ion-card-header>
           <ion-card-title>
@@ -75,7 +75,7 @@ import { Invite } from "@/models/Invite";
 import { mapState, mapMutations } from "vuex";
 
 export default defineComponent({
-  name: "DashBoard",
+  name: "HouseholdView",
   components: {
     IonPage,
     IonContent,
@@ -94,11 +94,17 @@ export default defineComponent({
     enterOutline,
     closeOutline,
   }),
+  props: {
+    id: Number,
+  },
   mounted() {
-    console.log(this.invites);
+    console.log(this.id);
   },
   computed: {
-    ...mapState(["invites", "user"]),
+    ...mapState(["households", "user"]),
+    invites() {
+      return [];
+    }
   },
   methods: {
     ...mapMutations(["removeInvite"]),
