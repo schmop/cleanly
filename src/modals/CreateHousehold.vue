@@ -1,13 +1,15 @@
 <template>
   <ion-header>
     <ion-toolbar color="medium">
-      <ion-title
-        >Create household<ion-icon
+      <ion-title>
+        Create household
+        <ion-icon
           :icon="closeCircleOutline"
           color="dark"
           @click="dismiss()"
           style="float: right"
-      /></ion-title>
+        />
+      </ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content color="light" @keypress.enter="create()">
@@ -96,7 +98,7 @@ export async function openCreateHouseholdModal() {
   });
   createHouseholdModal.present();
   await createHouseholdModal.onDidDismiss();
-  //await this.updateDashboard();
+  await client.dashboardInfo();
 }
 </script>
 

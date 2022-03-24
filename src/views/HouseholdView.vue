@@ -1,43 +1,28 @@
 <template>
   <ion-page>
     <ion-content id="household">
-      <ion-card v-for="(invite, index) in invites" :key="index">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-text color="secondary">
-              <i>{{ invite.inviter.name }}</i>
-            </ion-text>
-            invited you to
-            <ion-text color="secondary">
-              <i>{{ invite.householdName }}</i>
-            </ion-text>
-          </ion-card-title>
-          <ion-card-subtitle
-            >Do you want to accept the invitation?</ion-card-subtitle
-          >
-        </ion-card-header>
-        <ion-card-content>
-          <ion-toolbar>
-            <ion-buttons slot="end">
-              <ion-button color="success" @click="accept(invite)">
-                <ion-icon slot="start" :icon="enterOutline" />
-                Join
-              </ion-button>
-              <ion-button color="danger" @click="decline(invite)">
-                <ion-icon slot="start" :icon="closeOutline" />
-                Decline
-              </ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-card-content>
-      </ion-card>
+      <TaskView
+        v-for="(task, index) in household.tasks"
+        :task="task"
+        :key="index"
+      />
     </ion-content>
+    <ion-footer>
+      <ion-toolbar>
+        <ion-buttons slot="end">
+          <ion-button color="primary" fill="solid" @click="openAddTaskModal">
+            Add task
+            <ion-icon :icon="addCircleOutline" />
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-footer>
   </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { closeOutline, enterOutline } from "ionicons/icons";
+import { closeOutline, enterOutline, addCircleOutline } from "ionicons/icons";
 import client from "@/client";
 import toast from "@/toast";
 import router from "@/router";
@@ -73,68 +58,35 @@ import { Household } from "@/models/Household";
 import { User } from "@/models/User";
 import { Invite } from "@/models/Invite";
 import { mapState, mapMutations } from "vuex";
+import TaskView from '@/components/TaskView.vue';
+import {openAddTaskModal} from '@/modals/AddTask.vue';
 
 export default defineComponent({
   name: "HouseholdView",
   components: {
     IonPage,
     IonContent,
-    IonCardContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
+    TaskView,
     IonToolbar,
+    IonFooter,
     IonButtons,
     IonButton,
-    IonText,
     IonIcon,
   },
   data: () => ({
-    enterOutline,
-    closeOutline,
+    addCircleOutline
   }),
   props: {
     id: Number,
   },
-  mounted() {
-    console.log(this.id);
-  },
   computed: {
     ...mapState(["households", "user"]),
-    invites() {
-      return [];
+    household() {
+      return this.households.find((household: Household) => household.id === this.id);
     }
   },
   methods: {
-    ...mapMutations(["removeInvite"]),
-    async accept(invite: Invite) {
-      try {
-        await client.acceptInvite(invite);
-        this.removeInvite(invite);
-        toast.success("Household joined successfully!");
-        this.backToDashboardIfEmpty();
-      } catch (exception) {
-        console.error("Could not accept invitation!", exception);
-        toast.error("Error: Could not accept invitation!");
-      }
-    },
-    async decline(invite: Invite) {
-      try {
-        await client.declineInvite(invite);
-        this.removeInvite(invite);
-        toast.info("Invitation declined");
-        this.backToDashboardIfEmpty();
-      } catch (exception) {
-        console.error("Could not decline invitation!", exception);
-        toast.error("Error: Could not decline invite!");
-      }
-    },
-    backToDashboardIfEmpty() {
-      if (this.invites.length === 0) {
-        router.push("/app/dashboard");
-      }
-    },
+    openAddTaskModal,
   },
 });
 </script>
