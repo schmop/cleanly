@@ -19,10 +19,14 @@
         <ion-input type="text" v-model="taskName" />
       </ion-item>
       <ion-item button @click="openDurationPicker">
-        <ion-label
-          >Repeats every {{ duration }} {{ durationModifier }}</ion-label
-        >
+        <ion-label>
+          Repeats every {{ duration }} {{ durationModifier }}
+        </ion-label>
         <ion-icon slot="start" :icon="timeOutline" />
+      </ion-item>
+      <ion-item button @click="iconPicker">
+        <ion-text>{{icon}}</ion-text>
+        <ion-icon slot="end" :icon="icons[icon]" />
       </ion-item>
     </ion-item-group>
   </ion-content>
@@ -48,7 +52,6 @@ import {
   timeOutline,
 } from "ionicons/icons";
 import client from "@/client";
-import toast from "@/toast";
 import {
   IonLabel,
   IonInput,
@@ -61,12 +64,12 @@ import {
   IonIcon,
   IonButton,
   IonFooter,
+    IonText,
   modalController,
   menuController,
   pickerController,
 } from "@ionic/vue";
-import router from "@/router";
-import { Household } from "@/models/Household";
+import { openIconPicker } from "@/modals/IconPicker.vue";
 import icons from "@/components/icons";
 
 const AddTask = defineComponent({
@@ -77,6 +80,7 @@ const AddTask = defineComponent({
     IonIcon,
     IonTitle,
     IonLabel,
+    IonText,
     IonHeader,
     IonInput,
     IonItemGroup,
@@ -95,25 +99,33 @@ const AddTask = defineComponent({
     closeCircleOutline,
     timeOutline,
     taskName: "",
-    icon: "",
+    icon: "checkmark",
+    iconPickerOpen: false,
+    icons,
     duration: 1,
-    durationModifier: 'Days',
+    durationModifier: "Days",
     durationModifiers: {
       Days: 1,
       Weeks: 7,
       Months: 30,
       Years: 365,
-    },
+    } as {[modifierName: string]: number},
   }),
   computed: {
     valid() {
-      return icons.some((allowedIcon) => allowedIcon.name === this.icon);
+      return this.icon in icons;
     },
     durationModifierValue() {
       return (this.durationModifiers as any)[this.durationModifier];
+    },
+    calculatedDuration() {
+      return this.duration * this.durationModifiers[this.durationModifier];
     }
   },
   methods: {
+    async iconPicker() {
+      this.icon = await openIconPicker() ?? this.icon;
+    },
     dismiss() {
       modalController.dismiss();
     },
@@ -121,13 +133,17 @@ const AddTask = defineComponent({
       const picker = await pickerController.create({
         columns: [
           {
-            name: 'count', 
-            options: [...Array(100).keys()].filter(val => val).map(index => ({text: `${index}`, value: index}))
+            name: "count",
+            options: [...Array(100).keys()]
+              .filter((val) => val)
+              .map((index) => ({ text: `${index}`, value: index })),
           },
           {
-            name: 'modifier',
-            options: Object.entries(this.durationModifiers).map(([text, value]) => ({text, value})),
-          }
+            name: "modifier",
+            options: Object.entries(this.durationModifiers).map(
+              ([text, value]) => ({ text, value })
+            ),
+          },
         ],
         buttons: [
           {
@@ -136,7 +152,7 @@ const AddTask = defineComponent({
           },
           {
             text: "Confirm",
-            handler: ({count, modifier}) => {
+            handler: ({ count, modifier }) => {
               this.duration = count.value;
               this.durationModifier = modifier.text;
             },
@@ -167,6 +183,3 @@ export async function openAddTaskModal(householdId: number) {
   await client.dashboardInfo();
 }
 </script>
-
-<style scoped>
-</style>

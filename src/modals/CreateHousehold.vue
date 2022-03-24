@@ -58,7 +58,7 @@ import router from "@/router";
 import { Household } from "@/models/Household";
 
 const CreateHousehold = defineComponent({
-  name: "DashBoard",
+  name: "CreateHousehold",
   components: {
     IonContent,
     IonToolbar,

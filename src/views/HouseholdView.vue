@@ -10,7 +10,7 @@
     <ion-footer>
       <ion-toolbar>
         <ion-buttons slot="end">
-          <ion-button color="primary" fill="solid" @click="openAddTaskModal">
+          <ion-button color="primary" fill="solid" @click="openAddTaskModal(id)">
             Add task
             <ion-icon :icon="addCircleOutline" />
           </ion-button>

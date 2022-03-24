@@ -1,0 +1,100 @@
+<template>
+  <ion-header>
+    <ion-toolbar color="medium">
+      <ion-title>
+        Icon
+        <ion-icon
+          :icon="closeCircleOutline"
+          color="dark"
+          @click="dismiss()"
+          style="float: right"
+        />
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content color="light">
+    <ion-item-group>
+      <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(name)">
+        <ion-label>{{name}}</ion-label>
+        <ion-icon :icon="icon" />
+      </ion-item>
+    </ion-item-group>
+  </ion-content>
+</template>
+
+<script lang="ts">
+import { defineComponent, ref } from "vue";
+import { closeCircleOutline } from "ionicons/icons";
+import client from "@/client";
+import {
+  IonLabel,
+  IonInput,
+  IonItemGroup,
+  IonItem,
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonIcon,
+  IonButton,
+  IonFooter,
+  modalController,
+  menuController,
+} from "@ionic/vue";
+import icons from '@/components/icons';
+
+const IconPicker = defineComponent({
+  name: "IconPicker",
+  components: {
+    IonContent,
+    IonToolbar,
+    IonIcon,
+    IonTitle,
+    IonLabel,
+    IonHeader,
+    IonItemGroup,
+    IonItem,
+  },
+  data: () => ({
+    closeCircleOutline,
+    icons,
+  }),
+  props: {
+    iconReceiver: Object as () => EventTarget,
+  },
+  computed: {},
+  methods: {
+    dismiss() {
+      modalController.dismiss();
+    },
+    async select(icon: string) {
+      this.iconReceiver?.dispatchEvent(new CustomEvent('icon', {detail: icon}));
+      this.$emit('select', icon);
+      this.dismiss();
+    },
+  },
+});
+
+export default IconPicker;
+
+export async function openIconPicker() {
+  const iconReceiver = new EventTarget();
+  let icon = null as null|string;
+  iconReceiver.addEventListener('icon', (event) => {
+    icon = (event as CustomEvent).detail;
+  });
+  const iconPicker = await modalController.create({
+    component: IconPicker,
+    componentProps: {
+      iconReceiver,
+    }
+  });
+  iconPicker.present();
+  await iconPicker.onDidDismiss();
+
+  return icon;
+}
+</script>
+
+<style scoped>
+</style>

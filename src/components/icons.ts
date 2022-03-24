@@ -1,11 +1,13 @@
 import * as icons from 'ionicons/icons';
 
-export default [
+
+const iconNames = [
     'alarm',
     'barbell',
     'bicycle',
     'book',
     'car',
+    'checkmark',
     'construct',
     'cut',
     'dice',
@@ -34,7 +36,10 @@ export default [
     'train',
     'wallet',
     'water',
-].map((name: string) => ({
-    name,
-    icon: (icons as any)[name + 'Outline'],
-}))
+];
+const iconMap:{[name: string]: string} = {};
+iconNames.forEach(name => {
+    iconMap[name] = (icons as any)[name + 'Outline'];
+});
+
+export default iconMap;

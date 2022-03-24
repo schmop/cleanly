@@ -1,7 +1,10 @@
 <template>
   <ion-card>
     <ion-card-header>
-      <ion-card-title>{{ task.name }}</ion-card-title>
+      <ion-card-title>
+        <ion-icon :icon="icons[task.icon]" />
+        {{ task.name }}
+        </ion-card-title>
     </ion-card-header>
     <ion-card-content> </ion-card-content>
   </ion-card>
@@ -32,11 +35,13 @@ import {
 } from "@ionic/vue";
 import router from "@/router";
 import { Task } from "@/models/Task";
+import icons from '@/components/icons';
 
 export default defineComponent({
   name: "TaskView",
   components: {
     IonCard,
+    IonIcon,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
@@ -48,6 +53,7 @@ export default defineComponent({
     addCircleOutline,
     closeCircleOutline,
     householdName: "",
+    icons,
   }),
   computed: {},
   methods: {
