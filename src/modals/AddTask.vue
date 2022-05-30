@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        Add Task
+        {{_t('Add Task')}}
         <ion-icon
           :icon="closeCircleOutline"
           color="dark"
@@ -20,7 +20,7 @@
       </ion-item>
       <ion-item button @click="openDurationPicker">
         <ion-label>
-          Repeats every {{ duration }} {{ durationModifier }}
+          {{ __t('Repeats every {0} {1}', duration, _t(durationModifier)) }}
         </ion-label>
         <ion-icon slot="start" :icon="timeOutline" />
       </ion-item>
@@ -34,11 +34,11 @@
     <ion-toolbar>
       <ion-button color="primary" @click="create()" :disabled="!valid">
         <ion-icon :icon="addCircleOutline" slot="start" />
-        Add
+        {{ _t('Add') }}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
         <ion-icon :icon="closeCircleOutline" slot="start" />
-        Cancel
+        {{ _t('Cancel') }}
       </ion-button>
     </ion-toolbar>
   </ion-footer>
@@ -64,13 +64,15 @@ import {
   IonIcon,
   IonButton,
   IonFooter,
-    IonText,
+  IonText,
   modalController,
   menuController,
   pickerController,
 } from "@ionic/vue";
 import { openIconPicker } from "@/modals/IconPicker.vue";
 import icons from "@/components/icons";
+import { DURATION_SIZES } from "@/common/time";
+import { _t, translations } from "@/translation";
 
 const AddTask = defineComponent({
   name: "AddTask",
@@ -90,7 +92,7 @@ const AddTask = defineComponent({
   },
   props: {
     id: {
-      type: Object as () => number,
+      type: Number,
       required: true,
     },
   },
@@ -103,13 +105,8 @@ const AddTask = defineComponent({
     iconPickerOpen: false,
     icons,
     duration: 1,
-    durationModifier: "Days",
-    durationModifiers: {
-      Days: 1,
-      Weeks: 7,
-      Months: 30,
-      Years: 365,
-    } as {[modifierName: string]: number},
+    durationModifier: "days",
+    durationModifiers: DURATION_SIZES,
   }),
   computed: {
     valid() {
@@ -123,6 +120,7 @@ const AddTask = defineComponent({
     }
   },
   methods: {
+    ...translations,
     async iconPicker() {
       this.icon = await openIconPicker() ?? this.icon;
     },
@@ -147,7 +145,7 @@ const AddTask = defineComponent({
         ],
         buttons: [
           {
-            text: "Cancel",
+            text: _t("Cancel"),
             role: "cancel",
           },
           {

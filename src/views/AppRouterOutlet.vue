@@ -19,7 +19,7 @@
             </ion-badge>
           </ion-button>
         </ion-buttons>
-        <ion-title size="small"> Cleanly </ion-title>
+        <ion-title size="small"> {{ pageTitle ?? _t('Cleanly') }} </ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content id="main">
@@ -80,6 +80,9 @@ import {
 } from "@ionic/vue";
 import MenuView from "@/components/MenuView.vue";
 import { mapState } from "vuex";
+import store from "@/store";
+import { Household } from "@/models/Household";
+import { translations } from "@/translation";
 
 export default defineComponent({
   name: "DashBoard",
@@ -106,10 +109,20 @@ export default defineComponent({
     homeOutline,
   }),
   computed: {
-    ...mapState(["invites", "user"]),
+    ...mapState(["invites", "user", "pageTitle", "households"]),
     isDashboard() {
       return this.$route.path === "/app/dashboard";
     },
+  },
+  watch: {
+    '$route.path': {
+      handler() {
+        const id = parseInt(this.$route.params?.id as string);
+        const household = this.households.find((household: Household) => household.id === id);
+        store.commit('pageTitle', household?.name);
+      },
+      immediate: true,
+    }
   },
   async beforeCreate() {
     if (null == this.user) {
@@ -118,6 +131,7 @@ export default defineComponent({
     this.loading = false;
   },
   methods: {
+    ...translations,
     async forceReload(event: RefresherCustomEvent) {
       await client.dashboardInfo();
       event.target.complete();

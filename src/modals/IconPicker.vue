@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        Icon
+        {{ _t('Icon') }}
         <ion-icon
           :icon="closeCircleOutline"
           color="dark"
@@ -14,7 +14,7 @@
   </ion-header>
   <ion-content color="light">
     <ion-item-group>
-      <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(name)">
+      <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(`${name}`)">
         <ion-label>{{name}}</ion-label>
         <ion-icon :icon="icon" />
       </ion-item>
@@ -42,6 +42,7 @@ import {
   menuController,
 } from "@ionic/vue";
 import icons from '@/components/icons';
+import { translations } from "@/translation";
 
 const IconPicker = defineComponent({
   name: "IconPicker",
@@ -64,6 +65,7 @@ const IconPicker = defineComponent({
   },
   computed: {},
   methods: {
+    ...translations,
     dismiss() {
       modalController.dismiss();
     },

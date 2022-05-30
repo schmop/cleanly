@@ -7,25 +7,25 @@
             <ion-text color="secondary">
               <i>{{ invite.inviter.name }}</i>
             </ion-text>
-            invited you to
+            {{_t('invited you to')}}
             <ion-text color="secondary">
               <i>{{ invite.householdName }}</i>
             </ion-text>
           </ion-card-title>
-          <ion-card-subtitle
-            >Do you want to accept the invitation?</ion-card-subtitle
-          >
+          <ion-card-subtitle>
+            {{_t('Do you want to accept the invitation?')}}
+          </ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
           <ion-toolbar>
             <ion-buttons slot="end">
               <ion-button color="success" @click="accept(invite)">
                 <ion-icon slot="start" :icon="enterOutline" />
-                Join
+                {{_t('Join')}}
               </ion-button>
               <ion-button color="danger" @click="decline(invite)">
                 <ion-icon slot="start" :icon="closeOutline" />
-                Decline
+                {{_t('Decline')}}
               </ion-button>
             </ion-buttons>
           </ion-toolbar>
@@ -73,6 +73,7 @@ import { Household } from "@/models/Household";
 import { User } from "@/models/User";
 import { Invite } from "@/models/Invite";
 import { mapState, mapMutations } from "vuex";
+import { translations } from "@/translation";
 
 export default defineComponent({
   name: "DashBoard",
@@ -102,6 +103,7 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations(["removeInvite"]),
+    ...translations,
     async accept(invite: Invite) {
       try {
         await client.acceptInvite(invite);

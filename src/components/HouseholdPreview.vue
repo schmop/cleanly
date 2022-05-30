@@ -1,23 +1,28 @@
 <template>
-  <ion-card>
-    <ion-card-header>
-      <ion-toolbar>
+  <ion-card color="light">
+    <ion-card-header v-if="household">
+      <ion-toolbar color="none">
         <ion-card-title>{{ household.name }}</ion-card-title>
         <ion-buttons slot="primary" v-if="isAdmin">
-          <ion-button :id="editButtonId">
+          <ion-button :id="editButtonId" @click.stop>
             <ion-icon slot="icon-only" :icon="ellipsisVertical"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-popover :trigger="editButtonId" v-if="isAdmin" ref="popover" dismiss-on-select>
+        <ion-popover
+          :trigger="editButtonId"
+          v-if="isAdmin"
+          ref="popover"
+          dismiss-on-select
+        >
           <ion-content>
             <ion-list>
               <ion-item button>
                 <ion-icon slot="start" :icon="addCircleOutline" />
-                <ion-label> New Task </ion-label>
+                <ion-label> {{ _t('New task') }} </ion-label>
               </ion-item>
               <ion-item button @click.stop="openInviteModal">
                 <ion-icon slot="start" :icon="personAddOutline" />
-                <ion-label> Send invite </ion-label>
+                <ion-label> {{ _t('Send invite') }} </ion-label>
               </ion-item>
             </ion-list>
           </ion-content>
@@ -26,7 +31,7 @@
     </ion-card-header>
     <ion-card-content>
       <TaskView
-        v-for="(task, index) in household.tasks"
+        v-for="(task, index) in tasks"
         :task="task"
         :key="index"
       />
@@ -67,8 +72,11 @@ import {
 } from "@ionic/vue";
 import router from "@/router";
 import { Household } from "@/models/Household";
+import { Task } from "@/models/Task";
 import TaskView from "@/components/TaskView.vue";
 import InviteModal from "@/modals/InviteModal.vue";
+import { taskSortByPriority } from "@/common/task-priority";
+import {translations} from "@/translation";
 
 export default defineComponent({
   name: "HouseholdPreview",
@@ -104,14 +112,18 @@ export default defineComponent({
     editButtonId() {
       return `household-button-${this.household?.id}`;
     },
+    tasks() {
+      return this.household?.tasks.concat().sort(taskSortByPriority).slice(0, 2);
+    },
   },
   methods: {
+    ...translations,
     async openInviteModal() {
       const createHouseholdModal = await modalController.create({
         component: InviteModal,
         componentProps: {
-          household: this.household
-        }
+          household: this.household,
+        },
       });
       createHouseholdModal.present();
     },

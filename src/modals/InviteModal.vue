@@ -2,13 +2,8 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        Invite
-        <ion-icon
-          :icon="closeCircleOutline"
-          color="dark"
-          @click="dismiss()"
-          style="float: right"
-        />
+        {{ _t('Invite') }}
+        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -17,18 +12,13 @@
       <ion-item>
         <ion-label position="stacked">
           <ion-icon :icon="searchOutline" slot="start" />
-          Search for username
+          {{ _t('Search for username') }}
         </ion-label>
         <ion-input type="text" v-model="inviteSearch" />
       </ion-item>
 
       <ion-list>
-        <ion-item
-          button
-          v-for="(suggestion, index) in suggestions"
-          @click="add(suggestion)"
-          :key="index"
-        >
+        <ion-item button v-for="(suggestion, index) in suggestions" @click="add(suggestion)" :key="index">
           <ion-icon slot="start" :icon="personOutline" />
           <ion-label> {{ suggestion.name }} </ion-label>
         </ion-item>
@@ -38,7 +28,7 @@
         <ion-list>
           <ion-list-header>
             <ion-icon :icon="personOutline" slot="start" />
-            Selected user to invite:
+            {{ _t('Selected user to invite:') }}
           </ion-list-header>
           <ion-item>
             {{ selection.name }}
@@ -51,11 +41,11 @@
     <ion-toolbar>
       <ion-button color="primary" @click="invite()">
         <ion-icon :icon="personAddOutline" slot="start" />
-        Invite
+        {{ _t('Invite') }}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
         <ion-icon :icon="closeCircleOutline" slot="start" />
-        Cancel
+        {{ _t('Cancel') }}
       </ion-button>
     </ion-toolbar>
   </ion-footer>
@@ -93,6 +83,7 @@ import router from "@/router";
 import { Household } from "@/models/Household";
 import debounce from "@/common/debounce";
 import { LookupResult } from "@/models/LookupResult";
+import { translations } from "@/translation";
 
 export default defineComponent({
   name: "InviteModal",
@@ -136,6 +127,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...translations,
     dismiss() {
       modalController.dismiss();
     },

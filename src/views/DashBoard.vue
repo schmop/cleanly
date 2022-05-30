@@ -1,21 +1,17 @@
 <template>
   <ion-page>
     <ion-content id="dashboard">
-      <HouseholdPreview
-        v-for="(household, index) in households"
-        @click="openHousehold(household)"
-        :household="household"
-        :key="index"
-      />
+      <HouseholdPreview v-for="(household, index) in households" @click="openHousehold(household)"
+        :household="household" :key="index" />
       <ion-card v-if="households.length === 0">
         <ion-card-header>
-          <ion-card-title> No households yet... </ion-card-title>
+          <ion-card-title> {{ _t('No households yet...') }} </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          To start, join a household or create one:
+          {{ _t('To start, join a household or create one:') }}
           <ion-button color="primary" @click="openCreateHouseholdModal">
             <ion-icon slot="start" :icon="addCircleOutline" />
-            Create household
+            {{ _t('Create household') }}
           </ion-button>
         </ion-card-content>
       </ion-card>
@@ -31,7 +27,6 @@ import {
   logOutOutline,
   mailOutline,
 } from "ionicons/icons";
-import client from "@/client";
 import toast from "@/toast";
 import router from "@/router";
 import {
@@ -66,6 +61,8 @@ import { openCreateHouseholdModal } from "@/modals/CreateHousehold.vue";
 import HouseholdPreview from "@/components/HouseholdPreview.vue";
 import MenuView from "@/components/MenuView.vue";
 import { mapState, mapMutations } from "vuex";
+import { translations } from "../translation";
+import client from "@/client";
 
 export default defineComponent({
   name: "DashBoard",
@@ -90,6 +87,7 @@ export default defineComponent({
     ...mapState(["user", "households", "invites"]),
   },
   methods: {
+    ...translations,
     openCreateHouseholdModal,
     logout() {
       this.close();

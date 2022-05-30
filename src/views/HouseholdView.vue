@@ -1,17 +1,13 @@
 <template>
   <ion-page>
     <ion-content id="household">
-      <TaskView
-        v-for="(task, index) in household.tasks"
-        :task="task"
-        :key="index"
-      />
+      <TaskView v-for="(task, index) in household.tasks" :task="task" :key="index" />
     </ion-content>
     <ion-footer>
       <ion-toolbar>
         <ion-buttons slot="end">
-          <ion-button color="primary" fill="solid" @click="openAddTaskModal(id)">
-            Add task
+          <ion-button color="primary" fill="solid" @click="openAddTaskModal(household.id)">
+            {{ _t('Add task') }}
             <ion-icon :icon="addCircleOutline" />
           </ion-button>
         </ion-buttons>
@@ -59,7 +55,9 @@ import { User } from "@/models/User";
 import { Invite } from "@/models/Invite";
 import { mapState, mapMutations } from "vuex";
 import TaskView from '@/components/TaskView.vue';
-import {openAddTaskModal} from '@/modals/AddTask.vue';
+import { openAddTaskModal } from '@/modals/AddTask.vue';
+import store from "@/store";
+import { translations } from '@/translation';
 
 export default defineComponent({
   name: "HouseholdView",
@@ -86,6 +84,7 @@ export default defineComponent({
     }
   },
   methods: {
+    ...translations,
     openAddTaskModal,
   },
 });

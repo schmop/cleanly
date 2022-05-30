@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        Create household
+        {{ _t('Create household') }}
         <ion-icon
           :icon="closeCircleOutline"
           color="dark"
@@ -15,7 +15,7 @@
   <ion-content color="light" @keypress.enter="create()">
     <ion-item-group>
       <ion-item>
-        <ion-label position="stacked">Name</ion-label>
+        <ion-label position="stacked">{{_t('Name')}}</ion-label>
         <ion-input type="text" v-model="householdName" />
       </ion-item>
     </ion-item-group>
@@ -24,11 +24,11 @@
     <ion-toolbar>
       <ion-button color="primary" @click="create()">
         <ion-icon :icon="addCircleOutline" slot="start" />
-        Create
+        {{_t('Create')}}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
         <ion-icon :icon="closeCircleOutline" slot="start" />
-        Cancel
+        {{_t('Cancel')}}
       </ion-button>
     </ion-toolbar>
   </ion-footer>
@@ -56,6 +56,7 @@ import {
 } from "@ionic/vue";
 import router from "@/router";
 import { Household } from "@/models/Household";
+import { translations } from "@/translation";
 
 const CreateHousehold = defineComponent({
   name: "CreateHousehold",
@@ -79,6 +80,7 @@ const CreateHousehold = defineComponent({
   }),
   computed: {},
   methods: {
+    ...translations,
     dismiss() {
       modalController.dismiss();
     },

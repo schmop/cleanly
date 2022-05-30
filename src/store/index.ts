@@ -2,12 +2,14 @@ import { createStore, Store } from 'vuex';
 import { Household } from '../models/Household';
 import { User } from '../models/User';
 import { Invite } from '../models/Invite';
+import { Task } from '@/models/Task';
 
 // declare your own store states
 export interface State {
     households: Household[],
     user: null | User,
     invites: Invite[],
+    pageTitle: null | string,
 }
 
 declare module '@vue/runtime-core' {
@@ -23,20 +25,36 @@ export const store = createStore<State>({
         households: [] as Household[],
         user: null as null | User,
         invites: [] as Invite[],
+        pageTitle: null as null | string,
     }),
     mutations: {
-        user(state, user) {
+        user(state: State, user) {
             state.user = user;
         },
-        dashboard(state, data) {
+        pageTitle(state: State, title: string) {
+            state.pageTitle = title;
+        },
+        markTaskDone(state: State, data: {householdId: number, taskId: string, timestamp: number}) {
+            const {taskId, timestamp} = data;
+            const task = state
+                .households
+                .map((household: Household) => household.tasks)
+                .flat()
+                .find((task: Task) => task.id === taskId);
+            
+            if (task) {
+                task.lastComplete = timestamp;
+            }
+        },
+        dashboard(state: State, data) {
             state.households = data.households;
             state.user = data.user;
             state.invites = data.invites;
         },
-        removeInvite(state, inviteToRemove: Invite) {
+        removeInvite(state: State, inviteToRemove: Invite) {
             state.invites = state.invites.filter(invite => invite !== inviteToRemove);
         },
-        joinHousehold(state, household: Household) {
+        joinHousehold(state: State, household: Household) {
             state.households.push(household);
         }
     }

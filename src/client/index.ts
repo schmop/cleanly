@@ -13,7 +13,8 @@ class Client {
 
     get HOST() {
         //return "https://schmoppo.de";
-        return "https://127.0.0.1:8000";
+        //return "https://127.0.0.1:8000";
+        return "http://192.168.2.105:8000";
     }
 
 
@@ -47,6 +48,21 @@ class Client {
         });
 
         return response.status === 200;
+    }
+
+    /**
+     * @returns false on error, or the new timestamp of the now completed task
+     */
+    async markTaskComplete(taskId: string): Promise<boolean|number> {
+        const response = await this.request(`api/task/mark-done/${taskId}`, {
+            method: 'POST',
+        });
+
+        if (response.status === 200) {
+            return (await response.json()).timestamp as number;
+        }
+
+        return false;
     }
 
     async createHousehold(newHouseholdName: string): Promise<boolean> {
