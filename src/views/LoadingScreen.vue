@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-content>
-        <ion-loading spinner="circular"/>
+        <ion-loading :cssClass="'no-background'" spinner="circular"/>
     </ion-content>
   </ion-page>
 </template>
@@ -30,5 +30,11 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style>
+
+.no-background > .loading-wrapper {
+  background: none;
+  box-shadow: none;
+}
+
 </style>

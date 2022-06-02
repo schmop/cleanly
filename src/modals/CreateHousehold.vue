@@ -12,7 +12,7 @@
       </ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content color="light" @keypress.enter="create()">
+  <ion-content color="light" @keypress.enter="createHousehold()">
     <ion-item-group>
       <ion-item>
         <ion-label position="stacked">{{_t('Name')}}</ion-label>
@@ -22,7 +22,7 @@
   </ion-content>
   <ion-footer>
     <ion-toolbar>
-      <ion-button color="primary" @click="create()">
+      <ion-button color="primary" @click="createHousehold()">
         <ion-icon :icon="addCircleOutline" slot="start" />
         {{_t('Create')}}
       </ion-button>
@@ -79,12 +79,18 @@ const CreateHousehold = defineComponent({
     householdName: "",
   }),
   computed: {},
+  created() {
+      console.log("Component created");
+  },
+  mounted() {
+      console.log("Component mounted");
+  },
   methods: {
     ...translations,
     dismiss() {
       modalController.dismiss();
     },
-    async create() {
+    async createHousehold() {
       await client.createHousehold(this.householdName);
       this.dismiss();
     },
@@ -94,13 +100,19 @@ const CreateHousehold = defineComponent({
 export default CreateHousehold;
 
 export async function openCreateHouseholdModal() {
+  console.log("Start1");
   menuController.close("menu");
+  console.log("Start2");
   const createHouseholdModal = await modalController.create({
     component: CreateHousehold,
   });
+  console.log("Start3");
   createHouseholdModal.present();
-  await createHouseholdModal.onDidDismiss();
-  await client.dashboardInfo();
+  console.log("Start4");
+  //await createHouseholdModal.onDidDismiss();
+  console.log("Start5");
+  //await client.dashboardInfo();
+  console.log("Start6");
 }
 </script>
 

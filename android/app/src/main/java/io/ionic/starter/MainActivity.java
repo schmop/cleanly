@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package de.schmoppo.cleanly;
 
 import com.getcapacitor.BridgeActivity;
 

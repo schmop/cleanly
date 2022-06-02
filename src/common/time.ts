@@ -28,6 +28,12 @@ export const DURATION_SIZES: { [durationName: string]: number } = {
     years: 365,
 };
 
+function pluralToSingular(timeName: string): string {
+    // remove plural (s)
+    // weeks -> week
+    return timeName.slice(0, -1);
+}
+
 function formatInterval(someTime: number, someDurations: { [durationName: string]: number }, maxDepth = Infinity): string {
     let string = '';
     const sortedDurations = Object.entries(someDurations).sort(([, a], [, b]) => b - a);
@@ -36,7 +42,8 @@ function formatInterval(someTime: number, someDurations: { [durationName: string
         const num = Math.floor(someTime / duration);
         if (num > 0) {
             someTime = someTime % duration;
-            string += `${num} ${_n(name.slice(0, -1), name, num)} `;
+
+            string += `${num} ${_n(pluralToSingular(name), name, num)} `;
         }
     });
 
@@ -69,10 +76,7 @@ export function roundedRecurringInterval(days: number): string {
         const rest = days % duration;
         if (num > 0 && rest === 0) {
             if (num === 1) {
-                // remove plural (s)
-                // weeks -> week
-                return _t(`every ${name.slice(0, -1)}`);
-
+                return _t(`every ${pluralToSingular(name)}`);
             }
 
             return __t(`every {0} ${name}`, num);
