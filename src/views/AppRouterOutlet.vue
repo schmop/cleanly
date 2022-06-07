@@ -43,10 +43,10 @@ import {
   homeOutline,
   mailOutline,
 } from "ionicons/icons";
-import client from "@/client";
-import toast from "@/toast";
+import client from "../client";
+import toast from "../toast";
 import {RefresherCustomEvent} from "@ionic/core/components";
-import router from "@/router";
+import router from "../router";
 import {
   IonPage,
   IonLabel,
@@ -80,9 +80,9 @@ import {
 } from "@ionic/vue";
 import MenuView from "@/components/MenuView.vue";
 import { mapState } from "vuex";
-import store from "@/store";
-import { Household } from "@/models/Household";
-import { translations } from "@/translation";
+import store from "../store";
+import { Household } from "../models/Household";
+import { translations } from "../translation";
 
 export default defineComponent({
   name: "DashBoard",

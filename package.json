@@ -7,6 +7,7 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
+    "build:android": "capacitor update android && vue-cli-service build --mode=development && rmdir /s /Q \"android/app/src/main/assets/public\" && Xcopy /E /I \"dist\" \"android/app/src/main/assets/public\"",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "@ionic/vue": "^6.0.0",
     "@ionic/vue-router": "^6.0.0",
     "core-js": "^3.6.5",
+    "module-alias": "^2.2.2",
     "moment": "^2.29.3",
     "vue": "^3.2.21",
     "vue-router": "^4.0.12",

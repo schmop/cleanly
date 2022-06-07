@@ -35,8 +35,8 @@ import {
   logOutOutline,
   homeOutline,
 } from "ionicons/icons";
-import client from "@/client";
-import router from "@/router";
+import client from "../client";
+import router from "../router";
 import {
   IonItem,
   IonContent,
@@ -47,13 +47,14 @@ import {
   IonList,
   IonIcon,
   menuController,
+modalController,
 } from "@ionic/vue";
-import { Household } from "@/models/Household";
-import { User } from "@/models/User";
-import { Invite } from "@/models/Invite";
-import HouseholdView from "@/components/HouseholdPreview.vue";
-import { openCreateHouseholdModal } from "@/modals/CreateHousehold.vue";
-import { translations } from "@/translation";
+import { Household } from "../models/Household";
+import { User } from "../models/User";
+import { Invite } from "../models/Invite";
+import HouseholdView from "../components/HouseholdPreview.vue";
+import { translations } from "../translation";
+import CreateHousehold from "../modals/CreateHousehold.vue";
 
 export default defineComponent({
   name: "MenuView",
@@ -79,7 +80,15 @@ export default defineComponent({
   }),
   methods: {
     ...translations,
-    openCreateHouseholdModal,
+    async openCreateHouseholdModal() {
+      menuController.close("menu");
+      const createHouseholdModal = await modalController.create({
+        component: CreateHousehold,
+      });
+      createHouseholdModal.present();
+      await createHouseholdModal.onDidDismiss();
+      await client.dashboardInfo();
+    },
     gotoDashboard() {
       this.close();
       router.push('/app/dashboard');

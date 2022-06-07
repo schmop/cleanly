@@ -12,11 +12,12 @@ class Client {
     }
 
     get HOST() {
-        return "https://cleanly.schmoppo.de";
+        if (process.env.NODE_ENV === 'production') {
+            return "https://cleanly.schmoppo.de";
+        }
         //return "https://127.0.0.1:8000";
-        //return "http://192.168.2.102:8000";
+        return "http://192.168.2.107:8000";
     }
-
 
     constructor(store: Store<State>) {
         this.store = store;
@@ -45,6 +46,14 @@ class Client {
         const response = await this.request('api/task/create', {
             body: formData,
             method: 'POST',
+        });
+
+        return response.status === 200;
+    }
+
+    async deleteTask(taskId: string) {
+        const response = await this.request(`api/task/${taskId}`, {
+            method: 'DELETE',
         });
 
         return response.status === 200;

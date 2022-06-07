@@ -35,9 +35,10 @@
     <ion-footer>
       <ion-item-group>
         <ion-item>
-          <ion-label position="stacked">{{_t('')}}Register</ion-label>
+          <ion-label position="stacked">{{_t('Register')}}</ion-label>
           <ion-toggle
-            @ionChange="isRegistering = !isRegistering"
+            ref="toggle"
+            @ionChange="onToggle"
             :checked="isRegistering"
           />
         </ion-item>
@@ -101,6 +102,14 @@ export default defineComponent({
   },
   methods: {
     ...translations,
+    onToggle() {
+      // Hotfix from https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-826064939
+      const ref = (this.$refs.toggle as any).$el;
+      if (ref === document.activeElement) {
+        ref.blur();
+        this.isRegistering = !this.isRegistering;
+      }
+    },
     sendForm() {
       if (!this.formValid) {
         return;
@@ -114,7 +123,10 @@ export default defineComponent({
     async register() {
       try {
         await client.signUp(this.name, this.mail, this.password);
-        this.name = this.password = this.retype = this.mail = "";
+        this.name = "";
+        this.password = "";
+        this.retype = "";
+        this.mail = "";
         this.isRegistering = false;
         toast.info(_t("Register successful!"));
       } catch (error: any) {

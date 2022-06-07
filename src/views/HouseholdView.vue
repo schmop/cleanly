@@ -1,14 +1,18 @@
 <template>
   <ion-page>
     <ion-content id="household">
-      <TaskView v-for="(task, index) in household.tasks" :task="task" :key="index" />
+      <TaskView v-for="(task, index) in tasks" :task="task" :key="index" :show-actions="true"/>
     </ion-content>
-    <ion-footer>
+    <ion-footer v-if="isAdmin">
       <ion-toolbar>
         <ion-buttons slot="end">
-          <ion-button color="primary" fill="solid" @click="openAddTaskModal(household.id)">
-            {{ _t('Add task') }}
+          <ion-button color="primary" fill="solid" @click="openAddTaskModal">
             <ion-icon :icon="addCircleOutline" />
+            {{ _t('Add task') }}
+          </ion-button>
+          <ion-button color="secondary" fill="solid" @click="openInviteModal">
+            <ion-icon :icon="personAddOutline" />
+            {{ _t('Send invite') }}
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -18,10 +22,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { closeOutline, enterOutline, addCircleOutline } from "ionicons/icons";
-import client from "@/client";
-import toast from "@/toast";
-import router from "@/router";
+import { addCircleOutline, personAddOutline } from "ionicons/icons";
+import client from "../client";
+import toast from "../toast";
+import router from "../router";
 import {
   IonPage,
   IonLabel,
@@ -50,14 +54,16 @@ import {
   modalController,
   menuController,
 } from "@ionic/vue";
-import { Household } from "@/models/Household";
-import { User } from "@/models/User";
-import { Invite } from "@/models/Invite";
+import store from "../store";
+import { Household } from "../models/Household";
+import { User } from "../models/User";
+import { Invite } from "../models/Invite";
 import { mapState, mapMutations } from "vuex";
-import TaskView from '@/components/TaskView.vue';
-import { openAddTaskModal } from '@/modals/AddTask.vue';
-import store from "@/store";
-import { translations } from '@/translation';
+import TaskView from '../components/TaskView.vue';
+import InviteModal from "@/modals/InviteModal.vue";
+import AddTask from "../modals/AddTask.vue";
+import { translations } from '../translation';
+import { taskSortByPriority } from "@/common/task-priority";
 
 export default defineComponent({
   name: "HouseholdView",
@@ -72,20 +78,47 @@ export default defineComponent({
     IonIcon,
   },
   data: () => ({
-    addCircleOutline
+    addCircleOutline,
+    personAddOutline,
   }),
   props: {
     id: Number,
   },
   computed: {
     ...mapState(["households", "user"]),
-    household() {
+    household(): null|Household {
       return this.households.find((household: Household) => household.id === this.id);
-    }
+    },
+    isAdmin(): boolean {
+      return this.household?.admin === client.getMail();
+    },
+    tasks() {
+      return this.household?.tasks.concat().sort(taskSortByPriority);
+    },
   },
   methods: {
     ...translations,
-    openAddTaskModal,
+    async openAddTaskModal(): Promise<void> {
+      menuController.close("menu");
+      const addTaskModal = await modalController.create({
+        component: AddTask,
+        componentProps: {
+          id: this.household?.id,
+        },
+      });
+      addTaskModal.present();
+      await addTaskModal.onDidDismiss();
+      await client.dashboardInfo();
+    },
+    async openInviteModal(): Promise<void> {
+      const createHouseholdModal = await modalController.create({
+        component: InviteModal,
+        componentProps: {
+          household: this.household,
+        },
+      });
+      createHouseholdModal.present();
+    },
   },
 });
 </script>

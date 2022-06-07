@@ -8,9 +8,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import client from "@/client";
+import client from "../client";
 import { IonPage, IonContent, IonLoading } from "@ionic/vue";
-import router from "@/router";
+import router from "../router";
 
 export default defineComponent({
   name: "LoadingScreen",

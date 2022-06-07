@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { closeCircleOutline } from "ionicons/icons";
-import client from "@/client";
+import client from "../client";
 import {
   IonLabel,
   IonInput,
@@ -41,10 +41,10 @@ import {
   modalController,
   menuController,
 } from "@ionic/vue";
-import icons from '@/components/icons';
-import { translations } from "@/translation";
+import icons from '../components/icons';
+import { translations } from "../translation";
 
-const IconPicker = defineComponent({
+export default defineComponent({
   name: "IconPicker",
   components: {
     IonContent,
@@ -77,25 +77,6 @@ const IconPicker = defineComponent({
   },
 });
 
-export default IconPicker;
-
-export async function openIconPicker() {
-  const iconReceiver = new EventTarget();
-  let icon = null as null|string;
-  iconReceiver.addEventListener('icon', (event) => {
-    icon = (event as CustomEvent).detail;
-  });
-  const iconPicker = await modalController.create({
-    component: IconPicker,
-    componentProps: {
-      iconReceiver,
-    }
-  });
-  iconPicker.present();
-  await iconPicker.onDidDismiss();
-
-  return icon;
-}
 </script>
 
 <style scoped>

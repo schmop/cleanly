@@ -14,10 +14,9 @@
           <ion-icon :icon="searchOutline" slot="start" />
           {{ _t('Search for username') }}
         </ion-label>
-        <ion-input type="text" v-model="inviteSearch" />
+        <ion-input type="text" v-model="inviteSearch" ref="inviteSearch" />
       </ion-item>
-
-      <ion-list>
+      <ion-list v-if="suggestions.length > 0">
         <ion-item button v-for="(suggestion, index) in suggestions" @click="add(suggestion)" :key="index">
           <ion-icon slot="start" :icon="personOutline" />
           <ion-label> {{ suggestion.name }} </ion-label>
@@ -60,8 +59,8 @@ import {
   searchOutline,
   personAddOutline,
 } from "ionicons/icons";
-import client from "@/client";
-import toast from "@/toast";
+import client from "../client";
+import toast from "../toast";
 import {
   IonLabel,
   IonInput,
@@ -79,11 +78,11 @@ import {
   IonFooter,
   modalController,
 } from "@ionic/vue";
-import router from "@/router";
-import { Household } from "@/models/Household";
-import debounce from "@/common/debounce";
-import { LookupResult } from "@/models/LookupResult";
-import { translations } from "@/translation";
+import router from "../router";
+import { Household } from "../models/Household";
+import debounce from "../common/debounce";
+import { LookupResult } from "../models/LookupResult";
+import { translations } from "../translation";
 
 export default defineComponent({
   name: "InviteModal",

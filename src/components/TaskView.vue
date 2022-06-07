@@ -9,9 +9,9 @@
         </span>
       </ion-card-title>
     </ion-card-header>
-    <ion-card-content>
+    <ion-card-content class="flex">
       <ion-item-sliding ref="slidingButton">
-        <ion-item>
+        <ion-item lines="none">
           <div class="progress-background soft">
             <div class="progress" :style="progressStyle">
               {{ dueInText }}
@@ -20,17 +20,34 @@
         </ion-item>
         <ion-item-options side="start">
           <ion-item-option color="tertiary" @click="markDone">
-            {{_t('Mark done')}}
+            {{ _t('Mark done') }}
           </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
+      <template v-if="isAdmin && showActions">
+        <ion-buttons slot="end">
+          <ion-button :id="contextMenuId" @click.stop>
+            <ion-icon slot="icon-only" :icon="ellipsisVertical" />
+          </ion-button>
+        </ion-buttons>
+        <ion-popover :trigger="contextMenuId" dismiss-on-select>
+          <ion-content>
+            <ion-list>
+              <ion-item button @click="deleteTask" lines="none">
+                <ion-icon slot="start" :icon="trashOutline" />
+                <ion-label> {{ _t('Delete task') }} </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-content>
+        </ion-popover>
+      </template>
     </ion-card-content>
   </ion-card>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { addCircleOutline, closeCircleOutline } from "ionicons/icons";
+import { addCircleOutline, closeCircleOutline, ellipsisVertical, trashOutline } from "ionicons/icons";
 import client from "@/client";
 import toast from "@/toast";
 import {
@@ -44,8 +61,11 @@ import {
   IonTitle,
   IonIcon,
   IonButton,
+  IonButtons,
   IonFooter,
+  IonList,
   IonItemSliding,
+  IonPopover,
   IonItemOption,
   IonItemOptions,
   IonCard,
@@ -61,7 +81,9 @@ import { colorAsString, green, mix, red } from "@/common/colors";
 import { taskProgress } from "@/common/task-priority";
 import { DAY_IN_HOURS, DAY_IN_SECONDS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
 import store from "@/store";
-import { _t, translations, __t} from "@/translation";
+import { _t, translations, __t } from "@/translation";
+import { mapState } from "vuex";
+import { Household } from "@/models/Household";
 
 export default defineComponent({
   name: "TaskView",
@@ -73,19 +95,37 @@ export default defineComponent({
     IonCardContent,
     IonItemSliding,
     IonItemOption,
+    IonButtons,
+    IonButton,
+    IonLabel,
+    IonList,
+    IonContent,
+    IonPopover,
     IonItemOptions,
     IonItem,
   },
   props: {
     task: Object as () => Task,
+    showActions: Boolean,
   },
   data: () => ({
     addCircleOutline,
     closeCircleOutline,
+    ellipsisVertical,
+    trashOutline,
     householdName: "",
     icons,
   }),
   computed: {
+    ...mapState(['households']),
+    contextMenuId() {
+      return `task-contextmenu-${this.task?.id}`;
+    },
+    isAdmin() {
+      const household = this.households.find((h: Household) => this.task && h.tasks.includes(this.task));
+
+      return household.admin === client.getMail();
+    },
     progress() {
       if (!this.task) {
         return 0;
@@ -135,12 +175,11 @@ export default defineComponent({
   },
   methods: {
     ...translations,
-    dismiss() {
-      modalController.dismiss();
-    },
-    async create() {
-      await client.createHousehold(this.householdName);
-      this.dismiss();
+    async deleteTask() {
+      if (this.task?.id != null) {
+        const newTimestamp = await client.deleteTask(this.task.id);
+        store.commit('removeTask', this.task?.id);
+      }
     },
     async markDone() {
       if (this.task?.id != null) {
@@ -157,6 +196,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.flex {
+  display: flex;
+}
+
 .progress {
   border-radius: 4px;
   height: 40px;

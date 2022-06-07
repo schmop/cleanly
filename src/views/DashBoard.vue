@@ -27,8 +27,8 @@ import {
   logOutOutline,
   mailOutline,
 } from "ionicons/icons";
-import toast from "@/toast";
-import router from "@/router";
+import toast from "../toast";
+import router from "../router";
 import {
   IonPage,
   IonLabel,
@@ -54,15 +54,15 @@ import {
   modalController,
   menuController,
 } from "@ionic/vue";
-import { Household } from "@/models/Household";
-import { User } from "@/models/User";
-import { Invite } from "@/models/Invite";
-import { openCreateHouseholdModal } from "@/modals/CreateHousehold.vue";
-import HouseholdPreview from "@/components/HouseholdPreview.vue";
-import MenuView from "@/components/MenuView.vue";
+import { Household } from "../models/Household";
+import { User } from "../models/User";
+import { Invite } from "../models/Invite";
+import HouseholdPreview from "../components/HouseholdPreview.vue";
+import MenuView from "../components/MenuView.vue";
 import { mapState, mapMutations } from "vuex";
 import { translations } from "../translation";
-import client from "@/client";
+import client from "../client";
+import CreateHousehold from "../modals/CreateHousehold.vue";
 
 export default defineComponent({
   name: "DashBoard",
@@ -88,7 +88,15 @@ export default defineComponent({
   },
   methods: {
     ...translations,
-    openCreateHouseholdModal,
+    async openCreateHouseholdModal() {
+      menuController.close("menu");
+      const createHouseholdModal = await modalController.create({
+        component: CreateHousehold,
+      });
+      createHouseholdModal.present();
+      await createHouseholdModal.onDidDismiss();
+      await client.dashboardInfo();
+    },
     logout() {
       this.close();
       client.logout();

@@ -34,7 +34,17 @@ export const store = createStore<State>({
         pageTitle(state: State, title: string) {
             state.pageTitle = title;
         },
-        markTaskDone(state: State, data: {householdId: number, taskId: string, timestamp: number}) {
+        removeTask(state: State, taskId: string) {
+            const household = state
+                .households
+                .find(
+                    (h: Household) => h.tasks.some((t: Task) => t.id === taskId)
+                );
+            if (household != null) {
+                household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
+            }
+        },
+        markTaskDone(state: State, data: {taskId: string, timestamp: number}) {
             const {taskId, timestamp} = data;
             const task = state
                 .households

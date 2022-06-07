@@ -2,20 +2,15 @@ import { Task } from "@/models/Task";
 import { DAY_IN_SECONDS, secondsSince } from "./time";
 
 export function taskSortByPriority(a: Task, b: Task): number {
-    if (a.lastComplete != null && b.lastComplete != null) {
-        const aPercent = secondsSince(a.lastComplete) / a.duration;
-        const bPercent = secondsSince(b.lastComplete) / b.duration;
+    return Math.sign(secondsLeft(a) - secondsLeft(b));
+}
 
-        return bPercent - aPercent;
-    }
-    if (a.lastComplete == null && b.lastComplete != null) {
-        return 1;
-    }
-    if (a.lastComplete != null && b.lastComplete == null) {
-        return -1;
+export function secondsLeft(t: Task) {
+    if (t.lastComplete == null) {
+        return 0;
     }
 
-    return 0;
+    return t.duration * DAY_IN_SECONDS - secondsSince(t.lastComplete);
 }
 
 export function taskProgress(t: Task): number {

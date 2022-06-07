@@ -38,9 +38,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { closeOutline, enterOutline } from "ionicons/icons";
-import client from "@/client";
-import toast from "@/toast";
-import router from "@/router";
+import client from "../client";
+import toast from "../toast";
+import router from "../router";
 import {
   IonPage,
   IonLabel,
@@ -69,11 +69,11 @@ import {
   modalController,
   menuController,
 } from "@ionic/vue";
-import { Household } from "@/models/Household";
-import { User } from "@/models/User";
-import { Invite } from "@/models/Invite";
+import { Household } from "../models/Household";
+import { User } from "../models/User";
+import { Invite } from "../models/Invite";
 import { mapState, mapMutations } from "vuex";
-import { translations } from "@/translation";
+import { translations } from "../translation";
 
 export default defineComponent({
   name: "DashBoard",
@@ -95,9 +95,6 @@ export default defineComponent({
     enterOutline,
     closeOutline,
   }),
-  mounted() {
-    console.log(this.invites);
-  },
   computed: {
     ...mapState(["invites", "user"]),
   },

@@ -11,16 +11,15 @@
         <ion-popover
           :trigger="editButtonId"
           v-if="isAdmin"
-          ref="popover"
           dismiss-on-select
         >
           <ion-content>
             <ion-list>
-              <ion-item button>
+              <ion-item button @click="openAddTaskModal">
                 <ion-icon slot="start" :icon="addCircleOutline" />
                 <ion-label> {{ _t('New task') }} </ion-label>
               </ion-item>
-              <ion-item button @click.stop="openInviteModal">
+              <ion-item button @click="openInviteModal">
                 <ion-icon slot="start" :icon="personAddOutline" />
                 <ion-label> {{ _t('Send invite') }} </ion-label>
               </ion-item>
@@ -34,6 +33,7 @@
         v-for="(task, index) in tasks"
         :task="task"
         :key="index"
+        :show-actions="false"
       />
     </ion-card-content>
   </ion-card>
@@ -75,6 +75,7 @@ import { Household } from "@/models/Household";
 import { Task } from "@/models/Task";
 import TaskView from "@/components/TaskView.vue";
 import InviteModal from "@/modals/InviteModal.vue";
+import AddTask from "@/modals/AddTask.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import {translations} from "@/translation";
 
@@ -118,6 +119,17 @@ export default defineComponent({
   },
   methods: {
     ...translations,
+    async openAddTaskModal(): Promise<void> {
+      const addTaskModal = await modalController.create({
+        component: AddTask,
+        componentProps: {
+          id: this.household?.id,
+        },
+      });
+      addTaskModal.present();
+      await addTaskModal.onDidDismiss();
+      await client.dashboardInfo();
+    },
     async openInviteModal() {
       const createHouseholdModal = await modalController.create({
         component: InviteModal,

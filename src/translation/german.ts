@@ -52,5 +52,8 @@ export default {
     'Login successful!': 'Erfolgreich angemeldet!',
     'Add task': 'Aufgabe hinzufügen',
     'Icon': 'Icon',
+    'Your passwords need to match!': 'Die Passwörter müssen übereinstimmen!',
+    'Register successful!': 'Registrierung erfolgreich!',
+    'Delete task': 'Aufgabe löschen',
     '': '',
 } as { [english: string]: string };

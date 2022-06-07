@@ -2,13 +2,8 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        {{_t('Add Task')}}
-        <ion-icon
-          :icon="closeCircleOutline"
-          color="dark"
-          @click="dismiss()"
-          style="float: right"
-        />
+        {{ _t('Add Task') }}
+        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -17,6 +12,7 @@
       <ion-item>
         <ion-label position="stacked">Name</ion-label>
         <ion-input type="text" v-model="taskName" />
+        <ion-icon :icon="pencilOutline" slot="end" class="align-center" />
       </ion-item>
       <ion-item button @click="openDurationPicker">
         <ion-label>
@@ -24,8 +20,8 @@
         </ion-label>
         <ion-icon slot="start" :icon="timeOutline" />
       </ion-item>
-      <ion-item button @click="iconPicker">
-        <ion-text>{{icon}}</ion-text>
+      <ion-item button @click="iconPicker" lines="full">
+        <ion-text>{{ icon }}</ion-text>
         <ion-icon slot="end" :icon="icons[icon]" />
       </ion-item>
     </ion-item-group>
@@ -50,8 +46,9 @@ import {
   addCircleOutline,
   closeCircleOutline,
   timeOutline,
+  pencilOutline,
 } from "ionicons/icons";
-import client from "@/client";
+import client from "../client";
 import {
   IonLabel,
   IonInput,
@@ -69,12 +66,12 @@ import {
   menuController,
   pickerController,
 } from "@ionic/vue";
-import { openIconPicker } from "@/modals/IconPicker.vue";
-import icons from "@/components/icons";
-import { DURATION_SIZES } from "@/common/time";
-import { _t, translations } from "@/translation";
+import icons from "../components/icons";
+import { DURATION_SIZES } from "../common/time";
+import { _t, translations } from "../translation";
+import IconPicker from "./IconPicker.vue";
 
-const AddTask = defineComponent({
+export default defineComponent({
   name: "AddTask",
   components: {
     IonContent,
@@ -100,6 +97,7 @@ const AddTask = defineComponent({
     addCircleOutline,
     closeCircleOutline,
     timeOutline,
+    pencilOutline,
     taskName: "",
     icon: "checkmark",
     iconPickerOpen: false,
@@ -122,7 +120,21 @@ const AddTask = defineComponent({
   methods: {
     ...translations,
     async iconPicker() {
-      this.icon = await openIconPicker() ?? this.icon;
+      const iconReceiver = new EventTarget();
+      let icon = null as null | string;
+      iconReceiver.addEventListener('icon', (event) => {
+        icon = (event as CustomEvent).detail;
+      });
+      const iconPicker = await modalController.create({
+        component: IconPicker,
+        componentProps: {
+          iconReceiver,
+        }
+      });
+      iconPicker.present();
+      await iconPicker.onDidDismiss();
+
+      this.icon = icon ?? this.icon;
     },
     dismiss() {
       modalController.dismiss();
@@ -160,24 +172,9 @@ const AddTask = defineComponent({
       await picker.present();
     },
     async create() {
-      await client.addNewTask(this.id, this.taskName, this.icon, this.duration);
+      await client.addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
       this.dismiss();
     },
   },
 });
-
-export default AddTask;
-
-export async function openAddTaskModal(householdId: number) {
-  menuController.close("menu");
-  const addTaskModal = await modalController.create({
-    component: AddTask,
-    componentProps: {
-      id: householdId,
-    },
-  });
-  addTaskModal.present();
-  await addTaskModal.onDidDismiss();
-  await client.dashboardInfo();
-}
 </script>
