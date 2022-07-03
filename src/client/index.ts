@@ -5,6 +5,7 @@ import { Invite } from '../models/Invite';
 
 class Client {
     private _token: null | string = null;
+    private _refreshToken: null | string = null;
     private _mail: null | string = null;
     private store: Store<State>;
     private get LOCALSTORAGE_STATE_KEY() {
@@ -27,14 +28,50 @@ class Client {
         const stateString = localStorage.getItem(this.LOCALSTORAGE_STATE_KEY);
         if (null != stateString) {
             const state = JSON.parse(stateString);
-            this._token = state.token;
-            this._mail = state.mail;
-            const response = await this.request('api/auth_check', {}, false);
-            if (response.status !== 200) {
-                this._token = null;
-                this._mail = null;
+            this.setLoginData(state);
+            if (!await this.authCheck() && !await this.refreshLogin()) {
+                this.logout();
             }
         }
+    }
+
+    setLoginData({token, refresh_token, mail}: {token?: null|string, refresh_token?: null|string, mail?: null|string}) {
+        this._token = token ?? this._token;
+        this._refreshToken = refresh_token ?? this._refreshToken;
+        this._mail = mail ?? this._mail;
+        localStorage.setItem(
+            this.LOCALSTORAGE_STATE_KEY, 
+            JSON.stringify({ 
+                'mail': this._mail, 
+                'token': this._token, 
+                'refresh_token': this._refreshToken
+            })
+        );
+    }
+
+    async authCheck(): Promise<boolean> {
+        const response = await this.request('api/auth_check', {}, false);
+
+        return 200 === response.status;
+    }
+
+    async refreshLogin(): Promise<boolean> {
+        if (null === this._refreshToken) {
+            return false;
+        }
+        const formData = new FormData();
+        formData.append('refresh_token', this._refreshToken);
+        const response = await this.request('api/login_refresh', {
+            method: 'POST',
+            body: formData,
+        }, false);
+        if (response.status !== 200) {
+            return false;
+        }
+        const token = (await response.json()).token;
+        this.setLoginData({token, refresh_token: this._refreshToken});
+
+        return true;
     }
 
     async addNewTask(householdId: number, taskname: string, icon: string, duration: number) {
@@ -205,9 +242,7 @@ class Client {
         if (response.status === 200) {
             const data = await response.json();
             if ('token' in data) {
-                this._token = data.token;
-                this._mail = mail;
-                localStorage.setItem(this.LOCALSTORAGE_STATE_KEY, JSON.stringify({ 'mail': mail, 'token': data.token }));
+                this.setLoginData({...data, mail});
 
                 return;
             }
@@ -219,6 +254,7 @@ class Client {
         localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
         this._mail = null;
         this._token = null;
+        this._refreshToken = null;
     }
 
     isAuthenticated(): boolean {
