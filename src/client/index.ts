@@ -17,7 +17,7 @@ class Client {
             return "https://cleanly.schmoppo.de";
         }
         //return "https://127.0.0.1:8000";
-        return "http://192.168.2.107:8000";
+        return "http://192.168.2.108:8000";
     }
 
     constructor(store: Store<State>) {
@@ -174,7 +174,41 @@ class Client {
             method: 'DELETE',
         });
 
-        return response.status === 200;
+        if (response.status !== 200) {
+            console.error('Could not remove household', response.statusText);
+
+            return false;
+        }
+        
+        return true;
+    }
+
+    async kickFromHousehold(memberId: number, householdId: number) {
+        const response = await this.request(`api/household/kick/${householdId}/${memberId}`, {
+            method: 'POST',
+        });
+
+        if (response.status !== 200) {
+            console.error('Could not kick member from household', response.statusText);
+
+            return false;
+        }
+        
+        return true;
+    }
+
+    async leaveHousehold(householdId: number) {
+        const response = await this.request(`api/household/leave/${householdId}`, {
+            method: 'POST',
+        });
+
+        if (response.status !== 200) {
+            console.error('Could not leave household', response.statusText);
+
+            return false;
+        }
+        
+        return true;
     }
 
     async invite(householdId: number, ...ids: number[]) {

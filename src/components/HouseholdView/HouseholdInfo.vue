@@ -11,6 +11,14 @@
                     <ion-icon slot="start" :icon="personAddOutline" />
                     {{ _t('Send invite') }}
                 </ion-item>
+                <ion-item button @click="openLeaveHouseholdPrompt">
+                    <ion-icon slot="start" :icon="walkOutline" />
+                    {{ _t('Leave household') }}
+                </ion-item>
+                <ion-item button @click="openDeleteHouseholdPrompt">
+                    <ion-icon slot="start" :icon="trashOutline" />
+                    {{ _t('Delete household') }}
+                </ion-item>
             </ion-list>
             <ion-list>
                 <ion-list-header>{{ _t('Members') }}</ion-list-header>
@@ -40,17 +48,20 @@ import {
     modalController,
     IonBadge,
     popoverController,
+    alertController,
 } from "@ionic/vue";
 import { Household } from "@/models/Household";
 import { mapState } from "vuex";
 import AddTask from "@/modals/AddTask.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import { taskSortByPriority } from "@/common/task-priority";
-import { translations } from "@/translation";
+import { translations, _t } from "@/translation";
 import client from "@/client";
-import { addCircleOutline, cogOutline, personAddOutline, personOutline } from "ionicons/icons";
+import { addCircleOutline, cogOutline, personAddOutline, personOutline, trashOutline, walkOutline } from "ionicons/icons";
 import { User } from "@/models/User";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
+import toast from "@/toast";
+import router from "@/router";
 
 export default defineComponent({
     name: "HouseholdInfo",
@@ -68,6 +79,8 @@ export default defineComponent({
         addCircleOutline,
         personOutline,
         cogOutline,
+        trashOutline,
+        walkOutline,
     }),
     props: {
         id: Number,
@@ -100,12 +113,71 @@ export default defineComponent({
     },
     methods: {
         ...translations,
+        async openDeleteHouseholdPrompt() {
+            if (!this.isAdmin || this.id === undefined) {
+                console.error("Tried to delete household, but couldn't!");
+                return;
+            }
+            const alert = await alertController.create({
+                header: _t('Do you want to delete the household permanently? This cannot be undone!'),
+                buttons: [
+                    {
+                        text: _t('Ok'),
+                        role: 'confirm',
+                    },
+                    _t('Cancel'),
+                ]
+            });
+            await alert.present();
+            if ((await alert.onDidDismiss()).role === 'confirm') {
+                if (await client.removeHousehold(this.id)) {
+                    client.dashboardInfo();
+                    router.push('/app/dashboard');
+                    toast.success(_t('Successfully deleted the household!'));
+
+                    return;
+                }
+                await toast.error(_t('There was an error deleting the household!'));
+            }
+        },
+        async openLeaveHouseholdPrompt() {
+            if (!this.id) {
+                console.error("Tried to leave household, but couldn't!");
+                return;
+            }
+            if (this.isAdmin) {
+                toast.warning(_t('You cannot leave a household you own. You need to transfer your privileges or delete the household completely!'));
+                return;
+            }
+            const alert = await alertController.create({
+                header: _t('Do you want to leave the household?'),
+                buttons: [
+                    {
+                        text: _t('Ok'),
+                        role: 'confirm',
+                    },
+                    _t('Cancel'),
+                ]
+            });
+            await alert.present();
+            if ((await alert.onDidDismiss()).role === 'confirm') {
+                if (await client.leaveHousehold(this.id)) {
+                    client.dashboardInfo();
+                    router.push('/app/dashboard');
+                    toast.success(_t('Successfully left the household!'));
+
+                    return;
+                }
+                await toast.error(_t('There was an error leaving the household!'));
+            }
+        },
         async openMemberActionMenu(member: User) {
             if (!this.canPerformActionOn(member)) {
                 return;
             }
             const popover = await popoverController.create({
                 component: HouseholdMemberActions,
+                cssClass: 'autowidth',
                 componentProps: {
                     household: this.household,
                     member,
@@ -146,4 +218,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+</style>
+
+<style>
+.autowidth {
+    --width: unset;
+    --min-width: 250px;
+}
 </style>

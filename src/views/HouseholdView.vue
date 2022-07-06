@@ -46,6 +46,7 @@ import { Household } from "../models/Household";
 import { mapState } from "vuex";
 import { translations } from '../translation';
 import { taskSortByPriority, taskOverDue } from "@/common/task-priority";
+import router from "@/router";
 
 export default defineComponent({
   name: "HouseholdView",
@@ -68,6 +69,11 @@ export default defineComponent({
   }),
   props: {
     id: Number,
+  },
+  created() {
+    if (this.household == null) {
+      router.push('/app/dashboard');
+    }
   },
   computed: {
     ...mapState(["households", "user"]),
