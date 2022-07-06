@@ -78,6 +78,7 @@ import InviteModal from "@/modals/InviteModal.vue";
 import AddTask from "@/modals/AddTask.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import {translations} from "@/translation";
+import { mapState } from "vuex";
 
 export default defineComponent({
   name: "HouseholdPreview",
@@ -107,8 +108,9 @@ export default defineComponent({
     household: Object as () => Household,
   },
   computed: {
+    ...mapState(['user']),
     isAdmin() {
-      return this.household?.admin === client.getMail();
+      return this.household?.admin === this.user.id;
     },
     editButtonId() {
       return `household-button-${this.household?.id}`;

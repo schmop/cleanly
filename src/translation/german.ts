@@ -55,5 +55,10 @@ export default {
     'Your passwords need to match!': 'Die Passwörter müssen übereinstimmen!',
     'Register successful!': 'Registrierung erfolgreich!',
     'Delete task': 'Aufgabe löschen',
+    'Members': 'Mitglieder',
+    'Household settings': 'Haushalt Einstellungen',
+    'Admin': 'Administrator',
+    'Transfer ownership': 'Besitzrechte übertragen',
+    'Kick member': 'Mitglied entfernen',
     '': '',
 } as { [english: string]: string };

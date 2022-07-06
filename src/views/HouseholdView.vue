@@ -1,135 +1,97 @@
 <template>
   <ion-page>
-    <ion-content id="household">
-      <TaskView v-for="(task, index) in tasks" :task="task" :key="index" :show-actions="true"/>
-    </ion-content>
-    <ion-footer v-if="isAdmin">
-      <ion-toolbar>
-        <ion-buttons slot="end">
-          <ion-button color="primary" fill="solid" @click="openAddTaskModal">
-            <ion-icon :icon="addCircleOutline" />
-            {{ _t('Add task') }}
-          </ion-button>
-          <ion-button color="secondary" fill="solid" @click="openInviteModal">
-            <ion-icon :icon="personAddOutline" />
-            {{ _t('Send invite') }}
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-footer>
+    <ion-tabs>
+      <ion-router-outlet />
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="tasks" :href="`${href}/tasks`">
+          <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+          <ion-label>Tasks</ion-label>
+          <ion-badge v-if="numOverdueTasks > 0">{{ numOverdueTasks }}</ion-badge>
+        </ion-tab-button>
+
+        <ion-tab-button tab="checklist" :href="`${href}/checklist`">
+          <ion-icon :icon="listCircleOutline"></ion-icon>
+          <ion-label>Checklist</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button tab="household" :href="`${href}/info`">
+          <ion-icon :icon="peopleOutline"></ion-icon>
+          <ion-label>Household</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
   </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { addCircleOutline, personAddOutline } from "ionicons/icons";
-import client from "../client";
-import toast from "../toast";
-import router from "../router";
+import {
+  addCircleOutline,
+  checkmarkCircleOutline,
+  listCircleOutline,
+  personAddOutline,
+  peopleOutline
+} from "ionicons/icons";
 import {
   IonPage,
+  IonTabs,
+  IonTabBar,
+  IonTabButton,
   IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
-  IonContent,
-  IonCardHeader,
-  IonModal,
-  IonLoading,
-  IonFooter,
-  IonCardContent,
-  IonMenuButton,
-  IonMenu,
-  IonCard,
-  IonHeader,
-  IonButtons,
-  IonCardTitle,
-  IonText,
-  IonToolbar,
-  IonTitle,
-  IonList,
-  IonButton,
-  IonCardSubtitle,
+  IonBadge,
+  IonRouterOutlet,
   IonIcon,
-  modalController,
-  menuController,
 } from "@ionic/vue";
-import store from "../store";
 import { Household } from "../models/Household";
-import { User } from "../models/User";
-import { Invite } from "../models/Invite";
-import { mapState, mapMutations } from "vuex";
-import TaskView from '../components/TaskView.vue';
-import InviteModal from "@/modals/InviteModal.vue";
-import AddTask from "../modals/AddTask.vue";
+import { mapState } from "vuex";
 import { translations } from '../translation';
-import { taskSortByPriority } from "@/common/task-priority";
+import { taskSortByPriority, taskOverDue } from "@/common/task-priority";
 
 export default defineComponent({
   name: "HouseholdView",
   components: {
     IonPage,
-    IonContent,
-    TaskView,
-    IonToolbar,
-    IonFooter,
-    IonButtons,
-    IonButton,
+    IonTabs,
+    IonTabBar,
+    IonTabButton,
+    IonLabel,
+    IonBadge,
+    IonRouterOutlet,
     IonIcon,
   },
   data: () => ({
     addCircleOutline,
     personAddOutline,
+    peopleOutline,
+    checkmarkCircleOutline,
+    listCircleOutline,
   }),
   props: {
     id: Number,
   },
   computed: {
     ...mapState(["households", "user"]),
-    household(): null|Household {
+    household(): null | Household {
       return this.households.find((household: Household) => household.id === this.id);
     },
     isAdmin(): boolean {
-      return this.household?.admin === client.getMail();
+      return this.household?.admin === this.user.id;
     },
     tasks() {
       return this.household?.tasks.concat().sort(taskSortByPriority);
     },
+    href() {
+      return `/app/household/${this.id}`;
+    },
+    numOverdueTasks() {
+      return this.tasks?.filter(task => taskOverDue(task)).length ?? 0;
+    },
   },
   methods: {
     ...translations,
-    async openAddTaskModal(): Promise<void> {
-      menuController.close("menu");
-      const addTaskModal = await modalController.create({
-        component: AddTask,
-        componentProps: {
-          id: this.household?.id,
-        },
-      });
-      addTaskModal.present();
-      await addTaskModal.onDidDismiss();
-      await client.dashboardInfo();
-    },
-    async openInviteModal(): Promise<void> {
-      const createHouseholdModal = await modalController.create({
-        component: InviteModal,
-        componentProps: {
-          household: this.household,
-        },
-      });
-      createHouseholdModal.present();
-    },
   },
 });
 </script>
 
 <style scoped>
-.button-badge {
-  position: absolute;
-  right: -6px;
-  top: -9px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
 </style>

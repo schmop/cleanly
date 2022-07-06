@@ -133,12 +133,4 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.button-badge {
-  position: absolute;
-  right: -6px;
-  top: -9px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
 </style>

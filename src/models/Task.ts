@@ -5,7 +5,7 @@ export interface Task {
     id: string,
     icon: string,
     color: string,
-    lastComplete?: number | null, // unix timestamp
+    lastComplete?: number | null, // unix timestamp in seconds
     duration: number, // in days
     assignedTo: User,
 }

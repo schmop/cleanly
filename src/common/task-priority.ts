@@ -22,3 +22,12 @@ export function taskProgress(t: Task): number {
 
     return Math.max(0, duration - timeSinceLastComplete) / duration;
 }
+
+export function taskOverDue(task: Task): boolean {
+    if (!task.lastComplete) {
+        return false;
+    }
+    const sinceDays = secondsSince(task.lastComplete) / DAY_IN_SECONDS;
+
+    return sinceDays >= task.duration;
+}

@@ -78,7 +78,7 @@ import router from "@/router";
 import { Task } from "@/models/Task";
 import icons from "@/components/icons";
 import { colorAsString, green, mix, red } from "@/common/colors";
-import { taskProgress } from "@/common/task-priority";
+import { taskOverDue, taskProgress } from "@/common/task-priority";
 import { DAY_IN_HOURS, DAY_IN_SECONDS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
 import store from "@/store";
 import { _t, translations, __t } from "@/translation";
@@ -117,14 +117,14 @@ export default defineComponent({
     icons,
   }),
   computed: {
-    ...mapState(['households']),
+    ...mapState(['households', 'user']),
     contextMenuId() {
       return `task-contextmenu-${this.task?.id}`;
     },
     isAdmin() {
       const household = this.households.find((h: Household) => this.task && h.tasks.includes(this.task));
 
-      return household.admin === client.getMail();
+      return household.admin === this.user.id;
     },
     progress() {
       if (!this.task) {
@@ -139,12 +139,11 @@ export default defineComponent({
       return `width: ${this.progress * 100}%`;
     },
     overdue() {
-      if (!this.task || !this.task.lastComplete) {
+      if (!this.task) {
         return false;
       }
-      const sinceDays = secondsSince(this.task.lastComplete) / DAY_IN_SECONDS;
-
-      return sinceDays >= this.task.duration;
+      
+      return taskOverDue(this.task);
     },
     durationText() {
       if (!this.task) {

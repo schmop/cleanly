@@ -27,39 +27,22 @@ import {
   logOutOutline,
   mailOutline,
 } from "ionicons/icons";
-import toast from "../toast";
 import router from "../router";
 import {
   IonPage,
-  IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
   IonContent,
   IonCardHeader,
-  IonModal,
-  IonFooter,
   IonCardContent,
-  IonMenuButton,
-  IonMenu,
   IonCard,
-  IonHeader,
-  IonButtons,
   IonCardTitle,
-  IonToolbar,
-  IonTitle,
-  IonList,
   IonButton,
   IonIcon,
   modalController,
   menuController,
 } from "@ionic/vue";
 import { Household } from "../models/Household";
-import { User } from "../models/User";
-import { Invite } from "../models/Invite";
 import HouseholdPreview from "../components/HouseholdPreview.vue";
-import MenuView from "../components/MenuView.vue";
-import { mapState, mapMutations } from "vuex";
+import { mapState } from "vuex";
 import { translations } from "../translation";
 import client from "../client";
 import CreateHousehold from "../modals/CreateHousehold.vue";
@@ -113,12 +96,4 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.button-badge {
-  position: absolute;
-  right: -6px;
-  top: -9px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
 </style>
