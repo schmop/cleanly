@@ -190,7 +190,7 @@ export default defineComponent({
       const taskFormModal = await modalController.create({
         component: TaskForm,
         componentProps: {
-          id: this.task,
+          task: this.task,
         },
       });
       taskFormModal.present();

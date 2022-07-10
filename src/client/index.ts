@@ -92,10 +92,9 @@ class Client {
     async editTask(task: Task, taskname: string, icon: string, duration: number) {
         const formData = new FormData();
         formData.append('name', taskname);
-        formData.append('task_id', task.id);
         formData.append('icon', icon);
         formData.append('duration', duration.toString());
-        const response = await this.request('api/task/edit', {
+        const response = await this.request(`api/task/edit/${task.id}`, {
             body: formData,
             method: 'POST',
         });
