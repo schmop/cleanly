@@ -33,6 +33,10 @@
         <ion-popover :trigger="contextMenuId" dismiss-on-select>
           <ion-content>
             <ion-list>
+              <ion-item button @click="editTask" lines="none">
+                <ion-icon slot="start" :icon="pencilOutline" />
+                <ion-label> {{ _t('Edit task') }} </ion-label>
+              </ion-item>
               <ion-item button @click="deleteTask" lines="none">
                 <ion-icon slot="start" :icon="trashOutline" />
                 <ion-label> {{ _t('Delete task') }} </ion-label>
@@ -47,7 +51,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { addCircleOutline, closeCircleOutline, ellipsisVertical, trashOutline } from "ionicons/icons";
+import { addCircleOutline, closeCircleOutline, ellipsisVertical, trashOutline, pencilOutline } from "ionicons/icons";
 import client from "@/client";
 import toast from "@/toast";
 import {
@@ -76,6 +80,7 @@ import {
 } from "@ionic/vue";
 import router from "@/router";
 import { Task } from "@/models/Task";
+import TaskForm from "@/modals/TaskForm.vue";
 import icons from "@/components/icons";
 import { colorAsString, green, mix, red } from "@/common/colors";
 import { taskOverDue, taskProgress } from "@/common/task-priority";
@@ -112,6 +117,7 @@ export default defineComponent({
     addCircleOutline,
     closeCircleOutline,
     ellipsisVertical,
+    pencilOutline,
     trashOutline,
     householdName: "",
     icons,
@@ -176,9 +182,20 @@ export default defineComponent({
     ...translations,
     async deleteTask() {
       if (this.task?.id != null) {
-        const newTimestamp = await client.deleteTask(this.task.id);
+        await client.deleteTask(this.task.id);
         store.commit('removeTask', this.task?.id);
       }
+    },
+    async editTask() {
+      const taskFormModal = await modalController.create({
+        component: TaskForm,
+        componentProps: {
+          id: this.task,
+        },
+      });
+      taskFormModal.present();
+      await taskFormModal.onDidDismiss();
+      await client.dashboardInfo();
     },
     async markDone() {
       if (this.task?.id != null) {

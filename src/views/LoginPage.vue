@@ -36,8 +36,13 @@
       <ion-item-group>
         <ion-item>
           <ion-label position="stacked">{{_t('Register')}}</ion-label>
+          <!-- 
+            The timestamped key fixes the infinite update loop when programmatically settings the toggle value
+            @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
+          -->
           <ion-toggle
             ref="toggle"
+            :key="isRegistering + (new Date()).toISOString()"
             @ionChange="onToggle"
             :checked="isRegistering"
           />
@@ -103,12 +108,7 @@ export default defineComponent({
   methods: {
     ...translations,
     onToggle() {
-      // Hotfix from https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-826064939
-      const ref = (this.$refs.toggle as any).$el;
-      if (ref === document.activeElement) {
-        ref.blur();
-        this.isRegistering = !this.isRegistering;
-      }
+      this.isRegistering = !this.isRegistering;
     },
     sendForm() {
       if (!this.formValid) {

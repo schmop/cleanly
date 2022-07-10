@@ -7,7 +7,7 @@
       </ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content color="light" @keypress.enter="create()">
+  <ion-content color="light" @keypress.enter="submit()">
     <ion-item-group>
       <ion-item>
         <ion-label position="stacked">Name</ion-label>
@@ -28,7 +28,7 @@
   </ion-content>
   <ion-footer>
     <ion-toolbar>
-      <ion-button color="primary" @click="create()" :disabled="!valid">
+      <ion-button color="primary" @click="submit()" :disabled="!valid">
         <ion-icon :icon="addCircleOutline" slot="start" />
         {{ _t('Add') }}
       </ion-button>
@@ -69,10 +69,11 @@ import {
 import icons from "../components/icons";
 import { DURATION_SIZES } from "../common/time";
 import { _t, translations } from "../translation";
+import {Task} from '../models/Task';
 import IconPicker from "./IconPicker.vue";
 
 export default defineComponent({
-  name: "AddTask",
+  name: "TaskForm",
   components: {
     IonContent,
     IonToolbar,
@@ -90,7 +91,11 @@ export default defineComponent({
   props: {
     id: {
       type: Number,
-      required: true,
+      default: null,
+    },
+    task: {
+      type: Object as () => Task,
+      default: null, 
     },
   },
   data: () => ({
@@ -115,6 +120,19 @@ export default defineComponent({
     },
     calculatedDuration() {
       return this.duration * this.durationModifiers[this.durationModifier];
+    },
+    isEditing() {
+      return this.task !== null;
+    }
+  },
+  beforeMount() {
+    if (null === this.id && null === this.task) {
+      throw new Error('TaskForm requires either a household for adding or a task for editing!')
+    }
+    if (this.isEditing) {
+      this.taskName = this.task.name;
+      this.duration = this.task.duration;
+      this.icon = this.task.icon;
     }
   },
   methods: {
@@ -171,8 +189,12 @@ export default defineComponent({
       });
       await picker.present();
     },
-    async create() {
-      await client.addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
+    async submit() {
+      if (this.isEditing) {
+        await client.editTask(this.task, this.taskName, this.icon, this.calculatedDuration);
+      } else {
+        await client.addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
+      }
       this.dismiss();
     },
   },

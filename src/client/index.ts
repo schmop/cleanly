@@ -2,6 +2,7 @@ import { Store } from 'vuex';
 import router from '../router';
 import { store, State } from '../store';
 import { Invite } from '../models/Invite';
+import { Task } from '../models/Task';
 
 class Client {
     private _token: null | string = null;
@@ -16,8 +17,8 @@ class Client {
         if (process.env.NODE_ENV === 'production') {
             return "https://cleanly.schmoppo.de";
         }
-        //return "https://127.0.0.1:8000";
-        return "http://192.168.2.108:8000";
+        return "http://127.0.0.1:8000";
+        //return "http://192.168.2.108:8000";
     }
 
     constructor(store: Store<State>) {
@@ -81,6 +82,20 @@ class Client {
         formData.append('icon', icon);
         formData.append('duration', duration.toString());
         const response = await this.request('api/task/create', {
+            body: formData,
+            method: 'POST',
+        });
+
+        return response.status === 200;
+    }
+
+    async editTask(task: Task, taskname: string, icon: string, duration: number) {
+        const formData = new FormData();
+        formData.append('name', taskname);
+        formData.append('task_id', task.id);
+        formData.append('icon', icon);
+        formData.append('duration', duration.toString());
+        const response = await this.request('api/task/edit', {
             body: formData,
             method: 'POST',
         });

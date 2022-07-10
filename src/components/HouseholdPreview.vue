@@ -15,7 +15,7 @@
         >
           <ion-content>
             <ion-list>
-              <ion-item button @click="openAddTaskModal">
+              <ion-item button @click="openTaskFormModal">
                 <ion-icon slot="start" :icon="addCircleOutline" />
                 <ion-label> {{ _t('New task') }} </ion-label>
               </ion-item>
@@ -75,7 +75,7 @@ import { Household } from "@/models/Household";
 import { Task } from "@/models/Task";
 import TaskView from "@/components/TaskView.vue";
 import InviteModal from "@/modals/InviteModal.vue";
-import AddTask from "@/modals/AddTask.vue";
+import TaskForm from "@/modals/TaskForm.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import {translations} from "@/translation";
 import { mapState } from "vuex";
@@ -121,15 +121,15 @@ export default defineComponent({
   },
   methods: {
     ...translations,
-    async openAddTaskModal(): Promise<void> {
-      const addTaskModal = await modalController.create({
-        component: AddTask,
+    async openTaskFormModal(): Promise<void> {
+      const TaskFormModal = await modalController.create({
+        component: TaskForm,
         componentProps: {
           id: this.household?.id,
         },
       });
-      addTaskModal.present();
-      await addTaskModal.onDidDismiss();
+      TaskFormModal.present();
+      await TaskFormModal.onDidDismiss();
       await client.dashboardInfo();
     },
     async openInviteModal() {

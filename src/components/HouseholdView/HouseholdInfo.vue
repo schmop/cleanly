@@ -3,7 +3,7 @@
         <ion-content>
             <ion-list>
                 <ion-list-header>{{ _t('Household settings') }}</ion-list-header>
-                <ion-item button @click="openAddTaskModal">
+                <ion-item button @click="openTaskFormModal">
                     <ion-icon slot="start" :icon="addCircleOutline" />
                     {{ _t('Add task') }}
                 </ion-item>
@@ -52,7 +52,7 @@ import {
 } from "@ionic/vue";
 import { Household } from "@/models/Household";
 import { mapState } from "vuex";
-import AddTask from "@/modals/AddTask.vue";
+import TaskForm from "@/modals/TaskForm.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import { translations, _t } from "@/translation";
@@ -192,16 +192,16 @@ export default defineComponent({
 
             return member.id !== this.user.id;
         },
-        async openAddTaskModal(): Promise<void> {
+        async openTaskFormModal(): Promise<void> {
             menuController.close("menu");
-            const addTaskModal = await modalController.create({
-                component: AddTask,
+            const TaskFormModal = await modalController.create({
+                component: TaskForm,
                 componentProps: {
                     id: this.household?.id,
                 },
             });
-            addTaskModal.present();
-            await addTaskModal.onDidDismiss();
+            TaskFormModal.present();
+            await TaskFormModal.onDidDismiss();
             await client.dashboardInfo();
         },
         async openInviteModal(): Promise<void> {
