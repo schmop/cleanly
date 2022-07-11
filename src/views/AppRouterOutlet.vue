@@ -43,7 +43,6 @@ import {
   homeOutline,
   mailOutline,
 } from "ionicons/icons";
-import client from "../client";
 import toast from "../toast";
 import {RefresherCustomEvent} from "@ionic/core/components";
 import router from "../router";
@@ -83,6 +82,7 @@ import { mapState } from "vuex";
 import store from "../store";
 import { Household } from "../models/Household";
 import { translations } from "../translation";
+import { householdClient } from '../client/household-client';
 
 export default defineComponent({
   name: "DashBoard",
@@ -126,14 +126,14 @@ export default defineComponent({
   },
   async beforeCreate() {
     if (null == this.user) {
-      await client.dashboardInfo();
+      await householdClient.dashboardInfo();
     }
     this.loading = false;
   },
   methods: {
     ...translations,
     async forceReload(event: RefresherCustomEvent) {
-      await client.dashboardInfo();
+      await householdClient.dashboardInfo();
       event.target.complete();
     },
     showInvites() {

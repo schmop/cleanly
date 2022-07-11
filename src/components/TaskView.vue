@@ -52,7 +52,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { addCircleOutline, closeCircleOutline, ellipsisVertical, trashOutline, pencilOutline } from "ionicons/icons";
-import client from "@/client";
 import toast from "@/toast";
 import {
   IonLabel,
@@ -89,6 +88,8 @@ import store from "@/store";
 import { _t, translations, __t } from "@/translation";
 import { mapState } from "vuex";
 import { Household } from "@/models/Household";
+import { taskClient } from '../client/task-client';
+import { householdClient } from '../client/household-client';
 
 export default defineComponent({
   name: "TaskView",
@@ -182,7 +183,7 @@ export default defineComponent({
     ...translations,
     async deleteTask() {
       if (this.task?.id != null) {
-        await client.deleteTask(this.task.id);
+        await taskClient.deleteTask(this.task.id);
         store.commit('removeTask', this.task?.id);
       }
     },
@@ -195,12 +196,12 @@ export default defineComponent({
       });
       taskFormModal.present();
       await taskFormModal.onDidDismiss();
-      await client.dashboardInfo();
+      await householdClient.dashboardInfo();
     },
     async markDone() {
       if (this.task?.id != null) {
         (this.$refs.slidingButton as any).$el.close();
-        const newTimestamp = await client.markTaskComplete(this.task?.id);
+        const newTimestamp = await taskClient.markTaskComplete(this.task?.id);
         store.commit('markTaskDone', {
           taskId: this.task?.id,
           timestamp: newTimestamp,

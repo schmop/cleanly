@@ -56,12 +56,12 @@ import TaskForm from "@/modals/TaskForm.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import { translations, _t } from "@/translation";
-import client from "@/client";
 import { addCircleOutline, cogOutline, personAddOutline, personOutline, trashOutline, walkOutline } from "ionicons/icons";
 import { User } from "@/models/User";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 import toast from "@/toast";
 import router from "@/router";
+import { householdClient } from '../../client/household-client';
 
 export default defineComponent({
     name: "HouseholdInfo",
@@ -130,8 +130,8 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await client.removeHousehold(this.id)) {
-                    client.dashboardInfo();
+                if (await householdClient.removeHousehold(this.id)) {
+                    householdClient.dashboardInfo();
                     router.push('/app/dashboard');
                     toast.success(_t('Successfully deleted the household!'));
 
@@ -161,8 +161,8 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await client.leaveHousehold(this.id)) {
-                    client.dashboardInfo();
+                if (await householdClient.leaveHousehold(this.id)) {
+                    householdClient.dashboardInfo();
                     router.push('/app/dashboard');
                     toast.success(_t('Successfully left the household!'));
 
@@ -202,7 +202,7 @@ export default defineComponent({
             });
             TaskFormModal.present();
             await TaskFormModal.onDidDismiss();
-            await client.dashboardInfo();
+            await householdClient.dashboardInfo();
         },
         async openInviteModal(): Promise<void> {
             const createHouseholdModal = await modalController.create({

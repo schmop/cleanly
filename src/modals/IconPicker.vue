@@ -25,7 +25,6 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { closeCircleOutline } from "ionicons/icons";
-import client from "../client";
 import {
   IonLabel,
   IonInput,

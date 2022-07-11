@@ -48,7 +48,6 @@ import {
   timeOutline,
   pencilOutline,
 } from "ionicons/icons";
-import client from "../client";
 import {
   IonLabel,
   IonInput,
@@ -71,6 +70,7 @@ import { DURATION_SIZES } from "../common/time";
 import { _t, translations } from "../translation";
 import {Task} from '../models/Task';
 import IconPicker from "./IconPicker.vue";
+import { taskClient } from '../client/task-client';
 
 export default defineComponent({
   name: "TaskForm",
@@ -191,9 +191,9 @@ export default defineComponent({
     },
     async submit() {
       if (this.isEditing) {
-        await client.editTask(this.task, this.taskName, this.icon, this.calculatedDuration);
+        await taskClient.editTask(this.task, this.taskName, this.icon, this.calculatedDuration);
       } else {
-        await client.addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
+        await taskClient.addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
       }
       this.dismiss();
     },

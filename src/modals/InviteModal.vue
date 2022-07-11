@@ -59,7 +59,6 @@ import {
   searchOutline,
   personAddOutline,
 } from "ionicons/icons";
-import client from "../client";
 import toast from "../toast";
 import {
   IonLabel,
@@ -83,6 +82,8 @@ import { Household } from "../models/Household";
 import debounce from "../common/debounce";
 import { LookupResult } from "../models/LookupResult";
 import { translations } from "../translation";
+import { householdClient } from '../client/household-client';
+import { authClient } from '../client/auth-client';
 
 export default defineComponent({
   name: "InviteModal",
@@ -139,11 +140,11 @@ export default defineComponent({
       if (null == this.household?.id || null == this.selection?.id) {
         return;
       }
-      await client.invite(this.household?.id, this.selection?.id);
+      await householdClient.invite(this.household?.id, this.selection?.id);
       this.dismiss();
     },
     async _search() {
-      let suggestions = await client.lookupUsers(this.inviteSearch);
+      let suggestions = await authClient.lookupUsers(this.inviteSearch);
       const users = this.household?.users;
       if (null != users) {
         suggestions = suggestions.filter((suggestion: LookupResult) =>

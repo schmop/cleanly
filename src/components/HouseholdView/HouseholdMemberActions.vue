@@ -28,7 +28,7 @@ import { User } from "@/models/User";
 import { translations, _t, __t } from "@/translation";
 import { personRemoveOutline, returnUpForwardOutline } from "ionicons/icons";
 import toast from "@/toast";
-import client from "@/client";
+import { householdClient } from '../../client/household-client';
 
 export default defineComponent({
     name: "HouseholdMemberActions",
@@ -69,9 +69,9 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await client.kickFromHousehold(this.member.id, this.household.id)) {
+                if (await householdClient.kickFromHousehold(this.member.id, this.household.id)) {
                     toast.success(__t('Successfully kicked {0} from the household!', this.member?.name ?? _t('someone')));
-                    client.dashboardInfo();
+                    householdClient.dashboardInfo();
 
                     return;
                 }

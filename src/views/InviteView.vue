@@ -38,7 +38,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { closeOutline, enterOutline } from "ionicons/icons";
-import client from "../client";
 import toast from "../toast";
 import router from "../router";
 import {
@@ -74,6 +73,7 @@ import { User } from "../models/User";
 import { Invite } from "../models/Invite";
 import { mapState, mapMutations } from "vuex";
 import { translations } from "../translation";
+import { householdClient } from '../client/household-client';
 
 export default defineComponent({
   name: "DashBoard",
@@ -103,7 +103,7 @@ export default defineComponent({
     ...translations,
     async accept(invite: Invite) {
       try {
-        await client.acceptInvite(invite);
+        await householdClient.acceptInvite(invite);
         this.removeInvite(invite);
         toast.success("Household joined successfully!");
         this.backToDashboardIfEmpty();
@@ -114,7 +114,7 @@ export default defineComponent({
     },
     async decline(invite: Invite) {
       try {
-        await client.declineInvite(invite);
+        await householdClient.declineInvite(invite);
         this.removeInvite(invite);
         toast.info("Invitation declined");
         this.backToDashboardIfEmpty();

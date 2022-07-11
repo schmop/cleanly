@@ -33,7 +33,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { addCircleOutline, closeCircleOutline, pencilOutline } from "ionicons/icons";
-import client from "../client";
 import toast from "../toast";
 import {
   IonLabel,
@@ -53,6 +52,7 @@ import {
 import router from "../router";
 import { Household } from "../models/Household";
 import { translations } from "../translation";
+import { householdClient } from '../client/household-client';
 
 export default defineComponent({
   name: "CreateHousehold",
@@ -81,7 +81,7 @@ export default defineComponent({
       modalController.dismiss();
     },
     async createHousehold() {
-      await client.createHousehold(this.householdName);
+      await householdClient.createHousehold(this.householdName);
       this.dismiss();
     },
   },

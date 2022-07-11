@@ -47,7 +47,6 @@ import {
   personAddOutline,
   ellipsisVertical,
 } from "ionicons/icons";
-import client from "@/client";
 import toast from "@/toast";
 import {
   IonLabel,
@@ -79,6 +78,7 @@ import TaskForm from "@/modals/TaskForm.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import {translations} from "@/translation";
 import { mapState } from "vuex";
+import { householdClient } from '../client/household-client';
 
 export default defineComponent({
   name: "HouseholdPreview",
@@ -130,7 +130,7 @@ export default defineComponent({
       });
       TaskFormModal.present();
       await TaskFormModal.onDidDismiss();
-      await client.dashboardInfo();
+      await householdClient.dashboardInfo();
     },
     async openInviteModal() {
       const createHouseholdModal = await modalController.create({

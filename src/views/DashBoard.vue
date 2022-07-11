@@ -44,8 +44,9 @@ import { Household } from "../models/Household";
 import HouseholdPreview from "../components/HouseholdPreview.vue";
 import { mapState } from "vuex";
 import { translations } from "../translation";
-import client from "../client";
 import CreateHousehold from "../modals/CreateHousehold.vue";
+import { householdClient } from '../client/household-client';
+import { authClient } from '../client/auth-client';
 
 export default defineComponent({
   name: "DashBoard",
@@ -78,11 +79,11 @@ export default defineComponent({
       });
       createHouseholdModal.present();
       await createHouseholdModal.onDidDismiss();
-      await client.dashboardInfo();
+      await householdClient.dashboardInfo();
     },
     logout() {
       this.close();
-      client.logout();
+      authClient.logout();
       router.push("/login");
     },
     close() {

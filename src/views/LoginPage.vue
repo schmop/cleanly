@@ -55,7 +55,6 @@
 <script lang="ts">
 import { logInOutline, personAddOutline } from "ionicons/icons";
 import { defineComponent } from "vue";
-import client from "@/client";
 import toast from "@/toast";
 import {
   IonPage,
@@ -70,6 +69,7 @@ import {
 } from "@ionic/vue";
 import router from "@/router";
 import { translations, _t } from "@/translation";
+import { authClient } from '../client/auth-client';
 
 export default defineComponent({
   name: "LoginPage",
@@ -122,7 +122,7 @@ export default defineComponent({
     },
     async register() {
       try {
-        await client.signUp(this.name, this.mail, this.password);
+        await authClient.signUp(this.name, this.mail, this.password);
         this.name = "";
         this.password = "";
         this.retype = "";
@@ -135,7 +135,7 @@ export default defineComponent({
     },
     async login() {
        try {
-        await client.signIn(this.mail, this.password);
+        await authClient.signIn(this.mail, this.password);
         toast.info(_t("Login successful!"));
         router.replace('/app');
       } catch (error: any) {
