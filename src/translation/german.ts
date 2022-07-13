@@ -76,5 +76,8 @@ export default {
     'Do you want to kick {0} from {1}?': 'Willst du {0} aus {1} schmeißen?',
     'There was an error kicking a member from the household!': 'Es gabe einen Fehler beim Rausschmeißen eines Mitglieds aus dem Haushalt!',
     'Edit task': 'Aufgabe bearbeiten',
+    'Do you want to transfer ownership to {0}?': 'Möchtest du die Besitzrechte an {0} übertragen?',
+    'Successfully transfered ownership to {0}!': 'Besitzrechte erfolgreich an {0} übertragen!',
+    'Save': 'Speichern',
     '': '',
 } as { [english: string]: string };

@@ -1,5 +1,6 @@
-import {User} from "@/models/User";
-import {Task} from "@/models/Task";
+import { User } from "@/models/User";
+import { Task } from "@/models/Task";
+import { Todo } from "./Todo";
 
 export interface Household {
     id: number,
@@ -9,4 +10,5 @@ export interface Household {
     tasks: Task[],
     picture?: string | null,
     admin?: number | null,
+    checklist: Todo[],
 }

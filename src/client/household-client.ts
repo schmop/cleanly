@@ -3,6 +3,7 @@ import { State } from '@/store';
 import { Store } from 'vuex';
 import { AuthClient, authClient } from './auth-client';
 import store from '../store/index';
+import { Todo } from '@/models/Todo';
 
 export class HouseholdClient {
     constructor(private readonly client: AuthClient, private readonly store: Store<State>) {
@@ -94,6 +95,20 @@ export class HouseholdClient {
         return true;
     }
 
+    async transferOwnershipTo(memberId: number, householdId: number) {
+        const response = await this.client.request(`api/household/transfer-ownership/${householdId}/${memberId}`, {
+            method: 'POST',
+        });
+
+        if (response.status !== 200) {
+            console.error('Could not transfer ownership', response.statusText);
+
+            return false;
+        }
+        
+        return true;
+    }
+
     async leaveHousehold(householdId: number) {
         const response = await this.client.request(`api/household/leave/${householdId}`, {
             method: 'POST',
@@ -129,6 +144,23 @@ export class HouseholdClient {
         const data = await response.json();
 
         return data['token'];
+    }
+
+    async updateChecklist(householdId: number, todos: Todo[]): Promise<boolean> {
+        const formData = new FormData();
+        formData.append('todos', JSON.stringify(todos));
+        const response = await this.client.request(`api/household/update-checklist/${householdId}`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.status !== 200) {
+            console.error('Could not update checklist', response.statusText);
+
+            return false;
+        }
+        
+        return true;
     }
 }
 

@@ -1,7 +1,7 @@
 <template>
     <ion-list>
         <ion-list-header>{{__t('Actions for {0}', member?.name ?? '<unknown>')}}</ion-list-header>
-        <ion-item button>
+        <ion-item button @click="openTransferOwnership">
             <ion-icon slot="start" :icon="returnUpForwardOutline" />
             <ion-label>{{_t('Transfer ownership')}}</ion-label>
         </ion-item>
@@ -21,6 +21,7 @@ IonIcon,
 IonLabel,
 IonListHeader,
 alertController,
+popoverController,
 } from "@ionic/vue";
 import { Household } from "@/models/Household";
 import { mapState } from "vuex";
@@ -52,6 +53,36 @@ export default defineComponent({
     },
     methods: {
         ...translations,
+        async dismiss(): Promise<boolean> {
+            return popoverController.dismiss();
+        },
+        async openTransferOwnership() {
+            if (this.member?.id == null || this.household?.id == null) {
+                console.error("Tried to transfer ownership to another member, but could't");
+                return;
+            }
+            const alert = await alertController.create({
+                header: __t('Do you want to transfer ownership to {0}?', this.member.name),
+                buttons: [
+                    {
+                        text: _t('Ok'),
+                        role: 'confirm',
+                    },
+                    _t('Cancel'),
+                ]
+            });
+            this.dismiss();
+            await alert.present();
+            if ((await alert.onDidDismiss()).role === 'confirm') {
+                if (await householdClient.transferOwnershipTo(this.member.id, this.household.id)) {
+                    toast.success(__t('Successfully transfered ownership to {0}!', this.member.name));
+                    householdClient.dashboardInfo();
+
+                    return;
+                }
+                await toast.error(_t('There was an error transfering ownership to another member!'));
+            }
+        },
         async openKickMemberPrompt() {
             if (this.member?.id == null || this.household?.id == null) {
                 console.error("Tried to kick a member from the household, but could't");
@@ -67,6 +98,7 @@ export default defineComponent({
                     _t('Cancel'),
                 ]
             });
+            this.dismiss();
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
                 if (await householdClient.kickFromHousehold(this.member.id, this.household.id)) {
