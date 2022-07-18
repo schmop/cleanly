@@ -5,9 +5,9 @@ export class SseClient {
     source: EventSource|null;
     get HOST() {
         if (process.env.NODE_ENV === 'production') {
-            return "http://cleanly.schmoppo.de:3333";
+            return "https://cleanly.schmoppo.de:3333";
         }
-        return "http://127.0.0.1:3333";
+        return "http://127.0.0.1:3334";
     }
 
     get _token() {
