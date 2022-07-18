@@ -69,7 +69,7 @@ import {
 } from "@ionic/vue";
 import router from "@/router";
 import { translations, _t } from "@/translation";
-import { authClient } from '../client/auth-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "LoginPage",
@@ -122,7 +122,7 @@ export default defineComponent({
     },
     async register() {
       try {
-        await authClient.signUp(this.name, this.mail, this.password);
+        await container.getAuthClient().signUp(this.name, this.mail, this.password);
         this.name = "";
         this.password = "";
         this.retype = "";
@@ -135,7 +135,7 @@ export default defineComponent({
     },
     async login() {
        try {
-        await authClient.signIn(this.mail, this.password);
+        await container.getAuthClient().signIn(this.mail, this.password);
         toast.info(_t("Login successful!"));
         router.replace('/app');
       } catch (error: any) {

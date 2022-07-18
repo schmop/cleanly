@@ -73,7 +73,7 @@ import { User } from "../models/User";
 import { Invite } from "../models/Invite";
 import { mapState, mapMutations } from "vuex";
 import { translations } from "../translation";
-import { householdClient } from '../client/household-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "DashBoard",
@@ -103,7 +103,7 @@ export default defineComponent({
     ...translations,
     async accept(invite: Invite) {
       try {
-        await householdClient.acceptInvite(invite);
+        await container.getHouseholdClient().acceptInvite(invite);
         this.removeInvite(invite);
         toast.success("Household joined successfully!");
         this.backToDashboardIfEmpty();
@@ -114,7 +114,7 @@ export default defineComponent({
     },
     async decline(invite: Invite) {
       try {
-        await householdClient.declineInvite(invite);
+        await container.getHouseholdClient().declineInvite(invite);
         this.removeInvite(invite);
         toast.info("Invitation declined");
         this.backToDashboardIfEmpty();

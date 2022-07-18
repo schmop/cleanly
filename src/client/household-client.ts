@@ -1,9 +1,8 @@
 import { Invite } from '@/models/Invite';
 import { State } from '@/store';
 import { Store } from 'vuex';
-import { AuthClient, authClient } from './auth-client';
-import store from '../store/index';
-import { Todo } from '@/models/Todo';
+import { AuthClient } from './auth-client';
+import { TodoEvent } from '@/models/TodoEvent';
 
 export class HouseholdClient {
     constructor(private readonly client: AuthClient, private readonly store: Store<State>) {
@@ -146,9 +145,9 @@ export class HouseholdClient {
         return data['token'];
     }
 
-    async updateChecklist(householdId: number, todos: Todo[]): Promise<boolean> {
+    async updateChecklist(householdId: number, events: TodoEvent[]): Promise<boolean> {
         const formData = new FormData();
-        formData.append('todos', JSON.stringify(todos));
+        formData.append('events', JSON.stringify(events));
         const response = await this.client.request(`api/household/update-checklist/${householdId}`, {
             method: 'POST',
             body: formData,
@@ -163,5 +162,3 @@ export class HouseholdClient {
         return true;
     }
 }
-
-export const householdClient = new HouseholdClient(authClient, store);

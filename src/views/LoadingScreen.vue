@@ -10,7 +10,7 @@
 import { defineComponent } from "vue";
 import { IonPage, IonContent, IonLoading } from "@ionic/vue";
 import router from "../router";
-import { authClient } from '../client/auth-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "LoadingScreen",
@@ -20,8 +20,8 @@ export default defineComponent({
     IonLoading,
   },
   async beforeCreate() {
-    await authClient.restoreState();
-    if (authClient.isAuthenticated()) {
+    await container.getAuthClient().restoreState();
+    if (container.getAuthClient().isAuthenticated()) {
       router.replace("/app");
     } else {
       router.replace("/login");

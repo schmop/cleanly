@@ -61,7 +61,7 @@ import { User } from "@/models/User";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 import toast from "@/toast";
 import router from "@/router";
-import { householdClient } from '../../client/household-client';
+import { container } from "@/container";
 
 export default defineComponent({
     name: "HouseholdInfo",
@@ -109,6 +109,9 @@ export default defineComponent({
         },
         isAdmin(): boolean {
             return this.user.id === this.admin;
+        },
+        householdClient() {
+            return container.getHouseholdClient();
         }
     },
     methods: {
@@ -130,8 +133,8 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await householdClient.removeHousehold(this.id)) {
-                    householdClient.dashboardInfo();
+                if (await this.householdClient.removeHousehold(this.id)) {
+                    this.householdClient.dashboardInfo();
                     router.push('/app/dashboard');
                     toast.success(_t('Successfully deleted the household!'));
 
@@ -161,8 +164,8 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await householdClient.leaveHousehold(this.id)) {
-                    householdClient.dashboardInfo();
+                if (await this.householdClient.leaveHousehold(this.id)) {
+                    this.householdClient.dashboardInfo();
                     router.push('/app/dashboard');
                     toast.success(_t('Successfully left the household!'));
 
@@ -202,7 +205,7 @@ export default defineComponent({
             });
             TaskFormModal.present();
             await TaskFormModal.onDidDismiss();
-            await householdClient.dashboardInfo();
+            await this.householdClient.dashboardInfo();
         },
         async openInviteModal(): Promise<void> {
             const createHouseholdModal = await modalController.create({

@@ -54,8 +54,7 @@ import { Invite } from "../models/Invite";
 import HouseholdView from "../components/HouseholdPreview.vue";
 import { translations } from "../translation";
 import CreateHousehold from "../modals/CreateHousehold.vue";
-import { householdClient } from '../client/household-client';
-import { authClient } from '../client/auth-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "MenuView",
@@ -88,7 +87,7 @@ export default defineComponent({
       });
       createHouseholdModal.present();
       await createHouseholdModal.onDidDismiss();
-      await householdClient.dashboardInfo();
+      await container.getHouseholdClient().dashboardInfo();
     },
     gotoDashboard() {
       this.close();
@@ -96,7 +95,7 @@ export default defineComponent({
     },
     logout() {
       this.close();
-      authClient.logout();
+      container.getAuthClient().logout();
       router.push("/login");
     },
     close() {

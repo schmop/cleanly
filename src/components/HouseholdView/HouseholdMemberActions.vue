@@ -29,7 +29,7 @@ import { User } from "@/models/User";
 import { translations, _t, __t } from "@/translation";
 import { personRemoveOutline, returnUpForwardOutline } from "ionicons/icons";
 import toast from "@/toast";
-import { householdClient } from '../../client/household-client';
+import { container } from "@/container";
 
 export default defineComponent({
     name: "HouseholdMemberActions",
@@ -50,6 +50,9 @@ export default defineComponent({
     },
     computed: {
         ...mapState(["user"]),
+        householdClient() {
+            return container.getHouseholdClient();
+        },
     },
     methods: {
         ...translations,
@@ -74,9 +77,9 @@ export default defineComponent({
             this.dismiss();
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await householdClient.transferOwnershipTo(this.member.id, this.household.id)) {
+                if (await this.householdClient.transferOwnershipTo(this.member.id, this.household.id)) {
                     toast.success(__t('Successfully transfered ownership to {0}!', this.member.name));
-                    householdClient.dashboardInfo();
+                    this.householdClient.dashboardInfo();
 
                     return;
                 }
@@ -101,9 +104,9 @@ export default defineComponent({
             this.dismiss();
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await householdClient.kickFromHousehold(this.member.id, this.household.id)) {
+                if (await this.householdClient.kickFromHousehold(this.member.id, this.household.id)) {
                     toast.success(__t('Successfully kicked {0} from the household!', this.member?.name ?? _t('someone')));
-                    householdClient.dashboardInfo();
+                    this.householdClient.dashboardInfo();
 
                     return;
                 }

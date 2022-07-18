@@ -3,6 +3,7 @@ import { Household } from '../models/Household';
 import { User } from '../models/User';
 import { Invite } from '../models/Invite';
 import { Task } from '@/models/Task';
+import { Todo } from '@/models/Todo';
 
 // declare your own store states
 export interface State {
@@ -27,6 +28,11 @@ export const store = createStore<State>({
         invites: [] as Invite[],
         pageTitle: null as null | string,
     }),
+    getters: {
+        checklist: (state: State) => (householdId: number) => {
+            return state.households.find((household: Household) => household.id === householdId)?.checklist;
+        },
+    },
     mutations: {
         user(state: State, user) {
             state.user = user;
@@ -44,16 +50,23 @@ export const store = createStore<State>({
                 household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
             }
         },
-        markTaskDone(state: State, data: {taskId: string, timestamp: number}) {
-            const {taskId, timestamp} = data;
+        markTaskDone(state: State, data: { taskId: string, timestamp: number }) {
+            const { taskId, timestamp } = data;
             const task = state
                 .households
                 .map((household: Household) => household.tasks)
                 .flat()
                 .find((task: Task) => task.id === taskId);
-            
+
             if (task) {
                 task.lastComplete = timestamp;
+            }
+        },
+        updateChecklist(state: State, data: { household_id: number, checklist: Todo[] }) {
+            const { household_id, checklist } = data;
+            const household = state.households.find(household => household.id === household_id);
+            if (household) {
+                household.checklist = checklist;
             }
         },
         dashboard(state: State, data) {

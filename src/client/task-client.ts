@@ -1,5 +1,5 @@
 import { Task } from '@/models/Task';
-import { AuthClient, authClient } from './auth-client';
+import { AuthClient } from './auth-client';
 
 export class TaskClient {
     constructor(private readonly client: AuthClient) {
@@ -55,5 +55,3 @@ export class TaskClient {
         return false;
     }
 }
-
-export const taskClient = new TaskClient(authClient);

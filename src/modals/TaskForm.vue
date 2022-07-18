@@ -70,7 +70,7 @@ import { DURATION_SIZES } from "../common/time";
 import { _t, translations } from "../translation";
 import {Task} from '../models/Task';
 import IconPicker from "./IconPicker.vue";
-import { taskClient } from '../client/task-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "TaskForm",
@@ -191,9 +191,9 @@ export default defineComponent({
     },
     async submit() {
       if (this.isEditing) {
-        await taskClient.editTask(this.task, this.taskName, this.icon, this.calculatedDuration);
+        await container.getTaskClient().editTask(this.task, this.taskName, this.icon, this.calculatedDuration);
       } else {
-        await taskClient.addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
+        await container.getTaskClient().addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
       }
       this.dismiss();
     },

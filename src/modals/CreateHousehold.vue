@@ -52,7 +52,7 @@ import {
 import router from "../router";
 import { Household } from "../models/Household";
 import { translations } from "../translation";
-import { householdClient } from '../client/household-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "CreateHousehold",
@@ -81,7 +81,7 @@ export default defineComponent({
       modalController.dismiss();
     },
     async createHousehold() {
-      await householdClient.createHousehold(this.householdName);
+      await container.getHouseholdClient().createHousehold(this.householdName);
       this.dismiss();
     },
   },

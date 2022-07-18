@@ -2,14 +2,17 @@
     <ion-page>
         <ion-content>
             <ion-reorder-group :disabled="false" @ionItemReorder="reorder">
-                <ion-item v-for="(todo) in todos" :key="todo.uuid">
-                    <ion-button fill="clear" color="dark" shape="round" @click.stop="markAsCompleted(todo)">
-                        <ion-icon slot="icon-only" :icon="ellipseOutline" />
-                    </ion-button>
-                    <ion-input v-model="todo.content"></ion-input>
-                    <ion-reorder slot="end">
-                    </ion-reorder>
-                </ion-item>
+                <TransitionGroup name="checklist">
+                    <ion-item v-for="(todo, index) in todos" :key="todo.uuid">
+                        <ion-button fill="clear" color="dark" shape="round" @click.stop="markAsCompleted(index)">
+                            <ion-icon slot="icon-only" :icon="ellipseOutline" />
+                        </ion-button>
+                        <ion-input @ionInput="updateTodo(index, $event)" v-model="todo.content"></ion-input>
+                        <ion-reorder slot="end">
+                        </ion-reorder>
+                    </ion-item>
+                </TransitionGroup>
+
             </ion-reorder-group>
             <ion-fab vertical="bottom" horizontal="end" slot="fixed">
                 <ion-fab-button @click="addTodo">
@@ -43,8 +46,9 @@ import { add, ellipseOutline } from "ionicons/icons";
 import { uuid4 } from '../../common/uuid';
 import { IonContent } from '@ionic/vue';
 import debounce from '../../common/debounce';
-import { householdClient } from "@/client/household-client";
 import toast from "@/toast";
+import { TodoEvent } from "@/models/TodoEvent";
+import { container } from "@/container";
 
 export default defineComponent({
     name: "CheckList",
@@ -64,7 +68,8 @@ export default defineComponent({
         add,
         ellipseOutline,
         todos: [] as Todo[],
-        requestUpdate: (() => {/*NOOP*/ }) as (() => void),
+        eventQueue: [] as TodoEvent[],
+        requestFlushQueue: (() => {/*NOOP*/ }) as (() => void),
     }),
     props: {
         id: Number,
@@ -88,36 +93,86 @@ export default defineComponent({
                 }
             }
         },
-        todos: {
-            deep: true,
-            handler() {
-                this.requestUpdate();
-            }
-        },
     },
     created() {
-        this.requestUpdate = debounce(async () => {
+        this.requestFlushQueue = debounce(async () => {
             if (!this.id) {
                 return;
             }
-            if (!await householdClient.updateChecklist(this.id, this.todos)) {
+            const sentEventQueue = this.eventQueue;
+            this.eventQueue = [];
+            if (!await container.getHouseholdClient().updateChecklist(this.id, sentEventQueue)) {
                 toast.error('Could not send updated checklist to server!');
             }
         }, 1000, false);
     },
     methods: {
-        markAsCompleted(todo: Todo) {
-            this.todos = this.todos.filter((someTodo) => someTodo.uuid !== todo.uuid);
+        addToQueue(event: TodoEvent) {
+            this.eventQueue.push(event);
+            this.requestFlushQueue();
+        },
+        updateTodo(index: number, event: any) {
+            const todo = this.todos[index];
+            // just the last content update is relevant, clear the rest
+            this.eventQueue = this.eventQueue.filter(
+                (event: TodoEvent) => event.uuid !== todo.uuid || event.type !== 'update'
+            );
+            this.addToQueue({
+                type: 'update',
+                uuid: todo.uuid,
+                data: event.target.value,
+            });
+        },
+        markAsCompleted(index: number) {
+            const [todo] = this.todos.splice(index, 1);
+            // These events won't have an effect after deletion
+            this.eventQueue = this.eventQueue.filter(
+                (event: TodoEvent) => event.uuid !== todo.uuid
+            );
+            this.addToQueue({
+                type: 'delete',
+                uuid: todo.uuid,
+            });
         },
         reorder(event: ItemReorderCustomEvent) {
+            const {from, to} = event.detail;
+            const todo = this.todos[from];
+            const insertBeforeUuid = this.todos[to < from ? to : to + 1]?.uuid ?? undefined;
+            this.addToQueue({
+                type: 'sort',
+                uuid: todo.uuid,
+                data: insertBeforeUuid,
+            });
             this.todos = event.detail.complete(this.todos);
         },
         addTodo() {
-            this.todos.push({ uuid: uuid4(), content: '' } as Todo);
+            const todo: Todo = { uuid: uuid4(), content: '' };
+            this.todos.push(todo);
+            this.addToQueue({
+                type: 'create',
+                uuid: todo.uuid,
+            });
         },
     }
 });
 </script>
 
 <style scoped>
+.checklist-move, /* apply transition to moving elements */
+.checklist-enter-active,
+.checklist-leave-active {
+  transition: all 0.5s ease;
+}
+
+.checklist-enter-from,
+.checklist-leave-to {
+  opacity: 0;
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.checklist-leave-active {
+  position: absolute;
+  width: 100%;
+}
 </style>

@@ -1,14 +1,11 @@
-import { Store } from 'vuex';
 import router from '../router';
-import { store, State } from '../store';
-import { Invite } from '../models/Invite';
-import { Task } from '../models/Task';
+import { container } from '../container/index';
 
 export class AuthClient {
     private _token: null | string = null;
     private _refreshToken: null | string = null;
     private _mail: null | string = null;
-    private store: Store<State>;
+
     private get LOCALSTORAGE_STATE_KEY() {
         return 'Cleanly.State';
     }
@@ -19,10 +16,6 @@ export class AuthClient {
         }
         //return "http://127.0.0.1:8000";
         return "http://192.168.2.108:8000";
-    }
-
-    constructor(store: Store<State>) {
-        this.store = store;
     }
 
     async restoreState(): Promise<void> {
@@ -48,6 +41,7 @@ export class AuthClient {
                 'refresh_token': this._refreshToken
             })
         );
+        container.getSseClient().register();
     }
 
     async authCheck(): Promise<boolean> {
@@ -140,6 +134,10 @@ export class AuthClient {
         return this._mail;
     }
 
+    getToken(): null | string {
+        return this._token;
+    }
+
     async lookupUsers(search: string) {
         const formData = new FormData();
         formData.append('search', search);
@@ -181,5 +179,3 @@ export class AuthClient {
         return response;
     }
 }
-
-export const authClient = new AuthClient(store);

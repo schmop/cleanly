@@ -78,7 +78,7 @@ import TaskForm from "@/modals/TaskForm.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import {translations} from "@/translation";
 import { mapState } from "vuex";
-import { householdClient } from '../client/household-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "HouseholdPreview",
@@ -130,7 +130,7 @@ export default defineComponent({
       });
       TaskFormModal.present();
       await TaskFormModal.onDidDismiss();
-      await householdClient.dashboardInfo();
+      await container.getHouseholdClient().dashboardInfo();
     },
     async openInviteModal() {
       const createHouseholdModal = await modalController.create({

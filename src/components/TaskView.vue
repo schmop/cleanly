@@ -77,7 +77,6 @@ import {
   IonCardContent,
   modalController,
 } from "@ionic/vue";
-import router from "@/router";
 import { Task } from "@/models/Task";
 import TaskForm from "@/modals/TaskForm.vue";
 import icons from "@/components/icons";
@@ -88,8 +87,7 @@ import store from "@/store";
 import { _t, translations, __t } from "@/translation";
 import { mapState } from "vuex";
 import { Household } from "@/models/Household";
-import { taskClient } from '../client/task-client';
-import { householdClient } from '../client/household-client';
+import { container } from "@/container";
 
 export default defineComponent({
   name: "TaskView",
@@ -183,7 +181,7 @@ export default defineComponent({
     ...translations,
     async deleteTask() {
       if (this.task?.id != null) {
-        await taskClient.deleteTask(this.task.id);
+        await container.getTaskClient().deleteTask(this.task.id);
         store.commit('removeTask', this.task?.id);
       }
     },
@@ -196,12 +194,12 @@ export default defineComponent({
       });
       taskFormModal.present();
       await taskFormModal.onDidDismiss();
-      await householdClient.dashboardInfo();
+      await container.getHouseholdClient().dashboardInfo();
     },
     async markDone() {
       if (this.task?.id != null) {
         (this.$refs.slidingButton as any).$el.close();
-        const newTimestamp = await taskClient.markTaskComplete(this.task?.id);
+        const newTimestamp = await container.getTaskClient().markTaskComplete(this.task?.id);
         store.commit('markTaskDone', {
           taskId: this.task?.id,
           timestamp: newTimestamp,
