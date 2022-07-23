@@ -79,5 +79,8 @@ export default {
     'Do you want to transfer ownership to {0}?': 'Möchtest du die Besitzrechte an {0} übertragen?',
     'Successfully transfered ownership to {0}!': 'Besitzrechte erfolgreich an {0} übertragen!',
     'Save': 'Speichern',
+    'did': 'erledigte',
+    '{0} ago': 'vor {0}',
+    'just now': 'gerade eben',
     '': '',
 } as { [english: string]: string };

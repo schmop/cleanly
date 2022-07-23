@@ -45,7 +45,7 @@ export class TaskClient {
     }
 
     async fetchTaskLog(householdId: number): Promise<void> {
-        const household: undefined|Household = this.store.getters.household(householdId);
+        const household: undefined|Household = this.store.getters.householdById(householdId);
         if (null == household) {
             throw new Error('Cannot fetch tasklogs of an unknown household!');
         }
@@ -55,7 +55,7 @@ export class TaskClient {
             throw new Error('Could not fetch task logs, ' + response.statusText);
         }
 
-        const rawLogs = await response.json();
+        const rawLogs = (await response.json()).logs;
         // flatmap allows to map and filter at the same time!
         const logs: TaskLog[] = rawLogs.flatMap((log: any): TaskLog[] => {
             const keysOfData = Object.keys(log);
@@ -83,7 +83,7 @@ export class TaskClient {
                 } as TaskLog
             ];
         });
-        this.store.commit('logs', {logs});
+        this.store.commit('logs', {logs, householdId});
     }
 
     /**
