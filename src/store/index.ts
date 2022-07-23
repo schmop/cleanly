@@ -4,13 +4,17 @@ import { User } from '../models/User';
 import { Invite } from '../models/Invite';
 import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
+import { TaskLog } from '@/models/TaskLog';
 
 // declare your own store states
 export interface State {
+    loggedIn: boolean,
     households: Household[],
     user: null | User,
     invites: Invite[],
     pageTitle: null | string,
+    taskLogs: Record<string, TaskLog[]>,
+    viewedHousehold: null|number,
 }
 
 declare module '@vue/runtime-core' {
@@ -23,22 +27,46 @@ declare module '@vue/runtime-core' {
 
 export const store = createStore<State>({
     state: () => ({
+        loggedIn: false,
         households: [] as Household[],
         user: null as null | User,
         invites: [] as Invite[],
         pageTitle: null as null | string,
+        taskLogs: {} as Record<number, TaskLog[]>,
+        viewedHousehold: null,
     }),
     getters: {
         checklist: (state: State) => (householdId: number) => {
             return state.households.find((household: Household) => household.id === householdId)?.checklist;
         },
+        household: (state: State) => (householdId: number): undefined|Household => {
+            return state.households.find((household: Household) => household.id === householdId);
+        }
     },
     mutations: {
+        login(state: State) {
+            state.loggedIn = true;
+        },
+        logout(state: State) {
+            state.loggedIn = false;
+        },
         user(state: State, user) {
             state.user = user;
         },
         pageTitle(state: State, title: string) {
             state.pageTitle = title;
+        },
+        viewHousehold(state: State, householdId: number) {
+            state.viewedHousehold = householdId;
+        },
+        logs(state: State, data: {logs: TaskLog[], householdId: number}) {
+            const {logs, householdId} = data;
+            const household = state.households.find((household) => household.id === householdId);
+            if (null == household) {
+                throw new Error('Could not mutate logs, invalid household id given!');
+            }
+
+            state.taskLogs[householdId] = logs;
         },
         removeTask(state: State, taskId: string) {
             const household = state

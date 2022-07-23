@@ -3,11 +3,11 @@
         <ion-content>
             <ion-list>
                 <ion-list-header>{{ _t('Household settings') }}</ion-list-header>
-                <ion-item button @click="openTaskFormModal">
+                <ion-item v-if="isAdmin" button @click="openTaskFormModal">
                     <ion-icon slot="start" :icon="addCircleOutline" />
                     {{ _t('Add task') }}
                 </ion-item>
-                <ion-item button @click="openInviteModal">
+                <ion-item v-if="isAdmin" button @click="openInviteModal">
                     <ion-icon slot="start" :icon="personAddOutline" />
                     {{ _t('Send invite') }}
                 </ion-item>
@@ -15,7 +15,7 @@
                     <ion-icon slot="start" :icon="walkOutline" />
                     {{ _t('Leave household') }}
                 </ion-item>
-                <ion-item button @click="openDeleteHouseholdPrompt">
+                <ion-item v-if="isAdmin" button @click="openDeleteHouseholdPrompt">
                     <ion-icon slot="start" :icon="trashOutline" />
                     {{ _t('Delete household') }}
                 </ion-item>
@@ -82,11 +82,9 @@ export default defineComponent({
         trashOutline,
         walkOutline,
     }),
-    props: {
-        id: Number,
-    },
     computed: {
         ...mapState(["households", "user"]),
+        ...mapState({id: "viewedHousehold"}),
         household(): null | Household {
             return this.households.find((household: Household) => household.id === this.id);
         },
@@ -135,7 +133,7 @@ export default defineComponent({
             if ((await alert.onDidDismiss()).role === 'confirm') {
                 if (await this.householdClient.removeHousehold(this.id)) {
                     this.householdClient.dashboardInfo();
-                    router.push('/app/dashboard');
+                    router.push({name: 'dashboard'});
                     toast.success(_t('Successfully deleted the household!'));
 
                     return;
@@ -166,7 +164,7 @@ export default defineComponent({
             if ((await alert.onDidDismiss()).role === 'confirm') {
                 if (await this.householdClient.leaveHousehold(this.id)) {
                     this.householdClient.dashboardInfo();
-                    router.push('/app/dashboard');
+                    router.push({name: 'dashboard'});
                     toast.success(_t('Successfully left the household!'));
 
                     return;

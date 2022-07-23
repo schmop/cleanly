@@ -46,6 +46,7 @@ import { mapState } from "vuex";
 import { translations } from "../translation";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 import { container } from "@/container";
+import store from "@/store";
 
 export default defineComponent({
   name: "DashBoard",
@@ -89,7 +90,8 @@ export default defineComponent({
       menuController.close("menu");
     },
     openHousehold(household: Household) {
-      router.push(`/app/household/${household.id}`);
+      store.commit('viewHousehold', household.id);
+      router.push({name: 'household-view'});
     },
   },
 });

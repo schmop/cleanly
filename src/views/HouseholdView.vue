@@ -1,20 +1,25 @@
 <template>
   <ion-page>
     <ion-tabs>
-      <ion-router-outlet />
+      <ion-router-outlet/>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="tasks" :href="`${href}/tasks`">
+        <ion-tab-button tab="tasks" :href="href('tasks')">
           <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
           <ion-label>Tasks</ion-label>
           <ion-badge v-if="numOverdueTasks > 0">{{ numOverdueTasks }}</ion-badge>
         </ion-tab-button>
 
-        <ion-tab-button tab="checklist" :href="`${href}/checklist`">
+        <ion-tab-button tab="checklist" :href="href('checklist')">
           <ion-icon :icon="listCircleOutline"></ion-icon>
           <ion-label>Checklist</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="household" :href="`${href}/info`">
+        <ion-tab-button tab="activity" :href="href('activity')">
+          <ion-icon :icon="analyticsOutline"></ion-icon>
+          <ion-label>Activity</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button tab="household" :href="href('info')">
           <ion-icon :icon="peopleOutline"></ion-icon>
           <ion-label>Household</ion-label>
         </ion-tab-button>
@@ -30,7 +35,8 @@ import {
   checkmarkCircleOutline,
   listCircleOutline,
   personAddOutline,
-  peopleOutline
+  peopleOutline,
+analyticsOutline
 } from "ionicons/icons";
 import {
   IonPage,
@@ -47,6 +53,7 @@ import { mapState } from "vuex";
 import { translations } from '../translation';
 import { taskSortByPriority, taskOverDue } from "@/common/task-priority";
 import router from "@/router";
+import store from "@/store";
 
 export default defineComponent({
   name: "HouseholdView",
@@ -66,17 +73,19 @@ export default defineComponent({
     peopleOutline,
     checkmarkCircleOutline,
     listCircleOutline,
+    analyticsOutline,
   }),
-  props: {
-    id: Number,
-  },
   created() {
     if (this.household == null) {
-      router.push('/app/dashboard');
+      router.push({name: 'dashboard'});
     }
+  },
+  beforeUnmount() {
+    store.commit('viewHousehold', null);
   },
   computed: {
     ...mapState(["households", "user"]),
+    ...mapState({id: "viewedHousehold"}),
     household(): null | Household {
       return this.households.find((household: Household) => household.id === this.id);
     },
@@ -86,15 +95,15 @@ export default defineComponent({
     tasks() {
       return this.household?.tasks.concat().sort(taskSortByPriority);
     },
-    href() {
-      return `/app/household/${this.id}`;
-    },
     numOverdueTasks() {
       return this.tasks?.filter(task => taskOverDue(task)).length ?? 0;
     },
   },
   methods: {
     ...translations,
+    href(path:string) {
+      return `/household/${path}`;
+    },
   },
 });
 </script>

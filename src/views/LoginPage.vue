@@ -136,8 +136,9 @@ export default defineComponent({
     async login() {
        try {
         await container.getAuthClient().signIn(this.mail, this.password);
+        await container.getHouseholdClient().dashboardInfo();
         toast.info(_t("Login successful!"));
-        router.replace('/app');
+        router.replace({name: 'dashboard'});
       } catch (error: any) {
         toast.error(error.message);
       }

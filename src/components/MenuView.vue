@@ -10,7 +10,7 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-item button @click="gotoDashboard">
+        <ion-item router-link="/" router-direction="back" button @click="close">
           <ion-icon slot="start" :icon="homeOutline" />
           {{ _t('Dashboard') }}
         </ion-item>
@@ -51,7 +51,6 @@ modalController,
 import { Household } from "../models/Household";
 import { User } from "../models/User";
 import { Invite } from "../models/Invite";
-import HouseholdView from "../components/HouseholdPreview.vue";
 import { translations } from "../translation";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 import { container } from "@/container";
@@ -89,17 +88,13 @@ export default defineComponent({
       await createHouseholdModal.onDidDismiss();
       await container.getHouseholdClient().dashboardInfo();
     },
-    gotoDashboard() {
-      this.close();
-      router.push('/app/dashboard');
-    },
-    logout() {
-      this.close();
+    async logout() {
+      await this.close();
       container.getAuthClient().logout();
-      router.push("/login");
+      router.replace("/login");
     },
-    close() {
-      menuController.close("menu");
+    async close() {
+      return menuController.close("menu");
     },
   },
 });

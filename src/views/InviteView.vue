@@ -125,7 +125,7 @@ export default defineComponent({
     },
     backToDashboardIfEmpty() {
       if (this.invites.length === 0) {
-        router.push("/app/dashboard");
+        router.push({name: 'dashboard'});
       }
     },
   },

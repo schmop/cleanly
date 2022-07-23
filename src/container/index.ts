@@ -13,7 +13,7 @@ class Container {
     taskClient?: TaskClient;
 
     getAuthClient(): AuthClient {
-        this.authClient = this.authClient ?? new AuthClient();
+        this.authClient = this.authClient ?? new AuthClient(store);
 
         return this.authClient;
     }
@@ -37,7 +37,7 @@ class Container {
     }
 
     getTaskClient(): TaskClient {
-        this.taskClient = this.taskClient ?? new TaskClient(this.getAuthClient());
+        this.taskClient = this.taskClient ?? new TaskClient(this.getAuthClient(), store);
 
         return this.taskClient;
     }

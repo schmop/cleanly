@@ -22,9 +22,9 @@ export default defineComponent({
   async beforeCreate() {
     await container.getAuthClient().restoreState();
     if (container.getAuthClient().isAuthenticated()) {
-      router.replace("/app");
+      this.$emit('success');
     } else {
-      router.replace("/login");
+      this.$emit('fail');
     }
   },
 });

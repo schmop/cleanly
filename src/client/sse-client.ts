@@ -29,7 +29,7 @@ export class SseClient {
         this.source = new EventSource(`${this.HOST}/events?token=${this._token}`);
 
         this.source.onopen = function () {
-            console.log("Connection to server opened.");
+            console.info("Connection to server opened.");
         };
 
         this.source.onmessage = (e: MessageEvent) => {
@@ -43,7 +43,7 @@ export class SseClient {
         };
 
         this.source.onerror = function () {
-            console.log("EventSource failed.");
+            console.warn("EventSource failed.");
         };
     }
 }

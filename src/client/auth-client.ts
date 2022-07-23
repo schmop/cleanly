@@ -1,5 +1,7 @@
 import router from '../router';
 import { container } from '../container/index';
+import { Store } from 'vuex';
+import { State } from '@/store';
 
 export class AuthClient {
     private _token: null | string = null;
@@ -8,6 +10,9 @@ export class AuthClient {
 
     private get LOCALSTORAGE_STATE_KEY() {
         return 'Cleanly.State';
+    }
+
+    constructor(private store: Store<State>) {
     }
 
     get HOST() {
@@ -23,7 +28,9 @@ export class AuthClient {
         if (null != stateString) {
             const state = JSON.parse(stateString);
             this.setLoginData(state);
+            console.info("Found login data in local storage!");
             if (!await this.authCheck() && !await this.refreshLogin()) {
+                console.info("Login data was stale, logging out!");
                 this.logout();
             }
         }
@@ -41,6 +48,7 @@ export class AuthClient {
                 'refresh_token': this._refreshToken
             })
         );
+        this.store.commit('login');
         container.getSseClient().register();
     }
 
@@ -121,6 +129,7 @@ export class AuthClient {
 
     logout(): void {
         localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
+        this.store.commit('logout');
         this._mail = null;
         this._token = null;
         this._refreshToken = null;

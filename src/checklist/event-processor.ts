@@ -18,7 +18,6 @@ export class EventProcessor {
         events.forEach((event: TodoEvent) => {
             this.process(event, todos);
         });
-        console.log("PROCESSED");
         // TODO: Check if new commit to store is needed
         // this.store.commit('updateChecklist', {household_id: householdId, checklist: todos});
     }
