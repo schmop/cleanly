@@ -49,11 +49,10 @@ import {
   IonIcon,
 } from "@ionic/vue";
 import { Household } from "../models/Household";
-import { mapState } from "vuex";
 import { translations } from '../translation';
 import { taskSortByPriority, taskOverDue } from "@/common/task-priority";
 import router from "@/router";
-import store from "@/store";
+import { store } from "@/store";
 
 export default defineComponent({
   name: "HouseholdView",
@@ -81,16 +80,14 @@ export default defineComponent({
     }
   },
   beforeUnmount() {
-    store.commit('viewHousehold', null);
+    store.viewHousehold(null);
   },
   computed: {
-    ...mapState(["households", "user"]),
-    ...mapState({id: "viewedHousehold"}),
-    household(): null | Household {
-      return this.households.find((household: Household) => household.id === this.id);
+    household(): undefined | Household {
+      return store.getters.household.value;
     },
     isAdmin(): boolean {
-      return this.household?.admin === this.user.id;
+      return this.household?.admin === store.state.user?.id;
     },
     tasks() {
       return this.household?.tasks.concat().sort(taskSortByPriority);

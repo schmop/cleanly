@@ -1,11 +1,10 @@
 import { Invite } from '@/models/Invite';
-import { State } from '@/store';
-import { Store } from 'vuex';
 import { AuthClient } from './auth-client';
 import { TodoEvent } from '@/models/TodoEvent';
+import { Store } from '@/store';
 
 export class HouseholdClient {
-    constructor(private readonly client: AuthClient, private readonly store: Store<State>) {
+    constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
     async createHousehold(newHouseholdName: string): Promise<boolean> {
@@ -24,7 +23,7 @@ export class HouseholdClient {
         if (response.status !== 200) {
             throw new Error('Could not authenticate, code: ' + response.status);
         }
-        this.store.commit('dashboard', await response.json());
+        this.store.dashboard(await response.json());
     }
 
     async setHouseholdColor(householdId: number, color: string): Promise<boolean> {
@@ -54,7 +53,7 @@ export class HouseholdClient {
             throw new Error('Could not accept invite, ' + response.statusText);
         }
         const data = await response.json();
-        this.store.commit('joinHousehold', data.household);
+        this.store.joinHousehold(data.household);
     }
 
     async declineInvite(invite: Invite) {

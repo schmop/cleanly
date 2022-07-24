@@ -1,7 +1,6 @@
 import router from '../router';
 import { container } from '../container/index';
-import { Store } from 'vuex';
-import { State } from '@/store';
+import { Store } from '@/store';
 
 export class AuthClient {
     private _token: null | string = null;
@@ -12,7 +11,7 @@ export class AuthClient {
         return 'Cleanly.State';
     }
 
-    constructor(private store: Store<State>) {
+    constructor(private store: Store) {
     }
 
     get HOST() {

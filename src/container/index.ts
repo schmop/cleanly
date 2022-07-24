@@ -1,5 +1,5 @@
 import { EventProcessor } from '@/checklist/event-processor';
-import store from '@/store';
+import { store } from '@/store';
 import { AuthClient } from '../client/auth-client';
 import { HouseholdClient } from '../client/household-client';
 import { SseClient } from '../client/sse-client';

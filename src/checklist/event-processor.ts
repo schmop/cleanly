@@ -1,16 +1,15 @@
 import { Todo } from '@/models/Todo';
 import { TodoEvent } from '../models/TodoEvent';
 import toast from '@/toast';
-import { State } from '../store/index';
-import { Store } from 'vuex';
 import { HouseholdClient } from '../client/household-client';
+import { Store } from '@/store';
 
 export class EventProcessor {
-    constructor(private store: Store<State>, private householdClient: HouseholdClient) {
+    constructor(private store: Store, private householdClient: HouseholdClient) {
     }
 
     processBatch(events: TodoEvent[], householdId: number): void {
-        const todos = this.store.getters.checklist(householdId);
+        const todos = this.store.getters.checklist.value(householdId);
         if (null == todos) {
             this.error('processing multiple checklist updates');
             return;

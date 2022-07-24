@@ -26,7 +26,7 @@
       </ion-item-sliding>
       <template v-if="isAdmin && showActions">
         <ion-buttons slot="end">
-          <ion-button :id="contextMenuId" @click.stop>
+          <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */}">
             <ion-icon slot="icon-only" :icon="ellipsisVertical" />
           </ion-button>
         </ion-buttons>
@@ -52,20 +52,13 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { addCircleOutline, closeCircleOutline, ellipsisVertical, trashOutline, pencilOutline } from "ionicons/icons";
-import toast from "@/toast";
 import {
   IonLabel,
-  IonInput,
-  IonItemGroup,
   IonItem,
   IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonIcon,
   IonButton,
   IonButtons,
-  IonFooter,
   IonList,
   IonItemSliding,
   IonPopover,
@@ -82,12 +75,11 @@ import TaskForm from "@/modals/TaskForm.vue";
 import icons from "@/components/icons";
 import { colorAsString, green, mix, red } from "@/common/colors";
 import { taskOverDue, taskProgress } from "@/common/task-priority";
-import { DAY_IN_HOURS, DAY_IN_SECONDS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
-import store from "@/store";
+import { DAY_IN_HOURS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
 import { _t, translations, __t } from "@/translation";
-import { mapState } from "vuex";
 import { Household } from "@/models/Household";
 import { container } from "@/container";
+import { store } from "@/store";
 
 export default defineComponent({
   name: "TaskView",
@@ -122,14 +114,19 @@ export default defineComponent({
     icons,
   }),
   computed: {
-    ...mapState(['households', 'user']),
+    households() {
+      return store.state.households;
+    },
+    user() {
+      return store.state.user;
+    },
     contextMenuId() {
       return `task-contextmenu-${this.task?.id}`;
     },
     isAdmin() {
       const household = this.households.find((h: Household) => this.task && h.tasks.includes(this.task));
 
-      return household.admin === this.user.id;
+      return null != household && null != this.user && household.admin === this.user.id;
     },
     progress() {
       if (!this.task) {

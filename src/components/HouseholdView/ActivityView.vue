@@ -14,13 +14,13 @@ import {
 } from "@ionic/vue";
 import TaskLogView from '../TaskLogView.vue';
 import { container } from '../../container/index';
-import { computed, toRefs } from "vue";
-import { useStore } from "vuex";
+import { computed } from "vue";
 import { TaskLog } from '../../models/TaskLog';
+import { useStore } from "@/store";
 
 const store = useStore();
 const tasklogs = computed(() => {
-    const logs = store.getters.taskLogs.concat();
+    const logs = store.getters.taskLogs.value.concat();
 
     return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
 });

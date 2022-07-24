@@ -37,10 +37,8 @@ import {
     IonReorder,
     IonReorderGroup,
     ItemReorderCustomEvent,
-    modalController,
 } from "@ionic/vue";
 import { Household } from "@/models/Household";
-import { mapState } from "vuex";
 import { Todo } from '../../models/Todo';
 import { add, ellipseOutline } from "ionicons/icons";
 import { uuid4 } from '../../common/uuid';
@@ -49,6 +47,7 @@ import debounce from '../../common/debounce';
 import toast from "@/toast";
 import { TodoEvent } from "@/models/TodoEvent";
 import { container } from "@/container";
+import { store } from "@/store";
 
 export default defineComponent({
     name: "CheckList",
@@ -71,17 +70,16 @@ export default defineComponent({
         eventQueue: [] as TodoEvent[],
         requestFlushQueue: (() => {/*NOOP*/ }) as (() => void),
     }),
-    props: {
-        id: Number,
-    },
     computed: {
-        ...mapState(["households"]),
-        household(): null | Household {
-            return this.households.find((household: Household) => household.id === this.id);
+        household(): undefined | Household {
+            return store.state.households.find((household: Household) => household.id === this.id);
         },
         originTodos() {
             return this.household?.checklist;
         },
+        id() {
+            return store.state.viewedHousehold;
+        }
     },
     watch: {
         originTodos: {

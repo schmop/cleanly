@@ -1,12 +1,11 @@
 import { Household } from '@/models/Household';
 import { Task } from '@/models/Task';
 import { TaskLog } from '@/models/TaskLog';
-import { State } from '@/store';
-import { Store } from 'vuex';
+import { Store } from '@/store';
 import { AuthClient } from './auth-client';
 
 export class TaskClient {
-    constructor(private readonly client: AuthClient, private readonly store: Store<State>) {
+    constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
     async addNewTask(householdId: number, taskname: string, icon: string, duration: number) {
@@ -45,7 +44,7 @@ export class TaskClient {
     }
 
     async fetchTaskLog(householdId: number): Promise<void> {
-        const household: undefined|Household = this.store.getters.householdById(householdId);
+        const household: undefined|Household = this.store.getters.householdById.value(householdId);
         if (null == household) {
             throw new Error('Cannot fetch tasklogs of an unknown household!');
         }
@@ -65,10 +64,9 @@ export class TaskClient {
             }
             const user = household.users.find((user) => user.id === log.user);
             const task = household.tasks.find((task) => task.id === log.task);
-            if (null == user || null == task) {
+            if (null == task) {
                 console.warn(
-                    "Tasklog found, that doesn't not belong to a household member or task!", 
-                    log.user, 
+                    "Tasklog found, that doesn't not belong to a task!", 
                     log.task,
                 );
                 return []; // ignore
@@ -83,7 +81,7 @@ export class TaskClient {
                 } as TaskLog
             ];
         });
-        this.store.commit('logs', {logs, householdId});
+        this.store.logs(logs, householdId);
     }
 
     /**

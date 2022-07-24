@@ -24,12 +24,12 @@ alertController,
 popoverController,
 } from "@ionic/vue";
 import { Household } from "@/models/Household";
-import { mapState } from "vuex";
 import { User } from "@/models/User";
 import { translations, _t, __t } from "@/translation";
 import { personRemoveOutline, returnUpForwardOutline } from "ionicons/icons";
 import toast from "@/toast";
 import { container } from "@/container";
+import { store } from "@/store";
 
 export default defineComponent({
     name: "HouseholdMemberActions",
@@ -49,10 +49,12 @@ export default defineComponent({
         member: Object as () => User,
     },
     computed: {
-        ...mapState(["user"]),
         householdClient() {
             return container.getHouseholdClient();
         },
+        user() {
+            return store.state.user;
+        }
     },
     methods: {
         ...translations,

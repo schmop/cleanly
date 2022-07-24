@@ -55,9 +55,9 @@ import {
   IonIcon,
 } from "@ionic/vue";
 import { Invite } from "../models/Invite";
-import { mapState, mapMutations } from "vuex";
 import { translations } from "../translation";
 import { container } from "@/container";
+import { store } from "@/store";
 
 export default defineComponent({
   name: "DashBoard",
@@ -80,15 +80,16 @@ export default defineComponent({
     closeOutline,
   }),
   computed: {
-    ...mapState(["invites", "user"]),
+    invites() {
+      return store.state.invites;
+    }
   },
   methods: {
-    ...mapMutations(["removeInvite"]),
     ...translations,
     async accept(invite: Invite) {
       try {
         await container.getHouseholdClient().acceptInvite(invite);
-        this.removeInvite(invite);
+        store.removeInvite(invite);
         toast.success("Household joined successfully!");
         this.backToDashboardIfEmpty();
       } catch (exception) {
@@ -99,7 +100,7 @@ export default defineComponent({
     async decline(invite: Invite) {
       try {
         await container.getHouseholdClient().declineInvite(invite);
-        this.removeInvite(invite);
+        store.removeInvite(invite);
         toast.info("Invitation declined");
         this.backToDashboardIfEmpty();
       } catch (exception) {

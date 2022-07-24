@@ -42,11 +42,10 @@ import {
 } from "@ionic/vue";
 import { Household } from "../models/Household";
 import HouseholdPreview from "../components/HouseholdPreview.vue";
-import { mapState } from "vuex";
 import { translations } from "../translation";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 import { container } from "@/container";
-import store from "@/store";
+import { store } from "@/store";
 
 export default defineComponent({
   name: "DashBoard",
@@ -68,7 +67,9 @@ export default defineComponent({
     mailOutline,
   }),
   computed: {
-    ...mapState(["user", "households", "invites"]),
+    households() {
+      return store.state.households;
+    }
   },
   methods: {
     ...translations,

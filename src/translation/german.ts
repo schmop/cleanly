@@ -82,5 +82,6 @@ export default {
     'did': 'erledigte',
     '{0} ago': 'vor {0}',
     'just now': 'gerade eben',
+    '<former member>': '<Ehemaliges Mitglied>',
     '': '',
 } as { [english: string]: string };

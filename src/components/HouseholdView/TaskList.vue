@@ -12,9 +12,9 @@ import {
     IonContent,
     IonPage,
 } from "@ionic/vue";
-import { mapGetters } from "vuex";
 import TaskView from '../TaskView.vue';
 import { taskSortByPriority } from "@/common/task-priority";
+import { store } from "@/store";
 
 export default defineComponent({
     name: "TaskList",
@@ -25,9 +25,8 @@ export default defineComponent({
     },
     data: () => ({}),
     computed: {
-        ...mapGetters(['tasks']),
         sortedTasks() {
-            return this.tasks.concat().sort(taskSortByPriority);
+            return store.getters.tasks.value.concat().sort(taskSortByPriority);
         },
     },
 });

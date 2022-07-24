@@ -4,7 +4,7 @@
       <ion-toolbar color="none">
         <ion-card-title>{{ household.name }}</ion-card-title>
         <ion-buttons slot="primary" v-if="isAdmin">
-          <ion-button :id="editButtonId" @click.stop>
+          <ion-button :id="editButtonId" @click.stop="() => {/** noop */}">
             <ion-icon slot="icon-only" :icon="ellipsisVertical"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -47,20 +47,14 @@ import {
   personAddOutline,
   ellipsisVertical,
 } from "ionicons/icons";
-import toast from "@/toast";
 import {
   IonLabel,
-  IonInput,
-  IonItemGroup,
   IonItem,
   IonContent,
-  IonHeader,
   IonToolbar,
-  IonTitle,
   IonIcon,
   IonButton,
   IonButtons,
-  IonFooter,
   IonCard,
   IonList,
   IonPopover,
@@ -69,16 +63,14 @@ import {
   IonCardContent,
   modalController,
 } from "@ionic/vue";
-import router from "@/router";
 import { Household } from "@/models/Household";
-import { Task } from "@/models/Task";
 import TaskView from "@/components/TaskView.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import TaskForm from "@/modals/TaskForm.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import {translations} from "@/translation";
-import { mapState } from "vuex";
 import { container } from "@/container";
+import { store } from "@/store";
 
 export default defineComponent({
   name: "HouseholdPreview",
@@ -108,9 +100,8 @@ export default defineComponent({
     household: Object as () => Household,
   },
   computed: {
-    ...mapState(['user']),
     isAdmin() {
-      return this.household?.admin === this.user.id;
+      return this.household?.admin === store.state.user?.id;
     },
     editButtonId() {
       return `household-button-${this.household?.id}`;

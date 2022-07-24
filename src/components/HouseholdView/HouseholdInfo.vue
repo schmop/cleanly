@@ -51,7 +51,6 @@ import {
     alertController,
 } from "@ionic/vue";
 import { Household } from "@/models/Household";
-import { mapState } from "vuex";
 import TaskForm from "@/modals/TaskForm.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import { taskSortByPriority } from "@/common/task-priority";
@@ -62,6 +61,8 @@ import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 import toast from "@/toast";
 import router from "@/router";
 import { container } from "@/container";
+import { store } from "@/store";
+import { Task } from "@/models/Task";
 
 export default defineComponent({
     name: "HouseholdInfo",
@@ -83,13 +84,14 @@ export default defineComponent({
         walkOutline,
     }),
     computed: {
-        ...mapState(["households", "user"]),
-        ...mapState({id: "viewedHousehold"}),
-        household(): null | Household {
-            return this.households.find((household: Household) => household.id === this.id);
+        household() {
+            return store.getters.household.value;
         },
-        tasks() {
-            return this.household?.tasks.concat().sort(taskSortByPriority);
+        user() {
+            return store.state.user;
+        },
+        tasks(): Task[] {
+            return store.getters.tasks.value.concat().sort(taskSortByPriority);
         },
         members(): undefined | User[] {
             return this.household?.users.concat().sort((a: User, b: User) => {
@@ -106,7 +108,7 @@ export default defineComponent({
             return this.household?.admin;
         },
         isAdmin(): boolean {
-            return this.user.id === this.admin;
+            return this.user != null && this.admin != null && this.user.id === this.admin;
         },
         householdClient() {
             return container.getHouseholdClient();
@@ -115,7 +117,7 @@ export default defineComponent({
     methods: {
         ...translations,
         async openDeleteHouseholdPrompt() {
-            if (!this.isAdmin || this.id === undefined) {
+            if (!this.isAdmin || null == this.household) {
                 console.error("Tried to delete household, but couldn't!");
                 return;
             }
@@ -131,7 +133,7 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await this.householdClient.removeHousehold(this.id)) {
+                if (await this.householdClient.removeHousehold(this.household.id)) {
                     this.householdClient.dashboardInfo();
                     router.push({name: 'dashboard'});
                     toast.success(_t('Successfully deleted the household!'));
@@ -142,7 +144,7 @@ export default defineComponent({
             }
         },
         async openLeaveHouseholdPrompt() {
-            if (!this.id) {
+            if (!this.household) {
                 console.error("Tried to leave household, but couldn't!");
                 return;
             }
@@ -162,7 +164,7 @@ export default defineComponent({
             });
             await alert.present();
             if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await this.householdClient.leaveHousehold(this.id)) {
+                if (await this.householdClient.leaveHousehold(this.household.id)) {
                     this.householdClient.dashboardInfo();
                     router.push({name: 'dashboard'});
                     toast.success(_t('Successfully left the household!'));
@@ -187,7 +189,7 @@ export default defineComponent({
             popover.present();
         },
         canPerformActionOn(member: User) {
-            if (!this.isAdmin) {
+            if (!this.isAdmin || !this.user) {
                 return false;
             }
 

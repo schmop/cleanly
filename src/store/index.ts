@@ -1,11 +1,10 @@
-import { createStore, GetterTree, MutationTree, Store } from 'vuex';
 import { Household } from '../models/Household';
 import { User } from '../models/User';
 import { Invite } from '../models/Invite';
 import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
 import { TaskLog } from '@/models/TaskLog';
-import { InjectionKey } from 'vue';
+import { reactive, computed, App, ComputedRef } from 'vue';
 
 export class State {
     loggedIn = false;
@@ -14,63 +13,111 @@ export class State {
     invites: Invite[] = [];
     pageTitle: null | string = null;
     taskLogs: Record<string, TaskLog[]> = {};
-    viewedHousehold: null|number = null;
+    viewedHousehold: null | number = null;
 }
 
-declare module '@vue/runtime-core' {
-    // provide typings for `this.$store`
-    interface ComponentCustomProperties {
-        $store: Store<State>
+type Getters = {
+    checklist: (householdId: number) => Todo[],
+    householdById: (householdId: number) => undefined | Household,
+    taskLogs: TaskLog[],
+    household: undefined | Household,
+    tasks: Task[],
+};
+type GetterFunctions = {[key in keyof Getters]: () => Getters[key]};
+type ComputedGetters = {[key in keyof Getters]: ComputedRef<Getters[key]>};
+
+function makeGettersReactive(getters: GetterFunctions): ComputedGetters {
+    return Object.fromEntries(
+        Object.entries(getters).map(([key, getter]) => [key, computed(getter as any)])
+    ) as ComputedGetters;
+}
+
+const getters: GetterFunctions = {
+    checklist: () => (householdId: number): Todo[] => {
+        return store.state.households.find((household: Household) => household.id === householdId)?.checklist ?? [];
+    },
+    householdById: () => (householdId: number): undefined | Household => {
+        return store.state.households.find((household: Household) => household.id === householdId);
+    },
+    taskLogs: (): TaskLog[] => {
+        const { viewedHousehold } = store.state;
+        if (null === viewedHousehold) {
+            return [];
+        }
+
+        return store.state.taskLogs[viewedHousehold] ?? [];
+    },
+    household: (): undefined | Household => {
+        const { viewedHousehold } = store.state;
+        if (null === viewedHousehold) {
+            return undefined;
+        }
+
+        return store.getters.householdById.value(viewedHousehold);
+    },
+    tasks: (): Task[] => {
+        return store.getters.household.value?.tasks ?? [];
+    },
+};
+
+abstract class CommittableStore {
+    /**
+     * @deprecated Do not use commit anymore, because you will lose type safety
+     */
+    commit(action: keyof this, data?: any): void {
+        console.warn('DEPRECATION WARNING: `store.commit()` was called, but should not be used anymore!');
+        if (action in this && 'function' === typeof this[action]) {
+            (this[action] as any as CallableFunction)(data);
+        } else {
+            console.error('Could not commit, because the action does not exist:', action);
+        }
     }
 }
 
-export const key: InjectionKey<Store<State>> = Symbol();
-
-const getters = <GetterTree<State, any>> {
-    checklist: (state: State) => (householdId: number) => {
-        return state.households.find((household: Household) => household.id === householdId)?.checklist;
-    },
-    householdById: (state: State) => (householdId: number): undefined|Household => {
-        return state.households.find((household: Household) => household.id === householdId);
-    },
-    taskLogs: (state: State): TaskLog[] => {
-        return state.viewedHousehold ? state.taskLogs[state.viewedHousehold] : [];
-    },
-    household: (state: State, getters): undefined|Household => {
-        return getters.householdById(state.viewedHousehold);
-    },
-    tasks: (state: State, getters): undefined|Household => {
-        return getters.household.tasks;
-    },
+abstract class VueStorePlugin extends CommittableStore {
+    /** Used to register as a Vue Plugin */
+    install(app: App) {
+        app.provide('store', this);
+    }
 }
 
-const mutations = <MutationTree<State>> {
-    login(state: State) {
-        state.loggedIn = true;
-    },
-    logout(state: State) {
-        state.loggedIn = false;
-    },
-    user(state: State, user) {
-        state.user = user;
-    },
-    pageTitle(state: State, title: string) {
-        state.pageTitle = title;
-    },
-    viewHousehold(state: State, householdId: number) {
-        state.viewedHousehold = householdId;
-    },
-    logs(state: State, data: {logs: TaskLog[], householdId: number}) {
-        const {logs, householdId} = data;
-        const household = state.households.find((household) => household.id === householdId);
+export class Store extends VueStorePlugin {
+    public readonly state: State;
+    public readonly getters: ComputedGetters;
+    constructor(
+        state: State,
+        getters: GetterFunctions,
+    ) {
+        super();
+        this.state = state;
+        this.getters = makeGettersReactive(getters);
+    }
+
+    login() {
+        this.state.loggedIn = true;
+    }
+    logout() {
+        this.state.loggedIn = false;
+    }
+    user(user: User) {
+        this.state.user = user;
+    }
+    pageTitle(title: string|null) {
+        this.state.pageTitle = title;
+    }
+    viewHousehold(householdId: null|number) {
+        this.state.viewedHousehold = householdId;
+    }
+    logs(logs: TaskLog[], householdId: number) {
+        const household = this.state.households.find((household) => household.id === householdId);
         if (null == household) {
             throw new Error('Could not mutate logs, invalid household id given!');
         }
 
-        state.taskLogs[householdId] = logs;
-    },
-    removeTask(state: State, taskId: string) {
-        const household = state
+        this.state.taskLogs[householdId] = logs;
+    }
+    removeTask(taskId: string) {
+        const household = this.state
             .households
             .find(
                 (h: Household) => h.tasks.some((t: Task) => t.id === taskId)
@@ -78,10 +125,10 @@ const mutations = <MutationTree<State>> {
         if (household != null) {
             household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
         }
-    },
-    markTaskDone(state: State, data: { taskId: string, timestamp: number }) {
+    }
+    markTaskDone(data: { taskId: string, timestamp: number }) {
         const { taskId, timestamp } = data;
-        const task = state
+        const task = this.state
             .households
             .map((household: Household) => household.tasks)
             .flat()
@@ -90,32 +137,56 @@ const mutations = <MutationTree<State>> {
         if (task) {
             task.lastComplete = timestamp;
         }
-    },
-    updateChecklist(state: State, data: { household_id: number, checklist: Todo[] }) {
+    }
+    updateChecklist(data: { household_id: number, checklist: Todo[] }) {
         const { household_id, checklist } = data;
-        const household = state.households.find(household => household.id === household_id);
+        const household = this.state.households.find(household => household.id === household_id);
         if (household) {
             household.checklist = checklist;
         }
-    },
-    dashboard(state: State, data) {
-        state.households = data.households;
-        state.user = data.user;
-        state.invites = data.invites;
-    },
-    removeInvite(state: State, inviteToRemove: Invite) {
-        state.invites = state.invites.filter(invite => invite !== inviteToRemove);
-    },
-    joinHousehold(state: State, household: Household) {
-        state.households.push(household);
     }
-};
+    dashboard(data: { households: Household[], user: User, invites: Invite[] }) {
+        this.state.households = data.households;
+        this.state.user = data.user;
+        this.state.invites = data.invites;
+    }
+    removeInvite(inviteToRemove: Invite) {
+        this.state.invites = this.state.invites.filter(invite => invite !== inviteToRemove);
+    }
+    joinHousehold(household: Household) {
+        this.state.households.push(household);
+    }
+}
+
+const state = reactive(new State());
 
 
-export const store = createStore<State>({
-    state: new State(),
+
+export const store = new Store(
+    state,
     getters,
-    mutations,
-});
+);
 
-export default store;
+(window as any).store = store;
+
+export function mapGetters(reducer: string[]): Partial<Getters> {
+    return Object.fromEntries(
+        Object.entries(getters).filter(([name, getter]) => {
+            return reducer.includes(name);
+        })
+    );
+}
+export function mapState(reducer: string[]): Partial<State> {
+    return Object.fromEntries(
+        Object.entries(state).filter(([name, state]) => {
+            return reducer.includes(name);
+        })
+    );
+}
+
+/** 
+ * For use in composition API
+ */
+export function useStore(): Store {
+    return store;
+}

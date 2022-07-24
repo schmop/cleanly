@@ -19,27 +19,22 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import {
-  IonItem,
   IonText,
   IonIcon,
   IonCard,
   IonCardHeader,
   IonCardTitle,
-  IonCardContent,
 } from "@ionic/vue";
 import icons from "@/components/icons";
 import { _t, __t } from "@/translation";
 import { TaskLog } from '../models/TaskLog';
 import { formatHours, secondsSince } from "@/common/time";
 import { HOUR_IN_SECONDS } from '../common/time';
-import { useStore } from "vuex";
 
 
 const props = defineProps<{
   log: TaskLog,
 }>();
-const store = useStore();
-const { household } = store.getters;
 const task = computed(() => {
   if (null == props.log) {
     throw Error('TaskLog is mandatory in a TaskLogView');
@@ -47,7 +42,7 @@ const task = computed(() => {
   return props.log.task;
 });
 const userName = computed(() => {
-  return props.log.user.name ?? _t('<former member>');
+  return props.log.user?.name ?? _t('<former member>');
 });
 const relativeInterval = computed(() => {
   const hoursSinceDone = secondsSince(props.log.timestamp) / HOUR_IN_SECONDS;
