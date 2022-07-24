@@ -23,7 +23,8 @@ export class HouseholdClient {
         if (response.status !== 200) {
             throw new Error('Could not authenticate, code: ' + response.status);
         }
-        this.store.dashboard(await response.json());
+        const data = await response.json();
+        this.store.dashboard(data.households, data.user, data.invites);
     }
 
     async setHouseholdColor(householdId: number, color: string): Promise<boolean> {

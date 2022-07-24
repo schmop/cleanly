@@ -47,7 +47,7 @@ export class AuthClient {
                 'refresh_token': this._refreshToken
             })
         );
-        this.store.commit('login');
+        this.store.login();
         container.getSseClient().register();
     }
 
@@ -128,7 +128,7 @@ export class AuthClient {
 
     logout(): void {
         localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
-        this.store.commit('logout');
+        this.store.logout();
         this._mail = null;
         this._token = null;
         this._refreshToken = null;

@@ -23,8 +23,8 @@ type Getters = {
     household: undefined | Household,
     tasks: Task[],
 };
-type GetterFunctions = {[key in keyof Getters]: () => Getters[key]};
-type ComputedGetters = {[key in keyof Getters]: ComputedRef<Getters[key]>};
+type GetterFunctions = { [key in keyof Getters]: () => Getters[key] };
+type ComputedGetters = { [key in keyof Getters]: ComputedRef<Getters[key]> };
 
 function makeGettersReactive(getters: GetterFunctions): ComputedGetters {
     return Object.fromEntries(
@@ -60,21 +60,7 @@ const getters: GetterFunctions = {
     },
 };
 
-abstract class CommittableStore {
-    /**
-     * @deprecated Do not use commit anymore, because you will lose type safety
-     */
-    commit(action: keyof this, data?: any): void {
-        console.warn('DEPRECATION WARNING: `store.commit()` was called, but should not be used anymore!');
-        if (action in this && 'function' === typeof this[action]) {
-            (this[action] as any as CallableFunction)(data);
-        } else {
-            console.error('Could not commit, because the action does not exist:', action);
-        }
-    }
-}
-
-abstract class VueStorePlugin extends CommittableStore {
+abstract class VueStorePlugin {
     /** Used to register as a Vue Plugin */
     install(app: App) {
         app.provide('store', this);
@@ -102,10 +88,10 @@ export class Store extends VueStorePlugin {
     user(user: User) {
         this.state.user = user;
     }
-    pageTitle(title: string|null) {
+    pageTitle(title: string | null) {
         this.state.pageTitle = title;
     }
-    viewHousehold(householdId: null|number) {
+    viewHousehold(householdId: null | number) {
         this.state.viewedHousehold = householdId;
     }
     logs(logs: TaskLog[], householdId: number) {
@@ -126,8 +112,7 @@ export class Store extends VueStorePlugin {
             household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
         }
     }
-    markTaskDone(data: { taskId: string, timestamp: number }) {
-        const { taskId, timestamp } = data;
+    markTaskDone(taskId: string, timestamp: number) {
         const task = this.state
             .households
             .map((household: Household) => household.tasks)
@@ -138,17 +123,10 @@ export class Store extends VueStorePlugin {
             task.lastComplete = timestamp;
         }
     }
-    updateChecklist(data: { household_id: number, checklist: Todo[] }) {
-        const { household_id, checklist } = data;
-        const household = this.state.households.find(household => household.id === household_id);
-        if (household) {
-            household.checklist = checklist;
-        }
-    }
-    dashboard(data: { households: Household[], user: User, invites: Invite[] }) {
-        this.state.households = data.households;
-        this.state.user = data.user;
-        this.state.invites = data.invites;
+    dashboard(households: Household[], user: User, invites: Invite[]) {
+        this.state.households = households;
+        this.state.user = user;
+        this.state.invites = invites;
     }
     removeInvite(inviteToRemove: Invite) {
         this.state.invites = this.state.invites.filter(invite => invite !== inviteToRemove);
@@ -166,22 +144,11 @@ export const store = new Store(
     state,
     getters,
 );
-
-(window as any).store = store;
-
-export function mapGetters(reducer: string[]): Partial<Getters> {
-    return Object.fromEntries(
-        Object.entries(getters).filter(([name, getter]) => {
-            return reducer.includes(name);
-        })
-    );
-}
-export function mapState(reducer: string[]): Partial<State> {
-    return Object.fromEntries(
-        Object.entries(state).filter(([name, state]) => {
-            return reducer.includes(name);
-        })
-    );
+if (process.env.NODE_ENV !== 'production') {
+    /**
+     * This replaces the Vuex-Dev-Tools (in a poorly fashioned way)
+     */
+    (window as any).store = store;
 }
 
 /** 

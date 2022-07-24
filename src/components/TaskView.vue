@@ -26,7 +26,7 @@
       </ion-item-sliding>
       <template v-if="isAdmin && showActions">
         <ion-buttons slot="end">
-          <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */}">
+          <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
             <ion-icon slot="icon-only" :icon="ellipsisVertical" />
           </ion-button>
         </ion-buttons>
@@ -80,6 +80,7 @@ import { _t, translations, __t } from "@/translation";
 import { Household } from "@/models/Household";
 import { container } from "@/container";
 import { store } from "@/store";
+import toast from "@/toast";
 
 export default defineComponent({
   name: "TaskView",
@@ -144,7 +145,7 @@ export default defineComponent({
       if (!this.task) {
         return false;
       }
-      
+
       return taskOverDue(this.task);
     },
     durationText() {
@@ -179,7 +180,7 @@ export default defineComponent({
     async deleteTask() {
       if (this.task?.id != null) {
         await container.getTaskClient().deleteTask(this.task.id);
-        store.commit('removeTask', this.task?.id);
+        store.removeTask(this.task?.id);
       }
     },
     async editTask() {
@@ -197,10 +198,14 @@ export default defineComponent({
       if (this.task?.id != null) {
         (this.$refs.slidingButton as any).$el.close();
         const newTimestamp = await container.getTaskClient().markTaskComplete(this.task?.id);
-        store.commit('markTaskDone', {
-          taskId: this.task?.id,
-          timestamp: newTimestamp,
-        });
+        try {
+          store.markTaskDone(this.task?.id, newTimestamp);
+        } catch(err) {
+          if (err instanceof Error) {
+            toast.error(err.message);
+          }
+        }
+        
       }
     },
   },

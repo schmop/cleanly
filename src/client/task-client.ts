@@ -87,15 +87,16 @@ export class TaskClient {
     /**
      * @returns false on error, or the new timestamp of the now completed task
      */
-    async markTaskComplete(taskId: string): Promise<boolean|number> {
+    async markTaskComplete(taskId: string): Promise<number> {
         const response = await this.client.request(`api/task/mark-done/${taskId}`, {
             method: 'POST',
         });
 
-        if (response.status === 200) {
-            return (await response.json()).timestamp as number;
+        if (response.status !== 200) {
+            console.error('Could not mark task as done', response.statusText);
+            throw new Error('Could not mark task as done, ' + response.statusText);
         }
 
-        return false;
+        return (await response.json()).timestamp as number;
     }
 }

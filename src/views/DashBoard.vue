@@ -91,7 +91,7 @@ export default defineComponent({
       menuController.close("menu");
     },
     openHousehold(household: Household) {
-      store.commit('viewHousehold', household.id);
+      store.viewHousehold(household.id);
       router.push({name: 'household-view'});
     },
   },
