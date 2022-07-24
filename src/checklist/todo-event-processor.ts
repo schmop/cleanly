@@ -4,7 +4,7 @@ import toast from '@/toast';
 import { HouseholdClient } from '../client/household-client';
 import { Store } from '@/store';
 
-export class EventProcessor {
+export class TodoEventProcessor {
     constructor(private store: Store, private householdClient: HouseholdClient) {
     }
 

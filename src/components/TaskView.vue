@@ -49,9 +49,9 @@
   </ion-card>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { addCircleOutline, closeCircleOutline, ellipsisVertical, trashOutline, pencilOutline } from "ionicons/icons";
+<script setup lang="ts">
+import { ref, inject, computed, Ref } from 'vue';
+import { ellipsisVertical, trashOutline, pencilOutline } from "ionicons/icons";
 import {
   IonLabel,
   IonItem,
@@ -73,143 +73,83 @@ import {
 import { Task } from "@/models/Task";
 import TaskForm from "@/modals/TaskForm.vue";
 import icons from "@/components/icons";
-import { colorAsString, green, mix, red } from "@/common/colors";
 import { taskOverDue, taskProgress } from "@/common/task-priority";
 import { DAY_IN_HOURS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
-import { _t, translations, __t } from "@/translation";
+import { _t, __t } from "@/translation";
 import { Household } from "@/models/Household";
-import { container } from "@/container";
-import { store } from "@/store";
 import toast from "@/toast";
+import { householdClientSymbol, stateSymbol, storeSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 
-export default defineComponent({
-  name: "TaskView",
-  components: {
-    IonCard,
-    IonIcon,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonItemSliding,
-    IonItemOption,
-    IonButtons,
-    IonButton,
-    IonLabel,
-    IonList,
-    IonContent,
-    IonPopover,
-    IonItemOptions,
-    IonItem,
-  },
-  props: {
-    task: Object as () => Task,
-    showActions: Boolean,
-  },
-  data: () => ({
-    addCircleOutline,
-    closeCircleOutline,
-    ellipsisVertical,
-    pencilOutline,
-    trashOutline,
-    householdName: "",
-    icons,
-  }),
-  computed: {
-    households() {
-      return store.state.households;
-    },
-    user() {
-      return store.state.user;
-    },
-    contextMenuId() {
-      return `task-contextmenu-${this.task?.id}`;
-    },
-    isAdmin() {
-      const household = this.households.find((h: Household) => this.task && h.tasks.includes(this.task));
+const props = defineProps<{
+  task: Task,
+  showActions: boolean,
+}>();
+const store = inject(storeSymbol)!;
+const state = inject(stateSymbol)!;
+const taskClient = inject(taskClientSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
 
-      return null != household && null != this.user && household.admin === this.user.id;
-    },
-    progress() {
-      if (!this.task) {
-        return 0;
-      }
+const households = computed(() => state.households);
+const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
+const isAdmin = computed(() => households.value.find((h: Household) => h.tasks.includes(props.task)));
+const progress = computed(() => taskProgress(props.task));
+const progressStyle = computed(() => `width: ${progress.value * 100}%`);
+const overdue = computed(() => taskOverDue(props.task));
+const durationText = computed(() => roundedRecurringInterval(props.task.duration));
+const dueInText = computed(() => {
+  const { lastComplete, duration } = props.task;
 
-      return taskProgress(this.task);
-    },
-    progressStyle() {
-      const color = colorAsString(mix(green(), red(), this.progress));
+  if (null == lastComplete) {
+    return _t('Never done before');
+  }
+  const lastCompleteHours = secondsSince(lastComplete) / HOUR_IN_SECONDS;
+  const durationHours = duration * DAY_IN_HOURS;
+  const hoursLeft = durationHours - lastCompleteHours;
+  if (hoursLeft < 0) {
+    return __t('Overdue for {0}', formatHours(-hoursLeft));
+  }
 
-      return `width: ${this.progress * 100}%`;
-    },
-    overdue() {
-      if (!this.task) {
-        return false;
-      }
-
-      return taskOverDue(this.task);
-    },
-    durationText() {
-      if (!this.task) {
-        return '';
-      }
-
-      return roundedRecurringInterval(this.task.duration);
-    },
-    dueInText() {
-      if (!this.task) {
-        return '';
-      }
-
-      const { lastComplete, duration } = this.task;
-
-      if (null == lastComplete) {
-        return _t('Never done before');
-      }
-      const lastCompleteHours = secondsSince(lastComplete) / HOUR_IN_SECONDS;
-      const durationHours = duration * DAY_IN_HOURS;
-      const hoursLeft = durationHours - lastCompleteHours;
-      if (hoursLeft < 0) {
-        return __t('Overdue for {0}', formatHours(-hoursLeft));
-      }
-
-      return __t('{0} left', formatHours(hoursLeft));
-    },
-  },
-  methods: {
-    ...translations,
-    async deleteTask() {
-      if (this.task?.id != null) {
-        await container.getTaskClient().deleteTask(this.task.id);
-        store.removeTask(this.task?.id);
-      }
-    },
-    async editTask() {
-      const taskFormModal = await modalController.create({
-        component: TaskForm,
-        componentProps: {
-          task: this.task,
-        },
-      });
-      taskFormModal.present();
-      await taskFormModal.onDidDismiss();
-      await container.getHouseholdClient().dashboardInfo();
-    },
-    async markDone() {
-      if (this.task?.id != null) {
-        (this.$refs.slidingButton as any).$el.close();
-        const newTimestamp = await container.getTaskClient().markTaskComplete(this.task?.id);
-        try {
-          store.markTaskDone(this.task?.id, newTimestamp);
-        } catch(err) {
-          if (err instanceof Error) {
-            toast.error(err.message);
-          }
-        }
-        
-      }
-    },
-  },
+  return __t('{0} left', formatHours(hoursLeft));
 });
+
+const slidingButton: Ref<typeof IonItemSliding|null> = ref(null);
+
+async function deleteTask() {
+  if (props.task.id != null) {
+    await taskClient.deleteTask(props.task.id);
+    store.removeTask(props.task.id);
+  }
+}
+async function editTask() {
+  const taskFormModal = await modalController.create({
+    component: TaskForm,
+    componentProps: {
+      task: props.task,
+    },
+  });
+  taskFormModal.present();
+  await taskFormModal.onDidDismiss();
+  await householdClient.dashboardInfo();
+}
+async function markDone() {
+  if (props.task.id != null) {
+    if (null == slidingButton.value) {
+      console.error('Could not close sliding button, the button vanished!');
+      toast.error('Could not close sliding button, the button vanished!');
+      return;
+    }
+    slidingButton.value.$el.close();
+    const newTimestamp = await taskClient.markTaskComplete(props.task.id);
+    try {
+      store.markTaskDone(props.task.id, newTimestamp);
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      }
+    }
+
+  }
+}
 </script>
 
 <style scoped>

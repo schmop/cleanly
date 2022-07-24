@@ -7,13 +7,13 @@
             <ion-text color="secondary">
               <i>{{ invite.inviter.name }}</i>
             </ion-text>
-            {{_t('invited you to')}}
+            {{ _t('invited you to') }}
             <ion-text color="secondary">
               <i>{{ invite.householdName }}</i>
             </ion-text>
           </ion-card-title>
           <ion-card-subtitle>
-            {{_t('Do you want to accept the invitation?')}}
+            {{ _t('Do you want to accept the invitation?') }}
           </ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
@@ -21,11 +21,11 @@
             <ion-buttons slot="end">
               <ion-button color="success" @click="accept(invite)">
                 <ion-icon slot="start" :icon="enterOutline" />
-                {{_t('Join')}}
+                {{ _t('Join') }}
               </ion-button>
               <ion-button color="danger" @click="decline(invite)">
                 <ion-icon slot="start" :icon="closeOutline" />
-                {{_t('Decline')}}
+                {{ _t('Decline') }}
               </ion-button>
             </ion-buttons>
           </ion-toolbar>
@@ -35,8 +35,8 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed, inject } from "vue";
 import { closeOutline, enterOutline } from "ionicons/icons";
 import toast from "../toast";
 import router from "../router";
@@ -55,66 +55,42 @@ import {
   IonIcon,
 } from "@ionic/vue";
 import { Invite } from "../models/Invite";
-import { translations } from "../translation";
-import { container } from "@/container";
-import { store } from "@/store";
+import { _t } from "../translation";
+import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 
-export default defineComponent({
-  name: "DashBoard",
-  components: {
-    IonPage,
-    IonContent,
-    IonCardContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
-    IonToolbar,
-    IonButtons,
-    IonButton,
-    IonText,
-    IonIcon,
-  },
-  data: () => ({
-    enterOutline,
-    closeOutline,
-  }),
-  computed: {
-    invites() {
-      return store.state.invites;
-    }
-  },
-  methods: {
-    ...translations,
-    async accept(invite: Invite) {
-      try {
-        await container.getHouseholdClient().acceptInvite(invite);
-        store.removeInvite(invite);
-        toast.success("Household joined successfully!");
-        this.backToDashboardIfEmpty();
-      } catch (exception) {
-        console.error("Could not accept invitation!", exception);
-        toast.error("Error: Could not accept invitation!");
-      }
-    },
-    async decline(invite: Invite) {
-      try {
-        await container.getHouseholdClient().declineInvite(invite);
-        store.removeInvite(invite);
-        toast.info("Invitation declined");
-        this.backToDashboardIfEmpty();
-      } catch (exception) {
-        console.error("Could not decline invitation!", exception);
-        toast.error("Error: Could not decline invite!");
-      }
-    },
-    backToDashboardIfEmpty() {
-      if (this.invites.length === 0) {
-        router.push({name: 'dashboard'});
-      }
-    },
-  },
-});
+const store = inject(storeSymbol)!;
+const state = inject(stateSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
+
+const invites = computed(() => state.invites);
+
+function backToDashboardIfEmpty() {
+  if (invites.value.length === 0) {
+    router.push({ name: 'dashboard' });
+  }
+}
+async function accept(invite: Invite) {
+  try {
+    await householdClient.acceptInvite(invite);
+    store.removeInvite(invite);
+    toast.success("Household joined successfully!");
+    backToDashboardIfEmpty();
+  } catch (exception) {
+    console.error("Could not accept invitation!", exception);
+    toast.error("Error: Could not accept invitation!");
+  }
+}
+async function decline(invite: Invite) {
+  try {
+    await householdClient.declineInvite(invite);
+    store.removeInvite(invite);
+    toast.info("Invitation declined");
+    backToDashboardIfEmpty();
+  } catch (exception) {
+    console.error("Could not decline invitation!", exception);
+    toast.error("Error: Could not decline invite!");
+  }
+}
 </script>
 
 <style scoped>

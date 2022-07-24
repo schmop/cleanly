@@ -40,8 +40,8 @@
   </ion-footer>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed, inject, ref } from "vue";
 import {
   addCircleOutline,
   closeCircleOutline,
@@ -62,141 +62,100 @@ import {
   IonFooter,
   IonText,
   modalController,
-  menuController,
   pickerController,
 } from "@ionic/vue";
 import icons from "../components/icons";
 import { DURATION_SIZES } from "../common/time";
-import { _t, translations } from "../translation";
-import {Task} from '../models/Task';
+import { _t, __t } from "../translation";
+import { Task } from '../models/Task';
 import IconPicker from "./IconPicker.vue";
-import { container } from "@/container";
+import { container } from "@/dependency-injection/container";
+import { taskClientSymbol } from "@/dependency-injection/injection-keys";
 
-export default defineComponent({
-  name: "TaskForm",
-  components: {
-    IonContent,
-    IonToolbar,
-    IonIcon,
-    IonTitle,
-    IonLabel,
-    IonText,
-    IonHeader,
-    IonInput,
-    IonItemGroup,
-    IonItem,
-    IonButton,
-    IonFooter,
-  },
-  props: {
-    id: {
-      type: Number,
-      default: null,
-    },
-    task: {
-      type: Object as () => Task,
-      default: null, 
-    },
-  },
-  data: () => ({
-    addCircleOutline,
-    closeCircleOutline,
-    timeOutline,
-    pencilOutline,
-    taskName: "",
-    icon: "checkmark",
-    iconPickerOpen: false,
-    icons,
-    duration: 1,
-    durationModifier: "days",
-    durationModifiers: DURATION_SIZES,
-  }),
-  computed: {
-    valid() {
-      return this.icon in icons;
-    },
-    durationModifierValue() {
-      return (this.durationModifiers as any)[this.durationModifier];
-    },
-    calculatedDuration() {
-      return this.duration * this.durationModifiers[this.durationModifier];
-    },
-    isEditing() {
-      return this.task !== null;
-    }
-  },
-  beforeMount() {
-    if (null === this.id && null === this.task) {
-      throw new Error('TaskForm requires either a household for adding or a task for editing!')
-    }
-    if (this.isEditing) {
-      this.taskName = this.task.name;
-      this.duration = this.task.duration;
-      this.icon = this.task.icon;
-    }
-  },
-  methods: {
-    ...translations,
-    async iconPicker() {
-      const iconReceiver = new EventTarget();
-      let icon = null as null | string;
-      iconReceiver.addEventListener('icon', (event) => {
-        icon = (event as CustomEvent).detail;
-      });
-      const iconPicker = await modalController.create({
-        component: IconPicker,
-        componentProps: {
-          iconReceiver,
-        }
-      });
-      iconPicker.present();
-      await iconPicker.onDidDismiss();
+const props = defineProps<{
+  id?: number,
+  task?: Task,
+}>();
+const taskClient = inject(taskClientSymbol)!;
 
-      this.icon = icon ?? this.icon;
-    },
-    dismiss() {
-      modalController.dismiss();
-    },
-    async openDurationPicker() {
-      const picker = await pickerController.create({
-        columns: [
-          {
-            name: "count",
-            options: [...Array(100).keys()]
-              .filter((val) => val)
-              .map((index) => ({ text: `${index}`, value: index })),
-          },
-          {
-            name: "modifier",
-            options: Object.entries(this.durationModifiers).map(
-              ([text, value]) => ({ text, value })
-            ),
-          },
-        ],
-        buttons: [
-          {
-            text: _t("Cancel"),
-            role: "cancel",
-          },
-          {
-            text: "Confirm",
-            handler: ({ count, modifier }) => {
-              this.duration = count.value;
-              this.durationModifier = modifier.text;
-            },
-          },
-        ],
-      });
-      await picker.present();
-    },
-    async submit() {
-      if (this.isEditing) {
-        await container.getTaskClient().editTask(this.task, this.taskName, this.icon, this.calculatedDuration);
-      } else {
-        await container.getTaskClient().addNewTask(this.id, this.taskName, this.icon, this.calculatedDuration);
-      }
-      this.dismiss();
-    },
-  },
-});
+const durationModifiers = DURATION_SIZES;
+const durationModifier = ref('days');
+const duration = ref(1);
+const icon = ref('checkmark');
+const taskName = ref('');
+
+const valid = computed(() => icon.value in icons);
+const calculatedDuration = computed(() => duration.value * durationModifiers[durationModifier.value]);
+const isEditing = computed(() => null != props.task);
+
+
+async function iconPicker() {
+  const iconReceiver = new EventTarget();
+  let newIcon = null as null | string;
+  iconReceiver.addEventListener('icon', (event) => {
+    newIcon = (event as CustomEvent).detail;
+  });
+  const iconPicker = await modalController.create({
+    component: IconPicker,
+    componentProps: {
+      iconReceiver,
+    }
+  });
+  iconPicker.present();
+  await iconPicker.onDidDismiss();
+
+  icon.value = newIcon ?? icon.value;
+}
+function dismiss() {
+  modalController.dismiss();
+}
+async function openDurationPicker() {
+  const picker = await pickerController.create({
+    columns: [
+      {
+        name: "count",
+        options: [...Array(100).keys()]
+          .filter((val) => val)
+          .map((index) => ({ text: `${index}`, value: index })),
+      },
+      {
+        name: "modifier",
+        options: Object.entries(durationModifiers).map(
+          ([text, value]) => ({ text, value })
+        ),
+      },
+    ],
+    buttons: [
+      {
+        text: _t("Cancel"),
+        role: "cancel",
+      },
+      {
+        text: "Confirm",
+        handler: ({ count, modifier }) => {
+          duration.value = count.value;
+          durationModifier.value = modifier.text;
+        },
+      },
+    ],
+  });
+  await picker.present();
+}
+async function submit() {
+  if (isEditing.value) {
+    await taskClient.editTask(props.task!, taskName.value, icon.value, calculatedDuration.value);
+  } else {
+    await taskClient.addNewTask(props.id!, taskName.value, icon.value, calculatedDuration.value);
+  }
+  dismiss();
+}
+
+if (null == props.id && null == props.task) {
+  throw new Error('TaskForm requires either a household for adding or a task for editing!')
+}
+if (isEditing.value) {
+  taskName.value = props.task!.name;
+  duration.value = props.task!.duration;
+  icon.value = props.task!.icon;
+}
 </script>

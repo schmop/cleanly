@@ -35,8 +35,7 @@
     </ion-page>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import {
     IonContent,
     IonPage,
@@ -50,174 +49,144 @@ import {
     popoverController,
     alertController,
 } from "@ionic/vue";
-import { Household } from "@/models/Household";
 import TaskForm from "@/modals/TaskForm.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import { taskSortByPriority } from "@/common/task-priority";
-import { translations, _t } from "@/translation";
+import { _t } from "@/translation";
 import { addCircleOutline, cogOutline, personAddOutline, personOutline, trashOutline, walkOutline } from "ionicons/icons";
 import { User } from "@/models/User";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 import toast from "@/toast";
 import router from "@/router";
-import { container } from "@/container";
-import { store } from "@/store";
-import { Task } from "@/models/Task";
+import { container } from "@/dependency-injection/container";
+import { computed, inject } from "vue";
+import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
+import { stateSymbol } from '../../dependency-injection/injection-keys';
 
-export default defineComponent({
-    name: "HouseholdInfo",
-    components: {
-        IonContent,
-        IonPage,
-        IonItem,
-        IonIcon,
-        IonList,
-        IonListHeader,
-        IonBadge,
-    },
-    data: () => ({
-        personAddOutline,
-        addCircleOutline,
-        personOutline,
-        cogOutline,
-        trashOutline,
-        walkOutline,
-    }),
-    computed: {
-        household() {
-            return store.getters.household.value;
-        },
-        user() {
-            return store.state.user;
-        },
-        tasks(): Task[] {
-            return store.getters.tasks.value.concat().sort(taskSortByPriority);
-        },
-        members(): undefined | User[] {
-            return this.household?.users.concat().sort((a: User, b: User) => {
-                if (this.admin === a.id) {
-                    return -1;
-                }
-                if (this.admin === b.id) {
-                    return 1;
-                }
-                return a.name.localeCompare(b.name);
-            });
-        },
-        admin(): undefined | number | null {
-            return this.household?.admin;
-        },
-        isAdmin(): boolean {
-            return this.user != null && this.admin != null && this.user.id === this.admin;
-        },
-        householdClient() {
-            return container.getHouseholdClient();
+const getters = inject(gettersSymbol)!;
+const state = inject(stateSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
+
+const household = computed(() => getters.household.value);
+const user = computed(() => state.user);
+const tasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriority));
+const admin = computed(() => household.value?.admin);
+const members = computed(() => {
+    if (null == household.value) {
+        return [];
+    }
+    return household.value.users.concat().sort((a: User, b: User) => {
+        if (admin.value === a.id) {
+            return -1;
         }
-    },
-    methods: {
-        ...translations,
-        async openDeleteHouseholdPrompt() {
-            if (!this.isAdmin || null == this.household) {
-                console.error("Tried to delete household, but couldn't!");
-                return;
-            }
-            const alert = await alertController.create({
-                header: _t('Do you want to delete the household permanently? This cannot be undone!'),
-                buttons: [
-                    {
-                        text: _t('Ok'),
-                        role: 'confirm',
-                    },
-                    _t('Cancel'),
-                ]
-            });
-            await alert.present();
-            if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await this.householdClient.removeHousehold(this.household.id)) {
-                    this.householdClient.dashboardInfo();
-                    router.push({name: 'dashboard'});
-                    toast.success(_t('Successfully deleted the household!'));
-
-                    return;
-                }
-                await toast.error(_t('There was an error deleting the household!'));
-            }
-        },
-        async openLeaveHouseholdPrompt() {
-            if (!this.household) {
-                console.error("Tried to leave household, but couldn't!");
-                return;
-            }
-            if (this.isAdmin) {
-                toast.warning(_t('You cannot leave a household you own. You need to transfer your privileges or delete the household completely!'));
-                return;
-            }
-            const alert = await alertController.create({
-                header: _t('Do you want to leave the household?'),
-                buttons: [
-                    {
-                        text: _t('Ok'),
-                        role: 'confirm',
-                    },
-                    _t('Cancel'),
-                ]
-            });
-            await alert.present();
-            if ((await alert.onDidDismiss()).role === 'confirm') {
-                if (await this.householdClient.leaveHousehold(this.household.id)) {
-                    this.householdClient.dashboardInfo();
-                    router.push({name: 'dashboard'});
-                    toast.success(_t('Successfully left the household!'));
-
-                    return;
-                }
-                await toast.error(_t('There was an error leaving the household!'));
-            }
-        },
-        async openMemberActionMenu(member: User) {
-            if (!this.canPerformActionOn(member)) {
-                return;
-            }
-            const popover = await popoverController.create({
-                component: HouseholdMemberActions,
-                cssClass: 'autowidth',
-                componentProps: {
-                    household: this.household,
-                    member,
-                }
-            });
-            popover.present();
-        },
-        canPerformActionOn(member: User) {
-            if (!this.isAdmin || !this.user) {
-                return false;
-            }
-
-            return member.id !== this.user.id;
-        },
-        async openTaskFormModal(): Promise<void> {
-            menuController.close("menu");
-            const TaskFormModal = await modalController.create({
-                component: TaskForm,
-                componentProps: {
-                    id: this.household?.id,
-                },
-            });
-            TaskFormModal.present();
-            await TaskFormModal.onDidDismiss();
-            await this.householdClient.dashboardInfo();
-        },
-        async openInviteModal(): Promise<void> {
-            const createHouseholdModal = await modalController.create({
-                component: InviteModal,
-                componentProps: {
-                    household: this.household,
-                },
-            });
-            createHouseholdModal.present();
-        },
-    },
+        if (admin.value === b.id) {
+            return 1;
+        }
+        return a.name.localeCompare(b.name);
+    });
 });
+const isAdmin = computed(() => user.value != null && admin.value != null && user.value.id === admin.value);
+
+async function openDeleteHouseholdPrompt() {
+    if (null == isAdmin.value || null == household.value) {
+        console.error("Tried to delete household, but couldn't!");
+        return;
+    }
+    const alert = await alertController.create({
+        header: _t('Do you want to delete the household permanently? This cannot be undone!'),
+        buttons: [
+            {
+                text: _t('Ok'),
+                role: 'confirm',
+            },
+            _t('Cancel'),
+        ]
+    });
+    await alert.present();
+    if ((await alert.onDidDismiss()).role === 'confirm') {
+        if (await householdClient.removeHousehold(household.value.id)) {
+            householdClient.dashboardInfo();
+            router.push({ name: 'dashboard' });
+            toast.success(_t('Successfully deleted the household!'));
+
+            return;
+        }
+        await toast.error(_t('There was an error deleting the household!'));
+    }
+}
+async function openLeaveHouseholdPrompt() {
+    if (null == household.value) {
+        console.error("Tried to leave household, but couldn't!");
+        return;
+    }
+    if (true === isAdmin.value) {
+        toast.warning(_t('You cannot leave a household you own. You need to transfer your privileges or delete the household completely!'));
+        return;
+    }
+    const alert = await alertController.create({
+        header: _t('Do you want to leave the household?'),
+        buttons: [
+            {
+                text: _t('Ok'),
+                role: 'confirm',
+            },
+            _t('Cancel'),
+        ]
+    });
+    await alert.present();
+    if ((await alert.onDidDismiss()).role === 'confirm') {
+        if (await householdClient.leaveHousehold(household.value.id)) {
+            householdClient.dashboardInfo();
+            router.push({ name: 'dashboard' });
+            toast.success(_t('Successfully left the household!'));
+
+            return;
+        }
+        await toast.error(_t('There was an error leaving the household!'));
+    }
+}
+async function openMemberActionMenu(member: User) {
+    if (!canPerformActionOn(member)) {
+        return;
+    }
+    const popover = await popoverController.create({
+        component: HouseholdMemberActions,
+        cssClass: 'autowidth',
+        componentProps: {
+            household: household,
+            member,
+        }
+    });
+    popover.present();
+}
+function canPerformActionOn(member: User) {
+    if (!isAdmin.value || !user.value) {
+        return false;
+    }
+
+    return member.id !== user.value.id;
+}
+async function openTaskFormModal(): Promise<void> {
+    menuController.close("menu");
+    const TaskFormModal = await modalController.create({
+        component: TaskForm,
+        componentProps: {
+            id: household.value?.id,
+        },
+    });
+    TaskFormModal.present();
+    await TaskFormModal.onDidDismiss();
+    await householdClient.dashboardInfo();
+}
+async function openInviteModal(): Promise<void> {
+    const createHouseholdModal = await modalController.create({
+        component: InviteModal,
+        componentProps: {
+            household: household.value,
+        },
+    });
+    createHouseholdModal.present();
+}
 </script>
 
 <style scoped>

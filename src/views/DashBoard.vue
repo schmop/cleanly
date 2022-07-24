@@ -19,13 +19,10 @@
   </ion-page>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed, inject } from "vue";
 import {
   addCircleOutline,
-  closeCircleOutline,
-  logOutOutline,
-  mailOutline,
 } from "ionicons/icons";
 import router from "../router";
 import {
@@ -40,62 +37,41 @@ import {
   modalController,
   menuController,
 } from "@ionic/vue";
-import { Household } from "../models/Household";
 import HouseholdPreview from "../components/HouseholdPreview.vue";
-import { translations } from "../translation";
+import { _t } from "../translation";
 import CreateHousehold from "../modals/CreateHousehold.vue";
-import { container } from "@/container";
-import { store } from "@/store";
+import { authClientSymbol, householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import { Household } from "@/models/Household";
 
-export default defineComponent({
-  name: "DashBoard",
-  components: {
-    IonPage,
-    IonContent,
-    IonCardHeader,
-    IonButton,
-    IonCard,
-    IonCardTitle,
-    IonCardContent,
-    IonIcon,
-    HouseholdPreview,
-  },
-  data: () => ({
-    addCircleOutline,
-    closeCircleOutline,
-    logOutOutline,
-    mailOutline,
-  }),
-  computed: {
-    households() {
-      return store.state.households;
-    }
-  },
-  methods: {
-    ...translations,
-    async openCreateHouseholdModal() {
-      menuController.close("menu");
-      const createHouseholdModal = await modalController.create({
-        component: CreateHousehold,
-      });
-      createHouseholdModal.present();
-      await createHouseholdModal.onDidDismiss();
-      await container.getHouseholdClient().dashboardInfo();
-    },
-    logout() {
-      this.close();
-      container.getAuthClient().logout();
-      router.push("/login");
-    },
-    close() {
-      menuController.close("menu");
-    },
-    openHousehold(household: Household) {
-      store.viewHousehold(household.id);
-      router.push({name: 'household-view'});
-    },
-  },
-});
+const store = inject(storeSymbol)!;
+const state = inject(stateSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
+const authClient = inject(authClientSymbol)!;
+
+const households = computed(() => state.households);
+
+
+async function openCreateHouseholdModal() {
+  menuController.close("menu");
+  const createHouseholdModal = await modalController.create({
+    component: CreateHousehold,
+  });
+  createHouseholdModal.present();
+  await createHouseholdModal.onDidDismiss();
+  await householdClient.dashboardInfo();
+}
+function logout() {
+  close();
+  authClient.logout();
+  router.push("/login");
+}
+function close() {
+  menuController.close("menu");
+}
+function openHousehold(household: Household) {
+  store.viewHousehold(household.id);
+  router.push({ name: 'household-view' });
+}
 </script>
 
 <style scoped>

@@ -1,5 +1,5 @@
 import router from '../router';
-import { container } from '../container/index';
+import { container } from '../dependency-injection/container';
 import { Store } from '@/store';
 
 export class AuthClient {
@@ -48,6 +48,7 @@ export class AuthClient {
             })
         );
         this.store.login();
+        // Todo: resolve circular dependency
         container.getSseClient().register();
     }
 

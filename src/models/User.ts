@@ -1,5 +1,5 @@
 export interface User {
-    id: null|number,
+    id: number,
     name: string,
     mail?: null|string,
 }

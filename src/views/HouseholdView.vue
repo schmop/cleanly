@@ -1,42 +1,40 @@
 <template>
   <ion-page>
     <ion-tabs>
-      <ion-router-outlet/>
+      <ion-router-outlet />
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="tasks" :href="href('tasks')">
           <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-          <ion-label>Tasks</ion-label>
+          <ion-label>{{ _t('Tasks') }}</ion-label>
           <ion-badge v-if="numOverdueTasks > 0">{{ numOverdueTasks }}</ion-badge>
         </ion-tab-button>
 
         <ion-tab-button tab="checklist" :href="href('checklist')">
           <ion-icon :icon="listCircleOutline"></ion-icon>
-          <ion-label>Checklist</ion-label>
+          <ion-label>{{ _t('Checklist') }}</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="activity" :href="href('activity')">
           <ion-icon :icon="analyticsOutline"></ion-icon>
-          <ion-label>Activity</ion-label>
+          <ion-label>{{ _t('Activity') }}</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="household" :href="href('info')">
           <ion-icon :icon="peopleOutline"></ion-icon>
-          <ion-label>Household</ion-label>
+          <ion-label>{{ _t('Household') }}</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   </ion-page>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed, inject, onBeforeUnmount } from "vue";
 import {
-  addCircleOutline,
   checkmarkCircleOutline,
   listCircleOutline,
-  personAddOutline,
   peopleOutline,
-analyticsOutline
+  analyticsOutline
 } from "ionicons/icons";
 import {
   IonPage,
@@ -48,61 +46,30 @@ import {
   IonRouterOutlet,
   IonIcon,
 } from "@ionic/vue";
-import { Household } from "../models/Household";
-import { translations } from '../translation';
+import { _t } from '../translation';
 import { taskSortByPriority, taskOverDue } from "@/common/task-priority";
 import router from "@/router";
-import { store } from "@/store";
+import { gettersSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 
-export default defineComponent({
-  name: "HouseholdView",
-  components: {
-    IonPage,
-    IonTabs,
-    IonTabBar,
-    IonTabButton,
-    IonLabel,
-    IonBadge,
-    IonRouterOutlet,
-    IonIcon,
-  },
-  data: () => ({
-    addCircleOutline,
-    personAddOutline,
-    peopleOutline,
-    checkmarkCircleOutline,
-    listCircleOutline,
-    analyticsOutline,
-  }),
-  created() {
-    if (this.household == null) {
-      router.push({name: 'dashboard'});
-    }
-  },
-  beforeUnmount() {
-    store.viewHousehold(null);
-  },
-  computed: {
-    household(): undefined | Household {
-      return store.getters.household.value;
-    },
-    isAdmin(): boolean {
-      return this.household?.admin === store.state.user?.id;
-    },
-    tasks() {
-      return this.household?.tasks.concat().sort(taskSortByPriority);
-    },
-    numOverdueTasks() {
-      return this.tasks?.filter(task => taskOverDue(task)).length ?? 0;
-    },
-  },
-  methods: {
-    ...translations,
-    href(path:string) {
-      return `/household/${path}`;
-    },
-  },
+const store = inject(storeSymbol)!;
+const state = inject(stateSymbol)!;
+const getters = inject(gettersSymbol)!;
+
+const household = computed(() => getters.household.value);
+const tasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriority));
+const numOverdueTasks = computed(() => tasks.value.filter(task => taskOverDue(task)).length);
+
+
+if (household.value == null) {
+  router.push({ name: 'dashboard' });
+}
+onBeforeUnmount(() => {
+  store.viewHousehold(null);
 });
+
+function href(path: string) {
+  return `/household/${path}`;
+}
 </script>
 
 <style scoped>

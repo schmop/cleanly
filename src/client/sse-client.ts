@@ -1,5 +1,5 @@
 import { AuthClient } from './auth-client';
-import { EventProcessor } from '../checklist/event-processor';
+import { TodoEventProcessor } from '../checklist/todo-event-processor';
 
 export class SseClient {
     source: EventSource|null;
@@ -14,7 +14,7 @@ export class SseClient {
         return this.authClient.getToken();
     }
 
-    constructor(private authClient: AuthClient, private eventProcessor: EventProcessor) {
+    constructor(private authClient: AuthClient, private eventProcessor: TodoEventProcessor) {
         this.source = null;
     }
 

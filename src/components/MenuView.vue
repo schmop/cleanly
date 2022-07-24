@@ -27,8 +27,7 @@
   </ion-menu>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import {
   addCircleOutline,
   closeCircleOutline,
@@ -46,58 +45,33 @@ import {
   IonList,
   IonIcon,
   menuController,
-modalController,
+  modalController,
 } from "@ionic/vue";
-import { Household } from "../models/Household";
-import { User } from "../models/User";
-import { Invite } from "../models/Invite";
-import { translations } from "../translation";
 import CreateHousehold from "../modals/CreateHousehold.vue";
-import { container } from "@/container";
+import { _t } from "@/translation";
+import { householdClientSymbol, authClientSymbol } from '../dependency-injection/injection-keys';
+import { inject } from "vue";
 
-export default defineComponent({
-  name: "MenuView",
-  components: {
-    IonContent,
-    IonToolbar,
-    IonMenu,
-    IonItem,
-    IonList,
-    IonTitle,
-    IonHeader,
-    IonIcon,
-  },
-  data: () => ({
-    loading: true,
-    households: [] as Household[],
-    user: null as null | User,
-    invites: [] as Invite[],
-    addCircleOutline,
-    closeCircleOutline,
-    homeOutline,
-    logOutOutline,
-  }),
-  methods: {
-    ...translations,
-    async openCreateHouseholdModal() {
-      menuController.close("menu");
-      const createHouseholdModal = await modalController.create({
-        component: CreateHousehold,
-      });
-      createHouseholdModal.present();
-      await createHouseholdModal.onDidDismiss();
-      await container.getHouseholdClient().dashboardInfo();
-    },
-    async logout() {
-      await this.close();
-      container.getAuthClient().logout();
-      router.replace("/login");
-    },
-    async close() {
-      return menuController.close("menu");
-    },
-  },
-});
+const householdClient = inject(householdClientSymbol)!;
+const authClient = inject(authClientSymbol)!;
+
+async function close() {
+  return menuController.close("menu");
+}
+async function openCreateHouseholdModal() {
+  close()
+  const createHouseholdModal = await modalController.create({
+    component: CreateHousehold,
+  });
+  createHouseholdModal.present();
+  await createHouseholdModal.onDidDismiss();
+  await householdClient.dashboardInfo();
+}
+async function logout() {
+  await close();
+  authClient.logout();
+  router.replace({ name: 'login' });
+}
 </script>
 
 <style scoped>

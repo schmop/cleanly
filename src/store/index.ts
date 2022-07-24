@@ -4,7 +4,8 @@ import { Invite } from '../models/Invite';
 import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
 import { TaskLog } from '@/models/TaskLog';
-import { reactive, computed, App, ComputedRef } from 'vue';
+import { reactive, computed, App, ComputedRef, InjectionKey } from 'vue';
+import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/injection-keys';
 
 export class State {
     loggedIn = false;
@@ -16,19 +17,21 @@ export class State {
     viewedHousehold: null | number = null;
 }
 
-type Getters = {
+export type Getters = {
     checklist: (householdId: number) => Todo[],
     householdById: (householdId: number) => undefined | Household,
     taskLogs: TaskLog[],
     household: undefined | Household,
     tasks: Task[],
 };
-type GetterFunctions = { [key in keyof Getters]: () => Getters[key] };
-type ComputedGetters = { [key in keyof Getters]: ComputedRef<Getters[key]> };
+export type GetterFunctions = { [key in keyof Getters]: () => Getters[key] };
+export type ComputedGetters = { [key in keyof Getters]: ComputedRef<Getters[key]> };
 
 function makeGettersReactive(getters: GetterFunctions): ComputedGetters {
     return Object.fromEntries(
-        Object.entries(getters).map(([key, getter]) => [key, computed(getter as any)])
+        Object.entries(getters).map(
+            ([key, getter]) => [key, computed(getter as any)]
+        )
     ) as ComputedGetters;
 }
 
@@ -60,25 +63,27 @@ const getters: GetterFunctions = {
     },
 };
 
-abstract class VueStorePlugin {
-    /** Used to register as a Vue Plugin */
-    install(app: App) {
-        app.provide('store', this);
-    }
-}
-
-export class Store extends VueStorePlugin {
+export class Store {
     public readonly state: State;
     public readonly getters: ComputedGetters;
     constructor(
         state: State,
         getters: GetterFunctions,
     ) {
-        super();
         this.state = state;
         this.getters = makeGettersReactive(getters);
     }
 
+    /** Used to register as a Vue Plugin */
+    install(app: App) {
+        app.provide(storeSymbol, this);
+        app.provide(stateSymbol, this.state);
+        app.provide(gettersSymbol, this.getters);
+    }
+
+    /**
+     * Mutations
+     */
     login() {
         this.state.loggedIn = true;
     }
@@ -134,11 +139,13 @@ export class Store extends VueStorePlugin {
     joinHousehold(household: Household) {
         this.state.households.push(household);
     }
+
+    /**
+     * Actions
+     */
 }
 
 const state = reactive(new State());
-
-
 
 export const store = new Store(
     state,
@@ -149,11 +156,4 @@ if (process.env.NODE_ENV !== 'production') {
      * This replaces the Vuex-Dev-Tools (in a poorly fashioned way)
      */
     (window as any).store = store;
-}
-
-/** 
- * For use in composition API
- */
-export function useStore(): Store {
-    return store;
 }

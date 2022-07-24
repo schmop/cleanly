@@ -30,10 +30,9 @@
   </ion-footer>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { ref, inject } from 'vue';
 import { addCircleOutline, closeCircleOutline, pencilOutline } from "ionicons/icons";
-import toast from "../toast";
 import {
   IonLabel,
   IonInput,
@@ -47,45 +46,21 @@ import {
   IonButton,
   IonFooter,
   modalController,
-  menuController,
 } from "@ionic/vue";
-import router from "../router";
-import { Household } from "../models/Household";
-import { translations } from "../translation";
-import { container } from "@/container";
+import { householdClientSymbol } from '../dependency-injection/injection-keys';
+import { _t } from '@/translation';
 
-export default defineComponent({
-  name: "CreateHousehold",
-  components: {
-    IonContent,
-    IonToolbar,
-    IonIcon,
-    IonTitle,
-    IonLabel,
-    IonHeader,
-    IonInput,
-    IonItemGroup,
-    IonItem,
-    IonButton,
-    IonFooter,
-  },
-  data: () => ({
-    addCircleOutline,
-    closeCircleOutline,
-    pencilOutline,
-    householdName: "",
-  }),
-  methods: {
-    ...translations,
-    dismiss() {
-      modalController.dismiss();
-    },
-    async createHousehold() {
-      await container.getHouseholdClient().createHousehold(this.householdName);
-      this.dismiss();
-    },
-  },
-});
+const householdClient = inject(householdClientSymbol)!;
+
+const householdName = ref('');
+
+function dismiss() {
+  modalController.dismiss();
+}
+async function createHousehold() {
+  await householdClient.createHousehold(householdName.value);
+  dismiss();
+}
 </script>
 
 <style scoped>

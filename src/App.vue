@@ -55,38 +55,41 @@ import {
   RefresherCustomEvent
 } from '@ionic/vue';
 import MenuView from './components/MenuView.vue';
-import { computed, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { mailOutline, homeOutline } from 'ionicons/icons';
-import { container } from './container';
+import { container } from './dependency-injection/container';
 import { Household } from './models/Household';
 import { _t } from './translation';
 import LoadingScreen from './views/LoadingScreen.vue';
-import { useStore } from './store/index';
 import { useRoute, useRouter } from 'vue-router';
+import { householdClientSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
 
 
 let triedSessionRestore = ref(false);
-const store = useStore();
+const store = inject(storeSymbol)!;
+const state = inject(stateSymbol)!;
 const route = useRoute();
 const router = useRouter();
+const householdClient = inject(householdClientSymbol)!;
+
 const isDashboard = computed(() => route.name === 'dashboard');
 const isLoginPage = computed(() => route.name === 'login');
 
-const loggedIn = computed(() => store.state.loggedIn);
-const invites = computed(() => store.state.invites);
-const pageTitle = computed(() => store.state.pageTitle);
+const loggedIn = computed(() => state.loggedIn);
+const invites = computed(() => state.invites);
+const pageTitle = computed(() => state.pageTitle);
 
 watch(
-  () => store.state.viewedHousehold,
+  () => state.viewedHousehold,
   () => {
-    const household = store.state.households.find((household: Household) => household.id === store.state.viewedHousehold);
+    const household = state.households.find((household: Household) => household.id === state.viewedHousehold);
     store.pageTitle(household?.name ?? null);
   },
   { immediate: true }
 );
 
 async function sessionRestoreSuccess() {
-  await container.getHouseholdClient().dashboardInfo();
+  await householdClient.dashboardInfo();
   router.replace({ name: 'dashboard' });
   triedSessionRestore.value = true;
 }
@@ -95,7 +98,7 @@ function sessionRestoreFail() {
   triedSessionRestore.value = true;
 }
 async function forceReload(event: RefresherCustomEvent) {
-  await container.getHouseholdClient().dashboardInfo();
+  await householdClient.dashboardInfo();
   event.target.complete();
 }
 function showInvites() {

@@ -1,16 +1,30 @@
-import { EventProcessor } from '@/checklist/event-processor';
-import { store } from '@/store';
+import { TodoEventProcessor } from '@/checklist/todo-event-processor';
+import { Store, store } from '@/store';
+import { App } from 'vue';
 import { AuthClient } from '../client/auth-client';
 import { HouseholdClient } from '../client/household-client';
 import { SseClient } from '../client/sse-client';
 import { TaskClient } from '../client/task-client';
+import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol } from './injection-keys';
 
 class Container {
     authClient?: AuthClient;
     householdClient?: HouseholdClient;
     sseClient?: SseClient;
-    eventProcessor?: EventProcessor;
+    eventProcessor?: TodoEventProcessor;
     taskClient?: TaskClient;
+
+    /** Installation as Vue plugin */
+    install(app: App) {
+        app.provide(authClientSymbol, this.getAuthClient());
+        app.provide(sseClientSymbol, this.getSseClient());
+        app.provide(taskClientSymbol, this.getTaskClient());
+        app.provide(householdClientSymbol, this.getHouseholdClient());
+    }
+
+    getStore(): Store {
+        return store;
+    }
 
     getAuthClient(): AuthClient {
         this.authClient = this.authClient ?? new AuthClient(store);
@@ -30,8 +44,8 @@ class Container {
         return this.sseClient;
     }
 
-    getEventProcessor(): EventProcessor {
-        this.eventProcessor = this.eventProcessor ?? new EventProcessor(store, this.getHouseholdClient());
+    getEventProcessor(): TodoEventProcessor {
+        this.eventProcessor = this.eventProcessor ?? new TodoEventProcessor(store, this.getHouseholdClient());
 
         return this.eventProcessor;
     }

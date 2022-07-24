@@ -50,10 +50,9 @@
   </ion-footer>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { ref, reactive, Ref, inject, watch } from 'vue';
 import {
-  addCircleOutline,
   closeCircleOutline,
   personOutline,
   searchOutline,
@@ -79,79 +78,50 @@ import {
 import { Household } from "../models/Household";
 import debounce from "../common/debounce";
 import { LookupResult } from "../models/LookupResult";
-import { translations } from "../translation";
-import { container } from "@/container";
+import { authClientSymbol, householdClientSymbol } from '../dependency-injection/injection-keys';
+import { _t, __t } from '@/translation';
 
-export default defineComponent({
-  name: "InviteModal",
-  components: {
-    IonContent,
-    IonToolbar,
-    IonIcon,
-    IonTitle,
-    IonLabel,
-    IonHeader,
-    IonListHeader,
-    IonList,
-    IonInput,
-    IonItemDivider,
-    IonItemGroup,
-    IonItem,
-    IonButton,
-    IonFooter,
-  },
-  props: {
-    household: Object as () => Household,
-  },
-  data: () => ({
-    addCircleOutline,
-    searchOutline,
-    personAddOutline,
-    closeCircleOutline,
-    personOutline,
-    inviteSearch: "",
-    suggestions: [] as LookupResult[],
-    search: null as CallableFunction | null,
-    selection: null as LookupResult | null,
-  }),
-  computed: {},
-  watch: {
-    inviteSearch() {
-      if (null == this.search) {
-        this.search = debounce(this._search, 250, true);
-      }
-      this.search();
-    },
-  },
-  methods: {
-    ...translations,
-    dismiss() {
-      modalController.dismiss();
-    },
-    add(result: LookupResult) {
-      this.selection = result;
-      this.suggestions = [];
-      this.inviteSearch = "";
-    },
-    async invite() {
-      if (null == this.household?.id || null == this.selection?.id) {
-        return;
-      }
-      await container.getHouseholdClient().invite(this.household?.id, this.selection?.id);
-      this.dismiss();
-    },
-    async _search() {
-      let suggestions = await container.getAuthClient().lookupUsers(this.inviteSearch);
-      const users = this.household?.users;
-      if (null != users) {
-        suggestions = suggestions.filter((suggestion: LookupResult) =>
-          !users.some((user) => user.id != null && user.id === suggestion.id)
-        );
-      }
-      this.suggestions = suggestions;
-    },
-  },
-});
+const props = defineProps<{
+  household: Household,
+}>();
+const authClient = inject(authClientSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
+
+const inviteSearch = ref('');
+let suggestions: LookupResult[] = reactive([]);
+const selection: Ref<null | LookupResult> = ref(null);
+
+const search = debounce(async () => {
+  let newSuggestions = await authClient.lookupUsers(inviteSearch.value);
+  const users = props.household.users;
+  if (null != users) {
+    newSuggestions = newSuggestions.filter((suggestion: LookupResult) =>
+      !users.some((user) => user.id != null && user.id === suggestion.id)
+    );
+  }
+  suggestions = newSuggestions;
+}, 250, true);
+
+watch(
+  inviteSearch,
+  search,
+);
+
+function dismiss() {
+  modalController.dismiss();
+}
+function add(result: LookupResult) {
+  selection.value = result;
+  suggestions = [];
+  inviteSearch.value = "";
+}
+async function invite() {
+  if (null == props.household.id || null == selection.value?.id) {
+    return;
+  }
+  await householdClient.invite(props.household?.id, selection.value?.id);
+  dismiss();
+}
 </script>
 
 <style scoped>

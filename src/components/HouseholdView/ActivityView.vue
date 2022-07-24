@@ -13,24 +13,25 @@ import {
     onIonViewWillEnter,
 } from "@ionic/vue";
 import TaskLogView from '../TaskLogView.vue';
-import { container } from '../../container/index';
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { TaskLog } from '../../models/TaskLog';
-import { useStore } from "@/store";
+import { gettersSymbol, stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 
-const store = useStore();
+const state = inject(stateSymbol)!;
+const getters = inject(gettersSymbol)!;
+const taskClient = inject(taskClientSymbol)!;
 const tasklogs = computed(() => {
-    const logs = store.getters.taskLogs.value.concat();
+    const logs = getters.taskLogs.value.concat();
 
     return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
 });
 onIonViewWillEnter(() => {
-    const id = store.state.viewedHousehold;
+    const id = state.viewedHousehold;
     if (null == id) {
         console.error("Could not fetch, no id given");
         return;
     }
-    container.getTaskClient().fetchTaskLog(id);
+    taskClient.fetchTaskLog(id);
 });
 </script>
 

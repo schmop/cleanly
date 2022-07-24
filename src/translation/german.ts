@@ -83,5 +83,9 @@ export default {
     '{0} ago': 'vor {0}',
     'just now': 'gerade eben',
     '<former member>': '<Ehemaliges Mitglied>',
+    'Tasks': 'Aufgaben',
+    'Checklist': 'Checkliste',
+    'Activity': 'Aktivität',
+    'Household': 'Haushalt',
     '': '',
 } as { [english: string]: string };

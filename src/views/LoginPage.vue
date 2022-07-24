@@ -3,31 +3,23 @@
     <ion-content>
       <ion-item-group @keypress.enter.exact="sendForm">
         <ion-item v-if="isRegistering">
-          <ion-label position="stacked" required>{{_t('Name')}}</ion-label>
+          <ion-label position="stacked" required>{{ _t('Name') }}</ion-label>
           <ion-input v-model="name" type="text" />
         </ion-item>
         <ion-item>
-          <ion-label position="stacked" required>{{_t('Mail')}}</ion-label>
+          <ion-label position="stacked" required>{{ _t('Mail') }}</ion-label>
           <ion-input v-model="mail" type="email" />
         </ion-item>
         <ion-item>
-          <ion-label position="stacked" required>{{_t('Password')}}</ion-label>
+          <ion-label position="stacked" required>{{ _t('Password') }}</ion-label>
           <ion-input v-model="password" type="password" />
         </ion-item>
         <ion-item v-if="isRegistering">
-          <ion-label position="stacked" required>{{_t('Retype Password')}}</ion-label>
+          <ion-label position="stacked" required>{{ _t('Retype Password') }}</ion-label>
           <ion-input v-model="retype" type="password" />
         </ion-item>
-        <ion-item
-          button
-          @click="sendForm"
-          color="primary"
-          :disabled="!formValid"
-        >
-          <ion-icon
-            slot="start"
-            :icon="isRegistering ? logInOutline : personAddOutline"
-          />
+        <ion-item button @click="sendForm" color="primary" :disabled="!formValid">
+          <ion-icon slot="start" :icon="isRegistering ? logInOutline : personAddOutline" />
           {{ actionText }}
         </ion-item>
       </ion-item-group>
@@ -35,26 +27,22 @@
     <ion-footer>
       <ion-item-group>
         <ion-item>
-          <ion-label position="stacked">{{_t('Register')}}</ion-label>
+          <ion-label position="stacked">{{ _t('Register') }}</ion-label>
           <!-- 
-            The timestamped key fixes the infinite update loop when programmatically settings the toggle value
+            The timestamped key fixes the infinite update loop when programmatically setting the toggle value
             @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
           -->
-          <ion-toggle
-            ref="toggle"
-            :key="isRegistering + (new Date()).toISOString()"
-            @ionChange="onToggle"
-            :checked="isRegistering"
-          />
+          <ion-toggle ref="toggle" :key="isRegistering + (new Date()).toISOString()" @ionChange="onToggle"
+            :checked="isRegistering" />
         </ion-item>
       </ion-item-group>
     </ion-footer>
   </ion-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { logInOutline, personAddOutline } from "ionicons/icons";
-import { defineComponent } from "vue";
+import { computed, inject, ref } from "vue";
 import toast from "@/toast";
 import {
   IonPage,
@@ -68,83 +56,63 @@ import {
   IonIcon,
 } from "@ionic/vue";
 import router from "@/router";
-import { translations, _t } from "@/translation";
-import { container } from "@/container";
+import { _t } from "@/translation";
+import { authClientSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 
-export default defineComponent({
-  name: "LoginPage",
-  components: {
-    IonPage,
-    IonLabel,
-    IonInput,
-    IonItemGroup,
-    IonItem,
-    IonContent,
-    IonFooter,
-    IonToggle,
-    IonIcon,
-  },
-  data: () => ({
-    isRegistering: false,
-    name: "",
-    mail: "",
-    password: "",
-    retype: "",
-    logInOutline,
-    personAddOutline,
-  }),
-  computed: {
-    formValid() {
-      return !this.isRegistering || this.password === this.retype;
-    },
-    actionText() {
-      if (!this.formValid) {
-        return _t("Your passwords need to match!");
-      }
+const authClient = inject(authClientSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
 
-      return this.isRegistering ? _t("Register") : _t("Login");
-    },
-  },
-  methods: {
-    ...translations,
-    onToggle() {
-      this.isRegistering = !this.isRegistering;
-    },
-    sendForm() {
-      if (!this.formValid) {
-        return;
-      }
-      if (this.isRegistering) {
-        this.register();
-      } else {
-        this.login();
-      }
-    },
-    async register() {
-      try {
-        await container.getAuthClient().signUp(this.name, this.mail, this.password);
-        this.name = "";
-        this.password = "";
-        this.retype = "";
-        this.mail = "";
-        this.isRegistering = false;
-        toast.info(_t("Register successful!"));
-      } catch (error: any) {
-        toast.error(error.message + ', account may already exist');
-      }
-    },
-    async login() {
-       try {
-        await container.getAuthClient().signIn(this.mail, this.password);
-        await container.getHouseholdClient().dashboardInfo();
-        toast.info(_t("Login successful!"));
-        router.replace({name: 'dashboard'});
-      } catch (error: any) {
-        toast.error(error.message);
-      }
-    },
-  },
+const isRegistering = ref(false);
+const name = ref("");
+const mail = ref("");
+const password = ref("");
+const retype = ref("");
+
+const formValid = computed(() => !isRegistering.value || password.value === retype.value);
+const actionText = computed(() => {
+  if (!formValid.value) {
+    return _t("Your passwords need to match!");
+  }
+
+  return isRegistering.value ? _t("Register") : _t("Login");
 });
+
+function onToggle() {
+  isRegistering.value = !isRegistering.value;
+}
+function sendForm() {
+  if (!formValid.value) {
+    return;
+  }
+  if (isRegistering.value) {
+    register();
+  } else {
+    login();
+  }
+}
+async function register() {
+  try {
+    await authClient.signUp(name.value, mail.value, password.value);
+    name.value = "";
+    password.value = "";
+    retype.value = "";
+    mail.value = "";
+    isRegistering.value = false;
+    toast.info(_t("Register successful!"));
+  } catch (error: any) {
+    toast.error(error.message + ', account may already exist');
+  }
+}
+async function login() {
+  try {
+    await authClient.signIn(mail.value, password.value);
+    await householdClient.dashboardInfo();
+    toast.info(_t("Login successful!"));
+    router.replace({ name: 'dashboard' });
+  } catch (error: any) {
+    toast.error(error.message);
+  }
+}
 </script>
 
 <style scoped>

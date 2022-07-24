@@ -4,15 +4,11 @@
       <ion-toolbar color="none">
         <ion-card-title>{{ household.name }}</ion-card-title>
         <ion-buttons slot="primary" v-if="isAdmin">
-          <ion-button :id="editButtonId" @click.stop="() => {/** noop */}">
+          <ion-button :id="editButtonId" @click.stop="() => {/** noop */ }">
             <ion-icon slot="icon-only" :icon="ellipsisVertical"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-popover
-          :trigger="editButtonId"
-          v-if="isAdmin"
-          dismiss-on-select
-        >
+        <ion-popover :trigger="editButtonId" v-if="isAdmin" dismiss-on-select>
           <ion-content>
             <ion-list>
               <ion-item button @click="openTaskFormModal">
@@ -29,21 +25,15 @@
       </ion-toolbar>
     </ion-card-header>
     <ion-card-content>
-      <TaskView
-        v-for="(task, index) in tasks"
-        :task="task"
-        :key="index"
-        :show-actions="false"
-      />
+      <TaskView v-for="(task, index) in tasks" :task="task" :key="index" :show-actions="false" />
     </ion-card-content>
   </ion-card>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed, inject } from 'vue';
 import {
   addCircleOutline,
-  closeCircleOutline,
   personAddOutline,
   ellipsisVertical,
 } from "ionicons/icons";
@@ -68,72 +58,39 @@ import TaskView from "@/components/TaskView.vue";
 import InviteModal from "@/modals/InviteModal.vue";
 import TaskForm from "@/modals/TaskForm.vue";
 import { taskSortByPriority } from "@/common/task-priority";
-import {translations} from "@/translation";
-import { container } from "@/container";
-import { store } from "@/store";
+import { stateSymbol, householdClientSymbol } from '../dependency-injection/injection-keys';
+import { _t } from '@/translation';
 
-export default defineComponent({
-  name: "HouseholdPreview",
-  components: {
-    TaskView,
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonLabel,
-    IonIcon,
-    IonItem,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonToolbar,
-    IonList,
-    IonPopover,
-  },
-  data: () => ({
-    addCircleOutline,
-    closeCircleOutline,
-    personAddOutline,
-    ellipsisVertical,
-  }),
-  props: {
-    household: Object as () => Household,
-  },
-  computed: {
-    isAdmin() {
-      return this.household?.admin === store.state.user?.id;
+const props = defineProps<{
+  household: Household
+}>();
+const state = inject(stateSymbol)!;
+const householdClient = inject(householdClientSymbol)!;
+
+const isAdmin = computed(() => props.household.admin === state.user?.id);
+const editButtonId = computed(() => `household-button-${props.household.id}`);
+const tasks = computed(() => props.household.tasks.concat().sort(taskSortByPriority).slice(0, 2));
+
+async function openTaskFormModal(): Promise<void> {
+  const TaskFormModal = await modalController.create({
+    component: TaskForm,
+    componentProps: {
+      id: props.household.id,
     },
-    editButtonId() {
-      return `household-button-${this.household?.id}`;
+  });
+  TaskFormModal.present();
+  await TaskFormModal.onDidDismiss();
+  await householdClient.dashboardInfo();
+}
+async function openInviteModal() {
+  const createHouseholdModal = await modalController.create({
+    component: InviteModal,
+    componentProps: {
+      household: props.household,
     },
-    tasks() {
-      return this.household?.tasks.concat().sort(taskSortByPriority).slice(0, 2);
-    },
-  },
-  methods: {
-    ...translations,
-    async openTaskFormModal(): Promise<void> {
-      const TaskFormModal = await modalController.create({
-        component: TaskForm,
-        componentProps: {
-          id: this.household?.id,
-        },
-      });
-      TaskFormModal.present();
-      await TaskFormModal.onDidDismiss();
-      await container.getHouseholdClient().dashboardInfo();
-    },
-    async openInviteModal() {
-      const createHouseholdModal = await modalController.create({
-        component: InviteModal,
-        componentProps: {
-          household: this.household,
-        },
-      });
-      createHouseholdModal.present();
-    },
-  },
-});
+  });
+  createHouseholdModal.present();
+}
 </script>
 
 <style scoped>
