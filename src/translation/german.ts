@@ -56,7 +56,7 @@ export default {
     'Register successful!': 'Registrierung erfolgreich!',
     'Delete task': 'Aufgabe löschen',
     'Members': 'Mitglieder',
-    'Household settings': 'Haushalt Einstellungen',
+    'Household settings': 'Haushalteinstellungen',
     'Admin': 'Administrator',
     'Transfer ownership': 'Besitzrechte übertragen',
     'Kick member': 'Mitglied entfernen',
@@ -87,5 +87,6 @@ export default {
     'Checklist': 'Checkliste',
     'Activity': 'Aktivität',
     'Household': 'Haushalt',
+    'Changes': 'Änderungen',
     '': '',
 } as { [english: string]: string };

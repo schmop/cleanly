@@ -4,6 +4,7 @@ import Login from '@/views/LoginPage.vue';
 import Dashboard from '@/views/DashBoard.vue';
 import InviteView from '@/views/InviteView.vue';
 import HouseholdView from '@/views/HouseholdView.vue';
+import ChangelogsView from '@/views/ChangelogsView.vue';
 import TaskList from '@/components/HouseholdView/TaskList.vue';
 import ActivityView from '@/components/HouseholdView/ActivityView.vue';
 import CheckList from '@/components/HouseholdView/CheckList.vue';
@@ -19,6 +20,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/invites',
     component: InviteView,
     name: 'invite-view',
+  },
+  {
+    path: '/changelogs',
+    component: ChangelogsView,
+    name: 'changelogs',
   },
   {
     path: '/',

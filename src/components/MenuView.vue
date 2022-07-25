@@ -18,6 +18,10 @@
           <ion-icon slot="start" :icon="addCircleOutline" />
           {{ _t('Create household') }}
         </ion-item>
+        <ion-item button @click="gotoChangelog">
+          <ion-icon slot="start" :icon="documentTextOutline" />
+          {{ _t('Changes') }}
+        </ion-item>
         <ion-item button @click="logout">
           <ion-icon slot="start" :icon="logOutOutline" />
           {{ _t('Logout') }}
@@ -33,8 +37,8 @@ import {
   closeCircleOutline,
   logOutOutline,
   homeOutline,
+  documentTextOutline,
 } from "ionicons/icons";
-import router from "../router";
 import {
   IonItem,
   IonContent,
@@ -51,12 +55,18 @@ import CreateHousehold from "../modals/CreateHousehold.vue";
 import { _t } from "@/translation";
 import { householdClientSymbol, authClientSymbol } from '../dependency-injection/injection-keys';
 import { inject } from "vue";
+import { routerKey } from "vue-router";
 
 const householdClient = inject(householdClientSymbol)!;
 const authClient = inject(authClientSymbol)!;
+const router = inject(routerKey)!;
 
 async function close() {
   return menuController.close("menu");
+}
+function gotoChangelog() {
+  close();
+  router.push({name: 'changelogs'});
 }
 async function openCreateHouseholdModal() {
   close()
