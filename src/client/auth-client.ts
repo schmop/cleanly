@@ -16,9 +16,9 @@ export class AuthClient {
     }
 
     get HOST() {
-        /**if (process.env.NODE_ENV === 'production') {
+        if (process.env.NODE_ENV === 'production') {
             return "https://cleanly.schmoppo.de";
-        }*/
+        }
         //return "http://127.0.0.1:8000";
         return "http://192.168.2.108:8000";
     }
