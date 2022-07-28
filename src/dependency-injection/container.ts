@@ -1,11 +1,12 @@
 import { TodoEventProcessor } from '@/checklist/todo-event-processor';
+import { PushService } from '@/push';
 import { Store, store } from '@/store';
 import { App } from 'vue';
 import { AuthClient } from '../client/auth-client';
 import { HouseholdClient } from '../client/household-client';
 import { SseClient } from '../client/sse-client';
 import { TaskClient } from '../client/task-client';
-import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol } from './injection-keys';
+import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol, pushSymbol } from './injection-keys';
 
 class Container {
     authClient?: AuthClient;
@@ -13,6 +14,7 @@ class Container {
     sseClient?: SseClient;
     eventProcessor?: TodoEventProcessor;
     taskClient?: TaskClient;
+    push?: PushService;
 
     /** Installation as Vue plugin */
     install(app: App) {
@@ -20,6 +22,7 @@ class Container {
         app.provide(sseClientSymbol, this.getSseClient());
         app.provide(taskClientSymbol, this.getTaskClient());
         app.provide(householdClientSymbol, this.getHouseholdClient());
+        app.provide(pushSymbol, this.getPush());
     }
 
     getStore(): Store {
@@ -27,33 +30,28 @@ class Container {
     }
 
     getAuthClient(): AuthClient {
-        this.authClient = this.authClient ?? new AuthClient(store);
-
-        return this.authClient;
+        return this.authClient = this.authClient ?? new AuthClient(store, this.getPush());
     }
     
     getHouseholdClient(): HouseholdClient {
-        this.householdClient = this.householdClient ?? new HouseholdClient(this.getAuthClient(), store);
+        return this.householdClient = this.householdClient ?? new HouseholdClient(this.getAuthClient(), store);
+    }
 
-        return this.householdClient;
+    
+    getPush(): PushService {
+        return this.push = this.push ?? new PushService();
     }
 
     getSseClient(): SseClient {
-        this.sseClient = this.sseClient ?? new SseClient(this.getAuthClient(), this.getEventProcessor());
-
-        return this.sseClient;
+        return this.sseClient = this.sseClient ?? new SseClient(this.getAuthClient(), this.getEventProcessor());
     }
 
     getEventProcessor(): TodoEventProcessor {
-        this.eventProcessor = this.eventProcessor ?? new TodoEventProcessor(store, this.getHouseholdClient());
-
-        return this.eventProcessor;
+        return this.eventProcessor = this.eventProcessor ?? new TodoEventProcessor(store, this.getHouseholdClient());
     }
 
     getTaskClient(): TaskClient {
-        this.taskClient = this.taskClient ?? new TaskClient(this.getAuthClient(), store);
-
-        return this.taskClient;
+        return this.taskClient = this.taskClient ?? new TaskClient(this.getAuthClient(), store);
     }
 }
 

@@ -14,7 +14,7 @@
           <ion-icon :icon="searchOutline" slot="start" />
           {{ _t('Search for username') }}
         </ion-label>
-        <ion-input type="text" v-model="inviteSearch" ref="inviteSearch" />
+        <ion-input type="text" v-model="inviteSearch" />
       </ion-item>
       <ion-list v-if="suggestions.length > 0">
         <ion-item button v-for="(suggestion, index) in suggestions" @click="add(suggestion)" :key="index">
@@ -88,7 +88,7 @@ const authClient = inject(authClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 const inviteSearch = ref('');
-let suggestions: LookupResult[] = reactive([]);
+let suggestions: Ref<LookupResult[]> = ref([]);
 const selection: Ref<null | LookupResult> = ref(null);
 
 const search = debounce(async () => {
@@ -99,7 +99,8 @@ const search = debounce(async () => {
       !users.some((user) => user.id != null && user.id === suggestion.id)
     );
   }
-  suggestions = newSuggestions;
+  suggestions.value = newSuggestions;
+  console.log()
 }, 250, true);
 
 watch(
@@ -112,7 +113,7 @@ function dismiss() {
 }
 function add(result: LookupResult) {
   selection.value = result;
-  suggestions = [];
+  suggestions.value = [];
   inviteSearch.value = "";
 }
 async function invite() {

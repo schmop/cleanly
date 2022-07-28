@@ -58,7 +58,6 @@ import { User } from "@/models/User";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 import toast from "@/toast";
 import router from "@/router";
-import { container } from "@/dependency-injection/container";
 import { computed, inject } from "vue";
 import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 import { stateSymbol } from '../../dependency-injection/injection-keys';
@@ -153,7 +152,7 @@ async function openMemberActionMenu(member: User) {
         component: HouseholdMemberActions,
         cssClass: 'autowidth',
         componentProps: {
-            household: household,
+            household: household.value,
             member,
         }
     });

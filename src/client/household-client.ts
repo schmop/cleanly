@@ -131,20 +131,6 @@ export class HouseholdClient {
         });
     }
 
-    async fetchInviteLink(householdId: number): Promise<string> {
-        const response = await this.client.request(`api/household/invite/generate/${householdId}`, {
-            method: 'POST',
-        });
-
-        if (response.status !== 200) {
-            throw new Error("Error generating invite link!");
-        }
-
-        const data = await response.json();
-
-        return data['token'];
-    }
-
     async updateChecklist(householdId: number, events: TodoEvent[]): Promise<boolean> {
         const formData = new FormData();
         formData.append('events', JSON.stringify(events));

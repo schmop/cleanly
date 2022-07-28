@@ -1,6 +1,7 @@
 import router from '../router';
 import { container } from '../dependency-injection/container';
 import { Store } from '@/store';
+import { PushService } from '@/push';
 
 export class AuthClient {
     private _token: null | string = null;
@@ -11,13 +12,13 @@ export class AuthClient {
         return 'Cleanly.State';
     }
 
-    constructor(private store: Store) {
+    constructor(private store: Store, private push: PushService) {
     }
 
     get HOST() {
-        if (process.env.NODE_ENV === 'production') {
+        /**if (process.env.NODE_ENV === 'production') {
             return "https://cleanly.schmoppo.de";
-        }
+        }*/
         //return "http://127.0.0.1:8000";
         return "http://192.168.2.108:8000";
     }
@@ -50,6 +51,7 @@ export class AuthClient {
         this.store.login();
         // Todo: resolve circular dependency
         container.getSseClient().register();
+        this.registerPush();
     }
 
     async authCheck(): Promise<boolean> {
@@ -145,6 +147,24 @@ export class AuthClient {
 
     getToken(): null | string {
         return this._token;
+    }
+
+    async registerPush() {
+        const pushId = await this.push.getPushId()
+        const deviceId = this.push.getDeviceId();
+        if (null === pushId) {
+            console.error('No push id given, cannot register push service!');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('push_id', pushId);
+        formData.append('device_id', deviceId);
+        const response = await this.request('api/push', {
+            body: formData,
+            method: 'POST',
+        });
+
+        return await response.json();
     }
 
     async lookupUsers(search: string) {
