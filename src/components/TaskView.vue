@@ -139,8 +139,8 @@ async function markDone() {
       return;
     }
     slidingButton.value.$el.close();
-    const newTimestamp = await taskClient.markTaskComplete(props.task.id);
     try {
+      const newTimestamp = await taskClient.markTaskComplete(props.task.id);
       store.markTaskDone(props.task.id, newTimestamp);
     } catch (err) {
       if (err instanceof Error) {

@@ -57,7 +57,6 @@ import {
 import MenuView from './components/MenuView.vue';
 import { computed, inject, ref, watch } from 'vue';
 import { mailOutline, homeOutline } from 'ionicons/icons';
-import { container } from './dependency-injection/container';
 import { Household } from './models/Household';
 import { _t } from './translation';
 import LoadingScreen from './views/LoadingScreen.vue';
@@ -90,12 +89,12 @@ watch(
 
 async function sessionRestoreSuccess() {
   await householdClient.dashboardInfo();
-  router.replace({ name: 'dashboard' });
   triedSessionRestore.value = true;
+  router.replace({ name: 'dashboard' });
 }
 function sessionRestoreFail() {
-  router.replace({ name: 'login' });
   triedSessionRestore.value = true;
+  router.replace({ name: 'login' });
 }
 async function forceReload(event: RefresherCustomEvent) {
   await householdClient.dashboardInfo();

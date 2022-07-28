@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, reactive, computed, watch, ref, Ref, nextTick } from 'vue';
+import { inject, computed, watch, ref, Ref } from 'vue';
 import {
     IonButton,
     IonFab,
@@ -60,9 +60,9 @@ const requestFlushQueue = debounce(async () => {
     if (null == household.value) {
         return;
     }
-    const sentEventQueue = eventQueue;
+    const sentEventQueue = eventQueue.value;
     eventQueue.value = [];
-    if (!await householdClient.updateChecklist(household.value.id, sentEventQueue.value)) {
+    if (!await householdClient.updateChecklist(household.value.id, sentEventQueue)) {
         toast.error('Could not send updated checklist to server!');
     }
 }, 1000, false);

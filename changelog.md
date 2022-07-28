@@ -1,4 +1,11 @@
-# 1.3.3 - Aktuell
+# 1.4.1 - Aktuell
+Fehler behoben, bei dem 
+* man regelmäßig zu früh ausgeloggt wurde
+* sich das "Mitglieder einladen"-Fenster nicht mehr schloß
+* man keine Rückmeldung beim Abhaken von Aufgaben bekam
+* die Checkliste nicht mehr speicherte 
+
+# 1.4 - 28.07
 Änderungen werden in der App nun unter dem Menüeintrag "Änderungen" veröffentlicht.
 
 ![Changelog](assets/changelog/changelogs.png)
