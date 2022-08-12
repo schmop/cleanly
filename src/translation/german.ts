@@ -88,5 +88,12 @@ export default {
     'Activity': 'Aktivität',
     'Household': 'Haushalt',
     'Changes': 'Änderungen',
+    'Settings': 'Einstellungen',
+    'Notification settings': 'Benachrichtigungseinstellungen',
+    'Tasks are due': 'Aufgaben wurden dringend',
+    'Tasks are completed': 'Aufgaben wurden erledigt',
+    'Invited to a household': 'Einladungen zu Haushalten',
+    'Change password': 'Passwort ändern',
+    'Forgot password?': 'Passwort vergessen?',
     '': '',
 } as { [english: string]: string };

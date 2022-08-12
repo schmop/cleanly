@@ -1,11 +1,24 @@
-# 1.4.1 - Aktuell
-Fehler behoben, bei dem 
+# 1.4.2 - Aktuell
+Registrationen müssen ab sofort mit der bestätigung der E-Mail-Adresse abgeschlossen werden.
+
+Benachrichtigungseinstellungen hinzugefügt, die einem erlauben Push-Benachrichtigungen für explizite Ereignisse feingranular zu deaktivieren.
+
+![Notification settings](assets/changelog/notification-settings.png)
+
+Man wird nun benachrichtigt, wenn Aufgaben dringend werden.
+
+Kleinere Bugfixes:
+* "Aufgabe bearbeiten" repariert.
+* Die Checkliste kann wieder sortiert werden.
+
+# 1.4.1 - 30.07.2022
+Fehler behoben, bei dem
 * man regelmäßig zu früh ausgeloggt wurde
 * sich das "Mitglieder einladen"-Fenster nicht mehr schloß
 * man keine Rückmeldung beim Abhaken von Aufgaben bekam
-* die Checkliste nicht mehr speicherte 
+* die Checkliste nicht mehr speicherte
 
-# 1.4 - 28.07
+# 1.4 - 28.07.2022
 Änderungen werden in der App nun unter dem Menüeintrag "Änderungen" veröffentlicht.
 
 ![Changelog](assets/changelog/changelogs.png)

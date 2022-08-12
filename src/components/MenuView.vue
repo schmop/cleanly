@@ -18,6 +18,10 @@
           <ion-icon slot="start" :icon="addCircleOutline" />
           {{ _t('Create household') }}
         </ion-item>
+        <ion-item button @click="gotoSettings">
+          <ion-icon slot="start" :icon="settingsOutline" />
+          {{ _t('Settings') }}
+        </ion-item>
         <ion-item button @click="gotoChangelog">
           <ion-icon slot="start" :icon="documentTextOutline" />
           {{ _t('Changes') }}
@@ -37,6 +41,7 @@ import {
   closeCircleOutline,
   logOutOutline,
   homeOutline,
+  settingsOutline,
   documentTextOutline,
 } from "ionicons/icons";
 import {
@@ -67,6 +72,10 @@ async function close() {
 function gotoChangelog() {
   close();
   router.push({name: 'changelogs'});
+}
+function gotoSettings() {
+  close();
+  router.push({name: 'settings'});
 }
 async function openCreateHouseholdModal() {
   close()

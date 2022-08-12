@@ -3,6 +3,7 @@ import { RouteRecordRaw } from 'vue-router';
 import Login from '@/views/LoginPage.vue';
 import Dashboard from '@/views/DashBoard.vue';
 import InviteView from '@/views/InviteView.vue';
+import SettingsView from '@/views/SettingsView.vue';
 import HouseholdView from '@/views/HouseholdView.vue';
 import ChangelogsView from '@/views/ChangelogsView.vue';
 import TaskList from '@/components/HouseholdView/TaskList.vue';
@@ -25,6 +26,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/changelogs',
     component: ChangelogsView,
     name: 'changelogs',
+  },
+  {
+    path: '/settings',
+    component: SettingsView,
+    name: 'settings',
   },
   {
     path: '/',

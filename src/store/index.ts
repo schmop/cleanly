@@ -6,6 +6,7 @@ import { Todo } from '@/models/Todo';
 import { TaskLog } from '@/models/TaskLog';
 import { reactive, computed, App, ComputedRef, InjectionKey } from 'vue';
 import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/injection-keys';
+import { UserSettings } from '@/models/UserSettings';
 
 export class State {
     loggedIn = false;
@@ -15,6 +16,11 @@ export class State {
     pageTitle: null | string = null;
     taskLogs: Record<string, TaskLog[]> = {};
     viewedHousehold: null | number = null;
+    userSettings: UserSettings = {
+        notifyInvites: true,
+        notifyTaskDone: true,
+        notifyTaskDue: true,
+    };
 }
 
 export type Getters = {
@@ -138,6 +144,9 @@ export class Store {
     }
     joinHousehold(household: Household) {
         this.state.households.push(household);
+    }
+    setSettings(settings: UserSettings) {
+        this.state.userSettings = settings;
     }
 
     /**

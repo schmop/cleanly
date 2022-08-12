@@ -19,7 +19,7 @@
           </div>
         </ion-item>
         <ion-item-options side="start">
-          <ion-item-option color="tertiary" @click="markDone">
+          <ion-item-option color="tertiary" @click.stop="markDone">
             {{ _t('Mark done') }}
           </ion-item-option>
         </ion-item-options>

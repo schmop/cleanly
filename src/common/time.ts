@@ -1,4 +1,5 @@
 import { _n, _t, __t, } from "@/translation";
+import { Entries } from "@/types";
 
 export const DAY_IN_SECONDS = 60 * 60 * 24;
 export const DAY_IN_HOURS = 24;
@@ -14,14 +15,14 @@ export const DAY_FORMATTING_SIZES: { [durationName: string]: number } = {
     years: 365,
 };
 
-export const HOUR_FORMATTING_SIZES: { [durationName: string]: number } = {
+export const HOUR_FORMATTING_SIZES = {
     hours: 1,
     days: 24,
     months: 24 * 30,
     years: 24 * 365,
 };
 
-export const DURATION_SIZES: { [durationName: string]: number } = {
+export const DURATION_SIZES = {
     days: 1,
     weeks: 7,
     months: 30,
@@ -37,15 +38,20 @@ function pluralToSingular(timeName: string): string {
 function formatInterval(someTime: number, someDurations: { [durationName: string]: number }, maxDepth = Infinity): string {
     let string = '';
     const sortedDurations = Object.entries(someDurations).sort(([, a], [, b]) => b - a);
+    let depth = 0;
 
-    sortedDurations.forEach(([name, duration]) => {
+    for (const [name, duration] of sortedDurations) {
         const num = Math.floor(someTime / duration);
         if (num > 0) {
             someTime = someTime % duration;
 
             string += `${num} ${_n(pluralToSingular(name), name, num)} `;
         }
-    });
+        depth++;
+        if (depth >= maxDepth) {
+            break;
+        }
+    }
 
     if ('' === string) {
         const smallestDurationName = sortedDurations[sortedDurations.length - 1][0];
@@ -54,6 +60,23 @@ function formatInterval(someTime: number, someDurations: { [durationName: string
     }
 
     return string;
+}
+
+export function exactRecurringInterval(days: number): {times: number, format: keyof typeof DURATION_SIZES} {
+    const sortedDurations = Object.entries(DURATION_SIZES).sort(([, a], [, b]) => b - a) as Entries<typeof DURATION_SIZES>;
+    for (const [name, duration] of sortedDurations) {
+        if (days >= duration && days % duration === 0) {
+            return {
+                times: days / duration,
+                format: name,
+            }
+        }
+    }
+
+    return {
+        times: days,
+        format: 'days',
+    };
 }
 
 export function formatHours(hours: number, maxDepth = 2): string {

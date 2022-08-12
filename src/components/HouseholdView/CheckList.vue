@@ -112,12 +112,13 @@ function reorder(event: ItemReorderCustomEvent) {
     const { from, to } = event.detail;
     const todo = todos.value[from];
     const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? undefined;
+    console.log(insertBeforeUuid);
     addToQueue({
         type: 'sort',
         uuid: todo.uuid,
         data: insertBeforeUuid,
     });
-    todos = event.detail.complete(todos.value);
+    todos.value = event.detail.complete(todos.value);
 }
 async function addTodo() {
     const todo: Todo = { uuid: uuid4(), content: '' };

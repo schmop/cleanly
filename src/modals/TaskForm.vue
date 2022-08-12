@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        {{ _t('Add Task') }}
+        {{ isEditing ? __t('Edit task') : _t('Add task') }}
         <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
+import { computed, inject, Ref, ref } from "vue";
 import {
   addCircleOutline,
   closeCircleOutline,
@@ -65,11 +65,10 @@ import {
   pickerController,
 } from "@ionic/vue";
 import icons from "../components/icons";
-import { DURATION_SIZES } from "../common/time";
+import { DURATION_SIZES, exactRecurringInterval } from '../common/time';
 import { _t, __t } from "../translation";
 import { Task } from '../models/Task';
 import IconPicker from "./IconPicker.vue";
-import { container } from "@/dependency-injection/container";
 import { taskClientSymbol } from "@/dependency-injection/injection-keys";
 
 const props = defineProps<{
@@ -79,7 +78,7 @@ const props = defineProps<{
 const taskClient = inject(taskClientSymbol)!;
 
 const durationModifiers = DURATION_SIZES;
-const durationModifier = ref('days');
+const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
 const duration = ref(1);
 const icon = ref('checkmark');
 const taskName = ref('');
@@ -110,19 +109,25 @@ function dismiss() {
   modalController.dismiss();
 }
 async function openDurationPicker() {
+  const countOptions = [...Array(100).keys()]
+          .filter((val) => val)
+          .map((index) => ({ text: `${index}`, value: index }));
+  const countSelectedIndex = countOptions.findIndex(count => count.value === duration.value);
+  const modifierOptions = Object.entries(durationModifiers).map(
+    ([text]) => ({ text: _t(text), value: text , selected: text === durationModifier.value})
+  );
+  const modifierSelectedIndex = modifierOptions.findIndex(modifier => modifier.value === durationModifier.value);
   const picker = await pickerController.create({
     columns: [
       {
         name: "count",
-        options: [...Array(100).keys()]
-          .filter((val) => val)
-          .map((index) => ({ text: `${index}`, value: index })),
+        selectedIndex: countSelectedIndex,
+        options: countOptions,
       },
       {
         name: "modifier",
-        options: Object.entries(durationModifiers).map(
-          ([text, value]) => ({ text, value })
-        ),
+        selectedIndex: modifierSelectedIndex,
+        options: modifierOptions,
       },
     ],
     buttons: [
@@ -131,10 +136,10 @@ async function openDurationPicker() {
         role: "cancel",
       },
       {
-        text: "Confirm",
+        text: _t("Confirm"),
         handler: ({ count, modifier }) => {
           duration.value = count.value;
-          durationModifier.value = modifier.text;
+          durationModifier.value = modifier.value;
         },
       },
     ],
@@ -155,7 +160,9 @@ if (null == props.id && null == props.task) {
 }
 if (isEditing.value) {
   taskName.value = props.task!.name;
-  duration.value = props.task!.duration;
+  const recurring = exactRecurringInterval(props.task!.duration);
+  duration.value = recurring.times;
+  durationModifier.value = recurring.format;
   icon.value = props.task!.icon;
 }
 </script>

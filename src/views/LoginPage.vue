@@ -28,12 +28,23 @@
       <ion-item-group>
         <ion-item>
           <ion-label position="stacked">{{ _t('Register') }}</ion-label>
-          <!-- 
+          <!--
             The timestamped key fixes the infinite update loop when programmatically setting the toggle value
             @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
           -->
           <ion-toggle ref="toggle" :key="isRegistering + (new Date()).toISOString()" @ionChange="onToggle"
             :checked="isRegistering" />
+          <ion-button
+            class="align-center"
+            slot="end"
+            target="_blank"
+            href="https://cleanly.schmoppo.de/reset-password"
+            fill="clear"
+            size="small"
+          >
+            <ion-icon class="mr-1" :icon="openOutline"/>
+            {{_t('Forgot password?')}}
+          </ion-button>
         </ion-item>
       </ion-item-group>
     </ion-footer>
@@ -41,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { logInOutline, personAddOutline } from "ionicons/icons";
+import { logInOutline, personAddOutline, openOutline } from "ionicons/icons";
 import { computed, inject, ref } from "vue";
 import toast from "@/toast";
 import {
@@ -53,6 +64,7 @@ import {
   IonContent,
   IonFooter,
   IonToggle,
+  IonButton,
   IonIcon,
 } from "@ionic/vue";
 import router from "@/router";
@@ -98,7 +110,7 @@ async function register() {
     retype.value = "";
     mail.value = "";
     isRegistering.value = false;
-    toast.info(_t("Register successful!"));
+    toast.info(_t("Verification mail was sent, please verify your mail address before you can log in!"));
   } catch (error: any) {
     toast.error(error.message + ', account may already exist');
   }
@@ -116,4 +128,10 @@ async function login() {
 </script>
 
 <style scoped>
+.mr-1 {
+  margin-right: 4px;
+}
+.align-center {
+  align-self: center;
+}
 </style>
