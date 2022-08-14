@@ -1,5 +1,15 @@
-# 1.4.4 - Aktuell
+# 1.5 - Aktuell
 Man kann die Sprache nun wechseln. Es stehen die Sprachen "Deutsch" und "Englisch" zur Verfügung.
+
+![Language settings](assets/changelog/language-settings.png)
+
+Es wurde ein Sternesystem eingeführt, mit dem Aufgaben im Wert gewichtet werden können.
+
+![Stars overview](assets/changelog/stars-overview.png)
+
+Dadurch können Mitglieder eine Übersicht darüber bekommen, wer wie viel in der Vergangenheit erledigt hat.
+
+![Stars member](assets/changelog/stars-member.png)
 
 # 1.4.2 - 12.08.2022
 Registrationen müssen ab sofort mit der bestätigung der E-Mail-Adresse abgeschlossen werden.
