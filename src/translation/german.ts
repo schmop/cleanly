@@ -98,5 +98,7 @@ export default {
     'Language': 'Sprache',
     'German': 'Deutsch',
     'English': 'Englisch',
+    'for': 'für',
+    'Stars': 'Sterne',
     '': '',
 } as { [english: string]: string };

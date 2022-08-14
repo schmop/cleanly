@@ -2,11 +2,42 @@
   <ion-card :class="{ 'danger': overdue }">
     <ion-card-header v-if="task">
       <ion-card-title>
-        <ion-icon :icon="icons[task.icon]" />
-        {{ task.name }}
-        <span class="small pull-right">
-          {{ durationText }}
-        </span>
+        <div>
+          <ion-icon :icon="icons[task.icon]" />
+          {{ task.name }}
+        </div>
+        <div class="center">
+          <span class="small row">
+            {{ durationText }}
+          </span>
+          <div class="flex-end row">
+          <ion-text color="warning">
+            {{ task.stars }}
+            <ion-icon :icon="starOutline" />
+          </ion-text>
+          <template v-if="isAdmin && showActions">
+            <ion-buttons>
+              <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
+                <ion-icon slot="icon-only" :icon="ellipsisVertical" />
+              </ion-button>
+            </ion-buttons>
+            <ion-popover :trigger="contextMenuId" dismiss-on-select>
+              <ion-content>
+                <ion-list>
+                  <ion-item button @click="editTask" lines="none">
+                    <ion-icon slot="start" :icon="pencilOutline" />
+                    <ion-label> {{ _t('Edit task') }} </ion-label>
+                  </ion-item>
+                  <ion-item button @click="deleteTask" lines="none">
+                    <ion-icon slot="start" :icon="trashOutline" />
+                    <ion-label> {{ _t('Delete task') }} </ion-label>
+                  </ion-item>
+                </ion-list>
+              </ion-content>
+            </ion-popover>
+          </template>
+          </div>
+        </div>
       </ion-card-title>
     </ion-card-header>
     <ion-card-content class="flex">
@@ -24,38 +55,18 @@
           </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
-      <template v-if="isAdmin && showActions">
-        <ion-buttons slot="end">
-          <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
-            <ion-icon slot="icon-only" :icon="ellipsisVertical" />
-          </ion-button>
-        </ion-buttons>
-        <ion-popover :trigger="contextMenuId" dismiss-on-select>
-          <ion-content>
-            <ion-list>
-              <ion-item button @click="editTask" lines="none">
-                <ion-icon slot="start" :icon="pencilOutline" />
-                <ion-label> {{ _t('Edit task') }} </ion-label>
-              </ion-item>
-              <ion-item button @click="deleteTask" lines="none">
-                <ion-icon slot="start" :icon="trashOutline" />
-                <ion-label> {{ _t('Delete task') }} </ion-label>
-              </ion-item>
-            </ion-list>
-          </ion-content>
-        </ion-popover>
-      </template>
     </ion-card-content>
   </ion-card>
 </template>
 
 <script setup lang="ts">
 import { ref, inject, computed, Ref } from 'vue';
-import { ellipsisVertical, trashOutline, pencilOutline } from "ionicons/icons";
+import { ellipsisVertical, trashOutline, pencilOutline, starOutline } from "ionicons/icons";
 import {
   IonLabel,
   IonItem,
   IonContent,
+  IonText,
   IonIcon,
   IonButton,
   IonButtons,
@@ -112,7 +123,7 @@ const dueInText = computed(() => {
   return __t('{0} left', formatHours(hoursLeft));
 });
 
-const slidingButton: Ref<typeof IonItemSliding|null> = ref(null);
+const slidingButton: Ref<typeof IonItemSliding | null> = ref(null);
 
 async function deleteTask() {
   if (props.task.id != null) {
@@ -142,6 +153,10 @@ async function markDone() {
     try {
       const newTimestamp = await taskClient.markTaskComplete(props.task.id);
       store.markTaskDone(props.task.id, newTimestamp);
+      const householdId = household.value?.id;
+      if (null != householdId) {
+        householdClient.retrieveStars(householdId);
+      }
     } catch (err) {
       if (err instanceof Error) {
         toast.error(err.message);
@@ -191,7 +206,24 @@ async function markDone() {
   font-size: medium;
 }
 
-.pull-right {
-  float: right;
+.flex-start {
+  align-self: flex-start;
+}
+
+.flex-end {
+  align-self: flex-end;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
 }
 </style>

@@ -11,6 +11,10 @@
           <i>{{ task.name }}</i>
         </ion-text>
         {{ relativeInterval }}
+        {{_t('for')}}
+        <ion-text color="warning">
+          <i>{{task.stars}} <ion-icon :icon="starOutline"/></i>
+        </ion-text>
       </ion-card-title>
     </ion-card-header>
   </ion-card>
@@ -30,6 +34,7 @@ import { _t, __t } from "@/translation";
 import { TaskLog } from '../models/TaskLog';
 import { formatHours, secondsSince } from "@/common/time";
 import { HOUR_IN_SECONDS } from '../common/time';
+import { starOutline } from "ionicons/icons";
 
 
 const props = defineProps<{
@@ -47,7 +52,7 @@ const userName = computed(() => {
 const relativeInterval = computed(() => {
   const hoursSinceDone = secondsSince(props.log.timestamp) / HOUR_IN_SECONDS;
   if (hoursSinceDone < 1) {
-    return _t('just now'); 
+    return _t('just now');
   }
   return __t('{0} ago', formatHours(hoursSinceDone));
 });
