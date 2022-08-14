@@ -8,4 +8,5 @@ export interface Task {
     lastComplete?: number | null, // unix timestamp in seconds
     duration: number, // in days
     assignedTo: User,
+    stars: number,
 }

@@ -10,7 +10,7 @@
   <ion-content color="light" @keypress.enter="submit()">
     <ion-item-group>
       <ion-item>
-        <ion-label position="stacked">Name</ion-label>
+        <ion-label position="stacked">{{_t('Name')}}</ion-label>
         <ion-input type="text" v-model="taskName" />
         <ion-icon :icon="pencilOutline" slot="end" class="align-center" />
       </ion-item>
@@ -23,6 +23,11 @@
       <ion-item button @click="iconPicker" lines="full">
         <ion-text>{{ icon }}</ion-text>
         <ion-icon slot="end" :icon="icons[icon]" />
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">{{_t('Stars')}}</ion-label>
+        <ion-input type="number" v-model="stars" />
+        <ion-icon :icon="starOutline" slot="end" class="align-center" />
       </ion-item>
     </ion-item-group>
   </ion-content>
@@ -47,6 +52,7 @@ import {
   closeCircleOutline,
   timeOutline,
   pencilOutline,
+starOutline,
 } from "ionicons/icons";
 import {
   IonLabel,
@@ -82,6 +88,7 @@ const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
 const duration = ref(1);
 const icon = ref('checkmark');
 const taskName = ref('');
+const stars = ref('0');
 
 const valid = computed(() => icon.value in icons);
 const calculatedDuration = computed(() => duration.value * durationModifiers[durationModifier.value]);
@@ -148,9 +155,9 @@ async function openDurationPicker() {
 }
 async function submit() {
   if (isEditing.value) {
-    await taskClient.editTask(props.task!, taskName.value, icon.value, calculatedDuration.value);
+    await taskClient.editTask(props.task!, taskName.value, icon.value, calculatedDuration.value, parseInt(stars.value));
   } else {
-    await taskClient.addNewTask(props.id!, taskName.value, icon.value, calculatedDuration.value);
+    await taskClient.addNewTask(props.id!, taskName.value, icon.value, calculatedDuration.value, parseInt(stars.value));
   }
   dismiss();
 }
@@ -164,5 +171,17 @@ if (isEditing.value) {
   duration.value = recurring.times;
   durationModifier.value = recurring.format;
   icon.value = props.task!.icon;
+  stars.value = props.task!.stars.toString();
 }
 </script>
+
+<style>
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>

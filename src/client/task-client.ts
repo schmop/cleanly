@@ -8,12 +8,13 @@ export class TaskClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
-    async addNewTask(householdId: number, taskname: string, icon: string, duration: number) {
+    async addNewTask(householdId: number, taskname: string, icon: string, duration: number, stars: number) {
         const formData = new FormData();
         formData.append('name', taskname);
         formData.append('household_id', householdId.toString());
         formData.append('icon', icon);
         formData.append('duration', duration.toString());
+        formData.append('stars', stars.toString());
         const response = await this.client.request('api/task/create', {
             body: formData,
             method: 'POST',
@@ -22,11 +23,12 @@ export class TaskClient {
         return response.status === 200;
     }
 
-    async editTask(task: Task, taskname: string, icon: string, duration: number) {
+    async editTask(task: Task, taskname: string, icon: string, duration: number, stars: number) {
         const formData = new FormData();
         formData.append('name', taskname);
         formData.append('icon', icon);
         formData.append('duration', duration.toString());
+        formData.append('stars', stars.toString());
         const response = await this.client.request(`api/task/edit/${task.id}`, {
             body: formData,
             method: 'POST',
@@ -66,7 +68,7 @@ export class TaskClient {
             const task = household.tasks.find((task) => task.id === log.task);
             if (null == task) {
                 console.warn(
-                    "Tasklog found, that doesn't not belong to a task!", 
+                    "Tasklog found, that doesn't not belong to a task!",
                     log.task,
                 );
                 return []; // ignore

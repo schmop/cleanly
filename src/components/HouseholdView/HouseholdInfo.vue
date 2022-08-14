@@ -29,6 +29,10 @@
                     <ion-badge color="dark" slot="end" v-if="admin === member.id">
                         {{ _t('Admin') }}
                     </ion-badge>
+                    <ion-badge slot="end" color="warning" class="vertical-center">
+                        <ion-text>{{stars[member.id] ?? 0}}</ion-text>
+                        <ion-icon class="ml-1" :icon="starOutline"/>
+                    </ion-badge>
                 </ion-item>
             </ion-list>
         </ion-content>
@@ -41,6 +45,7 @@ import {
     IonPage,
     IonList,
     IonIcon,
+    IonText,
     IonItem,
     IonListHeader,
     menuController,
@@ -51,14 +56,13 @@ import {
 } from "@ionic/vue";
 import TaskForm from "@/modals/TaskForm.vue";
 import InviteModal from "@/modals/InviteModal.vue";
-import { taskSortByPriority } from "@/common/task-priority";
 import { _t } from "@/translation";
-import { addCircleOutline, cogOutline, personAddOutline, personOutline, trashOutline, walkOutline } from "ionicons/icons";
+import { addCircleOutline, cogOutline, personAddOutline, personOutline, trashOutline, walkOutline, starOutline } from "ionicons/icons";
 import { User } from "@/models/User";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 import toast from "@/toast";
 import router from "@/router";
-import { computed, inject } from "vue";
+import { computed, inject, onMounted, watch } from 'vue';
 import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 import { stateSymbol } from '../../dependency-injection/injection-keys';
 
@@ -68,7 +72,6 @@ const householdClient = inject(householdClientSymbol)!;
 
 const household = computed(() => getters.household.value);
 const user = computed(() => state.user);
-const tasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriority));
 const admin = computed(() => household.value?.admin);
 const members = computed(() => {
     if (null == household.value) {
@@ -85,6 +88,20 @@ const members = computed(() => {
     });
 });
 const isAdmin = computed(() => user.value != null && admin.value != null && user.value.id === admin.value);
+const stars = computed(() => getters.stars.value ?? {});
+
+watch(
+    household,
+    () => {
+        const householdId = household.value?.id;
+        if (null == householdId) {
+            console.warn('No household found');
+            return;
+        }
+        householdClient.retrieveStars(householdId);
+    },
+    {immediate: true}
+);
 
 async function openDeleteHouseholdPrompt() {
     if (null == isAdmin.value || null == household.value) {
@@ -195,5 +212,11 @@ async function openInviteModal(): Promise<void> {
 .autowidth {
     --width: unset;
     --min-width: 250px;
+}
+.vertical-center {
+    display: flex;
+}
+.ml-1 {
+    margin-left: 2px;
 }
 </style>

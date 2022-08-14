@@ -25,6 +25,7 @@ export class HouseholdClient {
         }
         const data = await response.json();
         this.store.dashboard(data.households, data.user, data.invites);
+        this.store.setSettings(data.settings);
     }
 
     async setHouseholdColor(householdId: number, color: string): Promise<boolean> {
@@ -76,7 +77,7 @@ export class HouseholdClient {
 
             return false;
         }
-        
+
         return true;
     }
 
@@ -90,7 +91,7 @@ export class HouseholdClient {
 
             return false;
         }
-        
+
         return true;
     }
 
@@ -104,7 +105,7 @@ export class HouseholdClient {
 
             return false;
         }
-        
+
         return true;
     }
 
@@ -118,8 +119,19 @@ export class HouseholdClient {
 
             return false;
         }
-        
+
         return true;
+    }
+
+    async retrieveStars(householdId: number) {
+        const response = await this.client.request(`api/household/${householdId}/stars`);
+        if (response.status !== 200) {
+            console.error('Could not fetch stars', response.statusText);
+
+            return null;
+        }
+
+        this.store.addStars(householdId, await response.json());
     }
 
     async invite(householdId: number, ...ids: number[]) {
@@ -144,7 +156,7 @@ export class HouseholdClient {
 
             return false;
         }
-        
+
         return true;
     }
 }

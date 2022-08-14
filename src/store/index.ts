@@ -7,6 +7,8 @@ import { TaskLog } from '@/models/TaskLog';
 import { reactive, computed, App, ComputedRef, InjectionKey } from 'vue';
 import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/injection-keys';
 import { UserSettings } from '@/models/UserSettings';
+import { HouseholdId, StarsRecord } from '@/types';
+import { UserId } from '../types/index';
 
 export class State {
     loggedIn = false;
@@ -22,6 +24,7 @@ export class State {
         notifyTaskDue: true,
         language: 'de',
     };
+    stars: Record<HouseholdId, StarsRecord> = {};
 }
 
 export type Getters = {
@@ -29,6 +32,7 @@ export type Getters = {
     householdById: (householdId: number) => undefined | Household,
     taskLogs: TaskLog[],
     household: undefined | Household,
+    stars: StarsRecord,
     tasks: Task[],
 };
 export type GetterFunctions = { [key in keyof Getters]: () => Getters[key] };
@@ -64,6 +68,14 @@ const getters: GetterFunctions = {
         }
 
         return store.getters.householdById.value(viewedHousehold);
+    },
+    stars: (): StarsRecord => {
+        const { viewedHousehold } = store.state;
+        if (null === viewedHousehold) {
+            return {};
+        }
+
+        return store.state.stars[viewedHousehold];
     },
     tasks: (): Task[] => {
         return store.getters.household.value?.tasks ?? [];
@@ -139,6 +151,13 @@ export class Store {
         this.state.households = households;
         this.state.user = user;
         this.state.invites = invites;
+    }
+    addStars(householdId: number, entries: {user: UserId, stars: number}[]) {
+        const householdStars: StarsRecord = {};
+        entries.forEach(({user, stars}) => {
+            householdStars[user] = stars;
+        });
+        this.state.stars[householdId] = householdStars;
     }
     removeInvite(inviteToRemove: Invite) {
         this.state.invites = this.state.invites.filter(invite => invite !== inviteToRemove);
