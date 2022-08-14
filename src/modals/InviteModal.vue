@@ -100,7 +100,6 @@ const search = debounce(async () => {
     );
   }
   suggestions.value = newSuggestions;
-  console.log()
 }, 250, true);
 
 watch(

@@ -46,8 +46,8 @@ function formatInterval(someTime: number, someDurations: { [durationName: string
             someTime = someTime % duration;
 
             string += `${num} ${_n(pluralToSingular(name), name, num)} `;
+            depth++;
         }
-        depth++;
         if (depth >= maxDepth) {
             break;
         }

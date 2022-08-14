@@ -1,4 +1,7 @@
-# 1.4.2 - Aktuell
+# 1.4.4 - Aktuell
+Man kann die Sprache nun wechseln. Es stehen die Sprachen "Deutsch" und "Englisch" zur Verfügung.
+
+# 1.4.2 - 12.08.2022
 Registrationen müssen ab sofort mit der bestätigung der E-Mail-Adresse abgeschlossen werden.
 
 Benachrichtigungseinstellungen hinzugefügt, die einem erlauben Push-Benachrichtigungen für explizite Ereignisse feingranular zu deaktivieren.

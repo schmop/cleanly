@@ -95,5 +95,8 @@ export default {
     'Invited to a household': 'Einladungen zu Haushalten',
     'Change password': 'Passwort ändern',
     'Forgot password?': 'Passwort vergessen?',
+    'Language': 'Sprache',
+    'German': 'Deutsch',
+    'English': 'Englisch',
     '': '',
 } as { [english: string]: string };

@@ -31,6 +31,12 @@
                 {{ _t('Invited to a household') }}
               </ion-label>
             </ion-item>
+            <ion-item>
+              <ion-select @ionChange="changeLanguage" :placeholder="_t('Language')" interface="popover">
+                <ion-select-option value="de">{{_t('German')}}</ion-select-option>
+                <ion-select-option value="en">{{_t('English')}}</ion-select-option>
+              </ion-select>
+            </ion-item>
           </ion-item-group>
         </ion-card-content>
       </ion-card>
@@ -58,12 +64,15 @@ import {
   IonIcon,
   IonToggle,
   IonLabel,
+  IonSelect,
+  IonSelectOption,
   IonButton,
   IonFooter,
   IonCardContent,
   IonItem,
   IonCardTitle,
   IonItemGroup,
+SelectChangeEventDetail,
 } from "@ionic/vue";
 import { storeSymbol } from "@/dependency-injection/injection-keys";
 import { _t } from '../translation/index';
@@ -80,12 +89,14 @@ const router = useRouter();
 const notifyTaskDue = ref(true);
 const notifyTaskDone = ref(true);
 const notifyInvites = ref(true);
+const language = ref('de');
 
 function resetUiToStore() {
   const settings = store.state.userSettings;
   notifyTaskDue.value = settings.notifyTaskDue;
   notifyTaskDone.value = settings.notifyTaskDone;
   notifyInvites.value = settings.notifyInvites;
+  language.value = settings.language;
 }
 
 watch(store.state.userSettings, () => {
@@ -104,12 +115,17 @@ function toggleNotifyInvites() {
   notifyInvites.value = !notifyInvites.value;
 }
 
+function changeLanguage(event: CustomEvent<SelectChangeEventDetail>) {
+  language.value = event.detail.value;
+}
+
 async function save() {
   try {
     const newSettings: UserSettings = {
       notifyInvites: notifyInvites.value,
       notifyTaskDone: notifyTaskDone.value,
       notifyTaskDue: notifyTaskDue.value,
+      language: language.value,
     };
     await userClient.saveUserSettings(newSettings);
     store.setSettings(newSettings);

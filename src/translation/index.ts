@@ -1,4 +1,7 @@
+import { container } from '@/dependency-injection/container';
 import german from './german';
+
+const state = container.getStore().state;
 
 function formatString(string: string, ...args: (string|number)[]) {
     return string.replace(/{([0-9]+)}/g, (match, index) => {
@@ -6,7 +9,14 @@ function formatString(string: string, ...args: (string|number)[]) {
     });
 }
 
+function language(): string {
+    return state?.userSettings.language ?? 'de';
+}
+
 export function _t(text: string) {
+    if (language() !== 'de') {
+        return text;
+    }
     if (!(text in german)) {
         console.warn('Untranslated text', text);
 

@@ -89,9 +89,9 @@ const state = inject(stateSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
-const households = computed(() => state.households);
+const household = computed(() => state.households.find((h: Household) => h.tasks.includes(props.task)));
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
-const isAdmin = computed(() => households.value.find((h: Household) => h.tasks.includes(props.task)));
+const isAdmin = computed(() => household.value?.admin === state.user?.id);
 const progress = computed(() => taskProgress(props.task));
 const progressStyle = computed(() => `width: ${progress.value * 100}%`);
 const overdue = computed(() => taskOverDue(props.task));

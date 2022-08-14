@@ -20,6 +20,7 @@ export class State {
         notifyInvites: true,
         notifyTaskDone: true,
         notifyTaskDue: true,
+        language: 'de',
     };
 }
 
