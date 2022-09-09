@@ -1,4 +1,14 @@
-# 1.5 - Aktuell
+# 1.5.1 - Aktuell
+
+Beim Erledigen einer Aufgabe wurde die Wischgeste mit einem Antippen ersetzt.
+
+![Mark done swipe](assets/changelog/mark-done-swipe.png)
+
+Neue Aufgaben können aus der Aufgabenübersicht heraus erstellt werden.
+
+![Create tasks](assets/changelog/new-task-from-overview.png)
+
+# 1.5 - 15.08.2022
 Man kann die Sprache nun wechseln. Es stehen die Sprachen "Deutsch" und "Englisch" zur Verfügung.
 
 ![Language settings](assets/changelog/language-settings.png)
@@ -20,7 +30,7 @@ Benachrichtigungseinstellungen hinzugefügt, die einem erlauben Push-Benachricht
 
 Man wird nun benachrichtigt, wenn Aufgaben dringend werden.
 
-Kleinere Bugfixes:
+Kleinere Fehlerbehebungen:
 * "Aufgabe bearbeiten" repariert.
 * Die Checkliste kann wieder sortiert werden.
 

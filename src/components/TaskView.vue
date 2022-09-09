@@ -1,60 +1,62 @@
 <template>
-  <ion-card :class="{ 'danger': overdue }">
+  <ion-card class="focus-no-highlight" :class="{ 'danger': overdue }" @click="toggleActions" tabindex="-1"
+    @blur.capture="closeActions">
     <ion-card-header v-if="task">
       <ion-card-title>
         <div>
           <ion-icon :icon="icons[task.icon]" />
-          {{ task.name }}
+          {{  task.name  }}
         </div>
         <div class="center">
           <span class="small row">
-            {{ durationText }}
+            {{  durationText  }}
           </span>
           <div class="flex-end row">
-          <ion-text color="warning">
-            {{ task.stars }}
-            <ion-icon :icon="starOutline" />
-          </ion-text>
-          <template v-if="isAdmin && showActions">
-            <ion-buttons>
-              <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
-                <ion-icon slot="icon-only" :icon="ellipsisVertical" />
-              </ion-button>
-            </ion-buttons>
-            <ion-popover :trigger="contextMenuId" dismiss-on-select>
-              <ion-content>
-                <ion-list>
-                  <ion-item button @click="editTask" lines="none">
-                    <ion-icon slot="start" :icon="pencilOutline" />
-                    <ion-label> {{ _t('Edit task') }} </ion-label>
-                  </ion-item>
-                  <ion-item button @click="deleteTask" lines="none">
-                    <ion-icon slot="start" :icon="trashOutline" />
-                    <ion-label> {{ _t('Delete task') }} </ion-label>
-                  </ion-item>
-                </ion-list>
-              </ion-content>
-            </ion-popover>
-          </template>
+            <ion-text color="warning">
+              {{  task.stars  }}
+              <ion-icon :icon="starOutline" />
+            </ion-text>
+            <template v-if="isAdmin && showActions">
+              <ion-buttons>
+                <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
+                  <ion-icon slot="icon-only" :icon="ellipsisVertical" />
+                </ion-button>
+              </ion-buttons>
+              <ion-popover :trigger="contextMenuId" dismiss-on-select>
+                <ion-content>
+                  <ion-list>
+                    <ion-item button @click="editTask" lines="none">
+                      <ion-icon slot="start" :icon="pencilOutline" />
+                      <ion-label> {{  _t('Edit task')  }} </ion-label>
+                    </ion-item>
+                    <ion-item button @click="deleteTask" lines="none">
+                      <ion-icon slot="start" :icon="trashOutline" />
+                      <ion-label> {{  _t('Delete task')  }} </ion-label>
+                    </ion-item>
+                  </ion-list>
+                </ion-content>
+              </ion-popover>
+            </template>
           </div>
         </div>
       </ion-card-title>
     </ion-card-header>
     <ion-card-content class="flex">
-      <ion-item-sliding ref="slidingButton">
-        <ion-item lines="none">
-          <div class="progress-background soft">
-            <div class="progress" :style="progressStyle">
-              {{ dueInText }}
-            </div>
+      <div class="w-100">
+        <div class="progress-background soft">
+          <div class="progress" :style="progressStyle">
+            {{  dueInText  }}
           </div>
-        </ion-item>
-        <ion-item-options side="start">
-          <ion-item-option color="tertiary" @click.stop="markDone">
-            {{ _t('Mark done') }}
-          </ion-item-option>
-        </ion-item-options>
-      </ion-item-sliding>
+        </div>
+      </div>
+      <transition name="actions">
+        <div class="w-100" v-show="actionsVisible">
+          <ion-button expand="block" color="tertiary" @click.stop="markDone">
+            {{  _t('Mark done')  }}
+          </ion-button>
+        </div>
+      </transition>
+
     </ion-card-content>
   </ion-card>
 </template>
@@ -73,8 +75,6 @@ import {
   IonList,
   IonItemSliding,
   IonPopover,
-  IonItemOption,
-  IonItemOptions,
   IonCard,
   IonCardHeader,
   IonCardTitle,
@@ -100,6 +100,8 @@ const state = inject(stateSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
+let actionsVisible = ref(false);
+
 const household = computed(() => state.households.find((h: Household) => h.tasks.includes(props.task)));
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
 const isAdmin = computed(() => household.value?.admin === state.user?.id);
@@ -123,8 +125,6 @@ const dueInText = computed(() => {
   return __t('{0} left', formatHours(hoursLeft));
 });
 
-const slidingButton: Ref<typeof IonItemSliding | null> = ref(null);
-
 async function deleteTask() {
   if (props.task.id != null) {
     await taskClient.deleteTask(props.task.id);
@@ -144,13 +144,8 @@ async function editTask() {
 }
 async function markDone() {
   if (props.task.id != null) {
-    if (null == slidingButton.value) {
-      console.error('Could not close sliding button, the button vanished!');
-      toast.error('Could not close sliding button, the button vanished!');
-      return;
-    }
-    slidingButton.value.$el.close();
     try {
+      actionsVisible.value = false;
       const newTimestamp = await taskClient.markTaskComplete(props.task.id);
       store.markTaskDone(props.task.id, newTimestamp);
       const householdId = household.value?.id;
@@ -162,14 +157,46 @@ async function markDone() {
         toast.error(err.message);
       }
     }
-
   }
 }
+function toggleActions(event: MouseEvent) {
+  if (!props.showActions) {
+    return;
+  }
+  actionsVisible.value = !actionsVisible.value;
+  const card = event.currentTarget;
+  if ((card instanceof HTMLElement)) {
+    card.focus();
+  }
+}
+
+function closeActions(event: FocusEvent) {
+  const card = event.currentTarget;
+  const target = event.relatedTarget;
+  if (!(card instanceof HTMLElement)) {
+    return;
+  }
+  if (target instanceof HTMLElement && card.contains(target as HTMLElement)) {
+    return;
+  }
+
+  actionsVisible.value = false;
+}
+
 </script>
 
 <style scoped>
+.focus-no-highlight:focus-visible {
+  outline: none;
+}
+
 .flex {
   display: flex;
+  flex-direction: column;
+}
+
+.w-100 {
+  width: 100%;
 }
 
 .progress {
@@ -190,8 +217,8 @@ async function markDone() {
 
 .progress-background {
   border-radius: 4px;
+  margin: 4px 2px 4px 2px;
   background-color: rgb(100, 21, 21);
-  width: 100%;
 }
 
 .progress-background.soft {
@@ -225,5 +252,23 @@ async function markDone() {
   align-items: center;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.actions-move,
+/* apply transition to moving elements */
+.actions-enter-active,
+.actions-leave-active {
+  transition: all 0.25s ease;
+}
+
+.actions-enter-from,
+.actions-leave-to {
+  opacity: 0;
+  height: 0;
+}
+
+.actions-enter-to,
+.actions-leave-from {
+  height: 44px;
 }
 </style>
