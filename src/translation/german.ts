@@ -100,5 +100,12 @@ export default {
     'English': 'Englisch',
     'for': 'für',
     'Stars': 'Sterne',
+    'Task edited successfully': 'Aufgabe erfolgreich bearbeitet',
+    'Could not edit task': 'Konnte Aufgabe nicht bearbeiten',
+    'Task created successfully': 'Aufgabe erfolgreich angelegt',
+    'Could not add task': 'Konnte Aufgabe nicht anlegen',
+    'Task done': 'Aufgabe erledigt',
+    'Task deleted successfully': 'Aufgabe erfolgreich gelöscht',
+    'Could not delete task': 'Konnte Aufgabe nicht löschen',
     '': '',
 } as { [english: string]: string };

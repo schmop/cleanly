@@ -8,6 +8,8 @@ Neue Aufgaben können aus der Aufgabenübersicht heraus erstellt werden.
 
 ![Create tasks](assets/changelog/new-task-from-overview.png)
 
+Interaktionen mit Aufgaben (Erstellen, Erledigen, Löschen, Editieren) geben (Miss-)Erfolgsrückmeldung.
+
 # 1.5 - 15.08.2022
 Man kann die Sprache nun wechseln. Es stehen die Sprachen "Deutsch" und "Englisch" zur Verfügung.
 

@@ -20,7 +20,9 @@ export class TaskClient {
             method: 'POST',
         });
 
-        return response.status === 200;
+        if (response.status !== 200) {
+            throw new Error('Could not create task, ' + response.statusText);
+        }
     }
 
     async editTask(task: Task, taskname: string, icon: string, duration: number, stars: number) {
@@ -34,7 +36,9 @@ export class TaskClient {
             method: 'POST',
         });
 
-        return response.status === 200;
+        if (response.status !== 200) {
+            throw new Error('Could not edit task, ' + response.statusText);
+        }
     }
 
     async deleteTask(taskId: string) {
@@ -42,7 +46,9 @@ export class TaskClient {
             method: 'DELETE',
         });
 
-        return response.status === 200;
+        if (response.status !== 200) {
+            throw new Error('Could not delete task, ' + response.statusText);
+        }
     }
 
     async fetchTaskLog(householdId: number): Promise<void> {

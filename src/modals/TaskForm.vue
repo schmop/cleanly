@@ -52,7 +52,7 @@ import {
   closeCircleOutline,
   timeOutline,
   pencilOutline,
-starOutline,
+  starOutline,
 } from "ionicons/icons";
 import {
   IonLabel,
@@ -76,6 +76,7 @@ import { _t, __t } from "../translation";
 import { Task } from '../models/Task';
 import IconPicker from "./IconPicker.vue";
 import { taskClientSymbol } from "@/dependency-injection/injection-keys";
+import toast from "@/toast";
 
 const props = defineProps<{
   id?: number,
@@ -117,11 +118,11 @@ function dismiss() {
 }
 async function openDurationPicker() {
   const countOptions = [...Array(100).keys()]
-          .filter((val) => val)
-          .map((index) => ({ text: `${index}`, value: index }));
+    .filter((val) => val)
+    .map((index) => ({ text: `${index}`, value: index }));
   const countSelectedIndex = countOptions.findIndex(count => count.value === duration.value);
   const modifierOptions = Object.entries(durationModifiers).map(
-    ([text]) => ({ text: _t(text), value: text , selected: text === durationModifier.value})
+    ([text]) => ({ text: _t(text), value: text, selected: text === durationModifier.value })
   );
   const modifierSelectedIndex = modifierOptions.findIndex(modifier => modifier.value === durationModifier.value);
   const picker = await pickerController.create({
@@ -155,9 +156,19 @@ async function openDurationPicker() {
 }
 async function submit() {
   if (isEditing.value) {
-    await taskClient.editTask(props.task!, taskName.value, icon.value, calculatedDuration.value, parseInt(stars.value));
+    try {
+      await taskClient.editTask(props.task!, taskName.value, icon.value, calculatedDuration.value, parseInt(stars.value));
+      toast.success(_t('Task edited successfully'));
+    } catch (e) {
+      toast.error(_t('Could not edit task'));
+    }
   } else {
-    await taskClient.addNewTask(props.id!, taskName.value, icon.value, calculatedDuration.value, parseInt(stars.value));
+    try {
+      await taskClient.addNewTask(props.id!, taskName.value, icon.value, calculatedDuration.value, parseInt(stars.value));
+      toast.success(_t('Task created successfully'));
+    } catch (e) {
+      toast.error(_t('Could not add task'));
+    }
   }
   dismiss();
 }
@@ -179,6 +190,7 @@ if (isEditing.value) {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;

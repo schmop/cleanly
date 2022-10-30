@@ -5,15 +5,15 @@
       <ion-card-title>
         <div>
           <ion-icon :icon="icons[task.icon]" />
-          {{  task.name  }}
+          {{ task.name }}
         </div>
         <div class="center">
           <span class="small row">
-            {{  durationText  }}
+            {{ durationText }}
           </span>
           <div class="flex-end row">
             <ion-text color="warning">
-              {{  task.stars  }}
+              {{ task.stars }}
               <ion-icon :icon="starOutline" />
             </ion-text>
             <template v-if="isAdmin && showActions">
@@ -27,11 +27,11 @@
                   <ion-list>
                     <ion-item button @click="editTask" lines="none">
                       <ion-icon slot="start" :icon="pencilOutline" />
-                      <ion-label> {{  _t('Edit task')  }} </ion-label>
+                      <ion-label> {{ _t('Edit task') }} </ion-label>
                     </ion-item>
                     <ion-item button @click="deleteTask" lines="none">
                       <ion-icon slot="start" :icon="trashOutline" />
-                      <ion-label> {{  _t('Delete task')  }} </ion-label>
+                      <ion-label> {{ _t('Delete task') }} </ion-label>
                     </ion-item>
                   </ion-list>
                 </ion-content>
@@ -45,14 +45,14 @@
       <div class="w-100">
         <div class="progress-background soft">
           <div class="progress" :style="progressStyle">
-            {{  dueInText  }}
+            {{ dueInText }}
           </div>
         </div>
       </div>
       <transition name="actions">
         <div class="w-100" v-show="actionsVisible">
           <ion-button expand="block" color="tertiary" @click.stop="markDone">
-            {{  _t('Mark done')  }}
+            {{ _t('Mark done') }}
           </ion-button>
         </div>
       </transition>
@@ -127,8 +127,13 @@ const dueInText = computed(() => {
 
 async function deleteTask() {
   if (props.task.id != null) {
-    await taskClient.deleteTask(props.task.id);
-    store.removeTask(props.task.id);
+    try {
+      await taskClient.deleteTask(props.task.id);
+      store.removeTask(props.task.id);
+      toast.success(_t('Task deleted successfully'));
+    } catch (e) {
+      toast.error(_t('Could not delete task'));
+    }
   }
 }
 async function editTask() {
@@ -148,6 +153,7 @@ async function markDone() {
       actionsVisible.value = false;
       const newTimestamp = await taskClient.markTaskComplete(props.task.id);
       store.markTaskDone(props.task.id, newTimestamp);
+      toast.success(_t('Task done'));
       const householdId = household.value?.id;
       if (null != householdId) {
         householdClient.retrieveStars(householdId);
