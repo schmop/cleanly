@@ -1,4 +1,4 @@
-# 1.5.1 - Aktuell
+# 1.6 - Aktuell
 
 Beim Erledigen einer Aufgabe wurde die Wischgeste mit einem Antippen ersetzt.
 
