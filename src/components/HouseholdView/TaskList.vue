@@ -1,9 +1,9 @@
 <template>
     <ion-page>
-        <ion-content>
-            <TaskView v-for="(task, index) in sortedTasks" :task="task" :key="index" :show-actions="true" />
+        <ion-content v-if="household">
+            <TaskView v-for="(task, index) in sortedTasks" :task="task" :household="household" :key="index" :show-actions="true" />
 
-            <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="isAdmin">
+            <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
                 <ion-fab-button @click="openTaskFormModal">
                     <ion-icon :icon="add" />
                 </ion-fab-button>
@@ -29,16 +29,12 @@ import { gettersSymbol, householdClientSymbol, stateSymbol } from "@/dependency-
 import TaskForm from '@/modals/TaskForm.vue';
 import { add } from 'ionicons/icons';
 
-const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 const household = computed(() => getters.household.value);
 const sortedTasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriority));
-const user = computed(() => state.user);
-const admin = computed(() => household.value?.admin);
-const isAdmin = computed(() => user.value != null && admin.value != null && user.value.id === admin.value);
-
+const canManageTasks = computed(() => getters.canManageTasks.value());
 
 async function openTaskFormModal(): Promise<void> {
     menuController.close("menu");

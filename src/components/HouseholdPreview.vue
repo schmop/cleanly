@@ -3,12 +3,12 @@
     <ion-card-header v-if="household">
       <ion-toolbar color="none">
         <ion-card-title>{{ household.name }}</ion-card-title>
-        <ion-buttons slot="primary" v-if="isAdmin">
+        <ion-buttons slot="primary" v-if="canManageTasks">
           <ion-button :id="editButtonId" @click.stop="() => {/** noop */ }">
             <ion-icon slot="icon-only" :icon="ellipsisVertical"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-popover :trigger="editButtonId" v-if="isAdmin" dismiss-on-select>
+        <ion-popover :trigger="editButtonId" v-if="canManageTasks" dismiss-on-select>
           <ion-content>
             <ion-list>
               <ion-item button @click="openTaskFormModal">
@@ -25,7 +25,7 @@
       </ion-toolbar>
     </ion-card-header>
     <ion-card-content>
-      <TaskView v-for="(task, index) in tasks" :task="task" :key="index" :show-actions="false" />
+      <TaskView v-for="(task, index) in tasks" :task="task" :household="props.household" :key="index" :show-actions="false" />
     </ion-card-content>
   </ion-card>
 </template>
@@ -60,6 +60,7 @@ import TaskForm from "@/modals/TaskForm.vue";
 import { taskSortByPriority } from "@/common/task-priority";
 import { stateSymbol, householdClientSymbol } from '../dependency-injection/injection-keys';
 import { _t } from '@/translation';
+import { HouseholdPrivilege, PrivilegeLevel } from '../models/HouseholdPrivilege';
 
 const props = defineProps<{
   household: Household
@@ -67,7 +68,9 @@ const props = defineProps<{
 const state = inject(stateSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
-const isAdmin = computed(() => props.household.admin === state.user?.id);
+const canManageTasks = computed(() => props.household.privileges.some(
+    (privilege: HouseholdPrivilege) => privilege.user === state.user?.id && privilege.privilege >= PrivilegeLevel.MODERATOR
+));
 const editButtonId = computed(() => `household-button-${props.household.id}`);
 const tasks = computed(() => props.household.tasks.concat().sort(taskSortByPriority).slice(0, 2));
 

@@ -20,7 +20,7 @@ export class AuthClient {
             return "https://cleanly.schmoppo.de";
         }
         //return "http://127.0.0.1:8000";
-        return "http://192.168.2.108:8000";
+        return "http://192.168.2.107:8000";
     }
 
     async restoreState(): Promise<void> {
@@ -41,10 +41,10 @@ export class AuthClient {
         this._refreshToken = refresh_token ?? this._refreshToken;
         this._mail = mail ?? this._mail;
         localStorage.setItem(
-            this.LOCALSTORAGE_STATE_KEY, 
-            JSON.stringify({ 
-                'mail': this._mail, 
-                'token': this._token, 
+            this.LOCALSTORAGE_STATE_KEY,
+            JSON.stringify({
+                'mail': this._mail,
+                'token': this._token,
                 'refresh_token': this._refreshToken
             })
         );

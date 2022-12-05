@@ -1,9 +1,17 @@
 <template>
     <ion-list>
         <ion-list-header>{{ __t('Actions for {0}', member?.name ?? '<unknown>') }}</ion-list-header>
-        <ion-item button @click="openTransferOwnership">
-            <ion-icon slot="start" :icon="returnUpForwardOutline" />
-            <ion-label>{{ _t('Transfer ownership') }}</ion-label>
+        <ion-item button @click="openPromoteToAdmin">
+            <ion-icon slot="start" :icon="arrowUpCircleOutline" />
+            <ion-label>{{ _t('Promote to admin') }}</ion-label>
+        </ion-item>
+        <ion-item button @click="openPromoteToModerator" v-if="memberPrivilege === PrivilegeLevel.USER">
+            <ion-icon slot="start" :icon="arrowUpCircleOutline" />
+            <ion-label>{{ _t('Promote to moderator') }}</ion-label>
+        </ion-item>
+        <ion-item button @click="openDemoteToUser" v-if="memberPrivilege === PrivilegeLevel.MODERATOR">
+            <ion-icon slot="start" :icon="arrowDownCircleOutline" />
+            <ion-label>{{ _t('Demote to user') }}</ion-label>
         </ion-item>
         <ion-item button @click="openKickMemberPrompt">
             <ion-icon slot="start" :icon="personRemoveOutline" />
@@ -13,38 +21,45 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, inject } from "vue";
-import {
-    IonList,
-    IonItem,
-    IonIcon,
-    IonLabel,
-    IonListHeader,
-    alertController,
-    popoverController,
-} from "@ionic/vue";
+import { gettersSymbol, householdClientSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
 import { Household } from "@/models/Household";
+import { PrivilegeLevel } from "@/models/HouseholdPrivilege";
 import { User } from "@/models/User";
-import { _t, __t } from "@/translation";
-import { personRemoveOutline, returnUpForwardOutline } from "ionicons/icons";
 import toast from "@/toast";
-import { householdClientSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
+import { _t, __t } from "@/translation";
+import {
+alertController, IonIcon, IonItem, IonLabel, IonList, IonListHeader, popoverController
+} from "@ionic/vue";
+import { arrowDownCircleOutline, arrowUpCircleOutline, personRemoveOutline } from "ionicons/icons";
+import { computed, inject } from "vue";
 
 const props = defineProps<{
     household: Household,
     member: User,
 }>();
 const state = inject(stateSymbol)!;
+const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 const user = computed(() => state.user);
+const memberPrivilege = computed(() => getters.privilege.value(props.member.id));
 
 async function dismiss(): Promise<boolean> {
     return popoverController.dismiss();
 }
-async function openTransferOwnership() {
+async function openDemoteToUser() {
+    return openChangePrivileges(_t('user'), PrivilegeLevel.USER);
+}
+async function openPromoteToModerator() {
+    return openChangePrivileges(_t('moderator'), PrivilegeLevel.MODERATOR);
+}
+async function openPromoteToAdmin() {
+    return openChangePrivileges(_t('admin'), PrivilegeLevel.ADMIN);
+}
+
+async function openChangePrivileges(nameLevel: string, level: PrivilegeLevel) {
     const alert = await alertController.create({
-        header: __t('Do you want to transfer ownership to {0}?', props.member.name),
+        header: __t('Do you want to make {0} {1}?', props.member.name, nameLevel),
         buttons: [
             {
                 text: _t('Ok'),
@@ -56,13 +71,13 @@ async function openTransferOwnership() {
     dismiss();
     await alert.present();
     if ((await alert.onDidDismiss()).role === 'confirm') {
-        if (await householdClient.transferOwnershipTo(props.member.id, props.household.id)) {
-            toast.success(__t('Successfully transfered ownership to {0}!', props.member.name));
+        if (await householdClient.changePrivilege(props.member.id, props.household.id, level)) {
+            toast.success(__t('Successfully changed privileges of {0}!', props.member.name));
             householdClient.dashboardInfo();
 
             return;
         }
-        await toast.error(_t('There was an error transfering ownership to another member!'));
+        await toast.error(_t('There was an error changing the privileges of a member!'));
     }
 }
 async function openKickMemberPrompt() {

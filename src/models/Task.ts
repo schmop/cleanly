@@ -1,12 +1,13 @@
 import {User} from "@/models/User";
 
+/** @see {isTask} ts-auto-guard:type-guard */
 export interface Task {
     name: string,
-    id: string,
+    id: number,
     icon: string,
-    color: string,
+    color?: string,
     lastComplete?: number | null, // unix timestamp in seconds
     duration: number, // in days
-    assignedTo: User,
+    assignedTo?: User,
     stars: number,
 }

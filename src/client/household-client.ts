@@ -2,10 +2,12 @@ import { Invite } from '@/models/Invite';
 import { AuthClient } from './auth-client';
 import { TodoEvent } from '@/models/TodoEvent';
 import { Store } from '@/store';
+import { error } from '@/toast';
+import { isDashboardInfo } from '@/models/DashboardInfo.guard';
+import { PrivilegeLevel } from '@/models/HouseholdPrivilege';
 
 export class HouseholdClient {
-    constructor(private readonly client: AuthClient, private readonly store: Store) {
-    }
+    constructor(private readonly client: AuthClient, private readonly store: Store) {}
 
     async createHousehold(newHouseholdName: string): Promise<boolean> {
         const formData = new FormData();
@@ -21,9 +23,15 @@ export class HouseholdClient {
     async dashboardInfo(): Promise<any> {
         const response = await this.client.request('api/dashboard');
         if (response.status !== 200) {
+            error("Could not authenticate!");
             throw new Error('Could not authenticate, code: ' + response.status);
         }
         const data = await response.json();
+        if (!isDashboardInfo(data)) {
+            error("Invalid dashboard data given, is your app out of date?");
+            console.error('Invalid data given:', data);
+            throw new Error('Invalid dashboard data given!');
+        }
         this.store.dashboard(data.households, data.user, data.invites);
         this.store.setSettings(data.settings);
     }
@@ -95,13 +103,13 @@ export class HouseholdClient {
         return true;
     }
 
-    async transferOwnershipTo(memberId: number, householdId: number) {
-        const response = await this.client.request(`api/household/transfer-ownership/${householdId}/${memberId}`, {
+    async changePrivilege(memberId: number, householdId: number, level: PrivilegeLevel) {
+        const response = await this.client.request(`api/household/privilege/${householdId}/${memberId}/${level}`, {
             method: 'POST',
         });
 
         if (response.status !== 200) {
-            console.error('Could not transfer ownership', response.statusText);
+            console.error('Could not change privileges', response.statusText);
 
             return false;
         }
@@ -115,12 +123,19 @@ export class HouseholdClient {
         });
 
         if (response.status !== 200) {
-            console.error('Could not leave household', response.statusText);
-
-            return false;
+            try {
+                const data = await response.json();
+                if (typeof data.reason !== 'string') {
+                    throw 'No reason known';
+                }
+                throw new Error(data.reason);
+            } catch (err: any) {
+                if (typeof err.message === 'string') {
+                    throw err;
+                }
+                throw new Error('Could not leave household');
+            }
         }
-
-        return true;
     }
 
     async retrieveStars(householdId: number) {

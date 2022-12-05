@@ -41,7 +41,7 @@ export class TaskClient {
         }
     }
 
-    async deleteTask(taskId: string) {
+    async deleteTask(taskId: number) {
         const response = await this.client.request(`api/task/${taskId}`, {
             method: 'DELETE',
         });
@@ -95,7 +95,7 @@ export class TaskClient {
     /**
      * @returns false on error, or the new timestamp of the now completed task
      */
-    async markTaskComplete(taskId: string): Promise<number> {
+    async markTaskComplete(taskId: number): Promise<number> {
         const response = await this.client.request(`api/task/mark-done/${taskId}`, {
             method: 'POST',
         });

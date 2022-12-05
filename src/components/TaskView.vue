@@ -16,7 +16,7 @@
               {{ task.stars }}
               <ion-icon :icon="starOutline" />
             </ion-text>
-            <template v-if="isAdmin && showActions">
+            <template v-if="canManageTasks && showActions">
               <ion-buttons>
                 <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
                   <ion-icon slot="icon-only" :icon="ellipsisVertical" />
@@ -56,7 +56,6 @@
           </ion-button>
         </div>
       </transition>
-
     </ion-card-content>
   </ion-card>
 </template>
@@ -89,22 +88,23 @@ import { DAY_IN_HOURS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, s
 import { _t, __t } from "@/translation";
 import { Household } from "@/models/Household";
 import toast from "@/toast";
-import { householdClientSymbol, stateSymbol, storeSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
+import { gettersSymbol, householdClientSymbol, stateSymbol, storeSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 
 const props = defineProps<{
   task: Task,
   showActions: boolean,
+  household: Household,
 }>();
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
+const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 let actionsVisible = ref(false);
 
-const household = computed(() => state.households.find((h: Household) => h.tasks.includes(props.task)));
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
-const isAdmin = computed(() => household.value?.admin === state.user?.id);
+const canManageTasks = computed(() => null !== state.user && getters.canManageTasks.value(state.user.id, props.household));
 const progress = computed(() => taskProgress(props.task));
 const progressStyle = computed(() => `width: ${progress.value * 100}%`);
 const overdue = computed(() => taskOverDue(props.task));
@@ -154,7 +154,7 @@ async function markDone() {
       const newTimestamp = await taskClient.markTaskComplete(props.task.id);
       store.markTaskDone(props.task.id, newTimestamp);
       toast.success(_t('Task done'));
-      const householdId = household.value?.id;
+      const householdId = props.household.id;
       if (null != householdId) {
         householdClient.retrieveStars(householdId);
       }

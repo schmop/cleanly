@@ -9,6 +9,7 @@ import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/
 import { UserSettings } from '@/models/UserSettings';
 import { HouseholdId, StarsRecord } from '@/types';
 import { UserId } from '../types/index';
+import { HouseholdPrivilege, PrivilegeLevel } from '@/models/HouseholdPrivilege';
 
 export class State {
     loggedIn = false;
@@ -32,6 +33,10 @@ export type Getters = {
     householdById: (householdId: number) => undefined | Household,
     taskLogs: TaskLog[],
     household: undefined | Household,
+    privileges:(household?: Household) => Record<UserId, PrivilegeLevel>,
+    privilege: (userId?: UserId, household?: Household) => PrivilegeLevel,
+    canManageTasks: (userId?: UserId, household?: Household) => boolean,
+    canManageHousehold: (userId?: UserId, household?: Household) => boolean,
     stars: StarsRecord,
     tasks: Task[],
 };
@@ -68,6 +73,34 @@ const getters: GetterFunctions = {
         }
 
         return store.getters.householdById.value(viewedHousehold);
+    },
+    privileges: () => (household?: Household): Record<UserId, PrivilegeLevel> => {
+        const usedHousehold = household ?? store.getters.household.value;
+        if (undefined === usedHousehold) {
+            return {};
+        }
+
+        return usedHousehold.privileges.reduce((accumulator, privilege: HouseholdPrivilege) => {
+            return Object.assign(accumulator, {[privilege.user]: privilege.privilege});
+        }, {});
+    },
+    privilege: () => (userId?: UserId, household?: Household): PrivilegeLevel => {
+        const user = userId ?? store.state.user?.id;
+        if (!user) {
+            return PrivilegeLevel.USER;
+        }
+
+        return store.getters.privileges.value(household)[user] ?? PrivilegeLevel.USER;
+    },
+    canManageTasks: () => (userId?: UserId, household?: Household): boolean => {
+        const privilege = store.getters.privilege.value(userId, household);
+
+        return privilege >= PrivilegeLevel.MODERATOR;
+    },
+    canManageHousehold: () => (userId?: UserId, household?: Household): boolean => {
+        const privilege = store.getters.privilege.value(userId, household);
+
+        return privilege === PrivilegeLevel.ADMIN;
     },
     stars: (): StarsRecord => {
         const { viewedHousehold } = store.state;
@@ -126,7 +159,7 @@ export class Store {
 
         this.state.taskLogs[householdId] = logs;
     }
-    removeTask(taskId: string) {
+    removeTask(taskId: number) {
         const household = this.state
             .households
             .find(
@@ -136,7 +169,7 @@ export class Store {
             household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
         }
     }
-    markTaskDone(taskId: string, timestamp: number) {
+    markTaskDone(taskId: number, timestamp: number) {
         const task = this.state
             .households
             .map((household: Household) => household.tasks)
