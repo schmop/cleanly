@@ -80,16 +80,10 @@ export class AuthClient {
     }
 
     async signUp(name: string, mail: string, password: string): Promise<void> {
-        const formData = new FormData();
-        formData.append('_name', name);
-        formData.append('_mail', mail);
-        formData.append('_password', password);
-        const response = await this.request(
+        const response = await this.sendJson(
             'signup',
-            {
-                body: formData,
-                method: 'POST',
-            },
+            {name, mail, password},
+            {method: 'POST'},
             false
         );
         if (response.status === 200) {
@@ -178,7 +172,7 @@ export class AuthClient {
         return await response.json();
     }
 
-    private async sendJson(endpoint: string, data: object, init: RequestInit, allowRetry = true): Promise<Response> {
+    async sendJson(endpoint: string, data: object, init: RequestInit, allowRetry = true): Promise<Response> {
         if (!(init.headers instanceof Headers)) {
             init.headers = new Headers(init.headers ?? {});
         }

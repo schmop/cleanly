@@ -8,33 +8,35 @@ export class TaskClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
-    async addNewTask(householdId: number, taskname: string, icon: string, duration: number, stars: number) {
-        const formData = new FormData();
-        formData.append('name', taskname);
-        formData.append('household_id', householdId.toString());
-        formData.append('icon', icon);
-        formData.append('duration', duration.toString());
-        formData.append('stars', stars.toString());
-        const response = await this.client.request('api/task/create', {
-            body: formData,
-            method: 'POST',
-        });
+    async addNewTask(householdId: number, name: string, icon: string, duration: number, stars: number) {
+        const response = await this.client.sendJson(
+            'api/task/create',
+            {
+                household_id: householdId,
+                name,
+                icon,
+                duration,
+                stars,
+            },
+            {method: 'POST'}
+        );
 
         if (response.status !== 200) {
             throw new Error('Could not create task, ' + response.statusText);
         }
     }
 
-    async editTask(task: Task, taskname: string, icon: string, duration: number, stars: number) {
-        const formData = new FormData();
-        formData.append('name', taskname);
-        formData.append('icon', icon);
-        formData.append('duration', duration.toString());
-        formData.append('stars', stars.toString());
-        const response = await this.client.request(`api/task/edit/${task.id}`, {
-            body: formData,
-            method: 'POST',
-        });
+    async editTask(task: Task, name: string, icon: string, duration: number, stars: number) {
+        const response = await this.client.sendJson(
+            `api/task/edit/${task.id}`,
+            {
+                name,
+                icon,
+                duration,
+                stars,
+            },
+            {method: 'POST'}
+        );
 
         if (response.status !== 200) {
             throw new Error('Could not edit task, ' + response.statusText);

@@ -7,7 +7,6 @@ import { HouseholdPrivilege } from './HouseholdPrivilege';
 export interface Household {
     id: number,
     name: string,
-    color: string,
     users: User[],
     tasks: Task[],
     picture?: string | null,

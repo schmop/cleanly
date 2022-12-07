@@ -150,21 +150,19 @@ export class HouseholdClient {
     }
 
     async invite(householdId: number, ...ids: number[]) {
-        const formData = new FormData();
-        formData.append('ids', JSON.stringify(ids));
-        return await this.client.request(`api/household/invite/${householdId}`, {
-            body: formData,
-            method: 'POST',
-        });
+        return await this.client.sendJson(
+            `api/household/invite/${householdId}`,
+            {ids},
+            {method: 'POST'}
+        );
     }
 
     async updateChecklist(householdId: number, events: TodoEvent[]): Promise<boolean> {
-        const formData = new FormData();
-        formData.append('events', JSON.stringify(events));
-        const response = await this.client.request(`api/household/update-checklist/${householdId}`, {
-            method: 'POST',
-            body: formData,
-        });
+        const response = await this.client.sendJson(
+            `api/household/update-checklist/${householdId}`,
+            {events},
+            {method: 'POST'},
+        );
 
         if (response.status !== 200) {
             console.error('Could not update checklist', response.statusText);

@@ -31,7 +31,6 @@ export function isHousehold(obj: unknown, argumentName: string = "household"): o
             typeof typedObj === "function") &&
         evaluate(typeof typedObj["id"] === "number", `${argumentName}["id"]`, "number", typedObj["id"]) &&
         evaluate(typeof typedObj["name"] === "string", `${argumentName}["name"]`, "string", typedObj["name"]) &&
-        evaluate(typeof typedObj["color"] === "string", `${argumentName}["color"]`, "string", typedObj["color"]) &&
         evaluate(Array.isArray(typedObj["users"]) &&
             typedObj["users"].every((e: any) =>
                 isUser(e) as boolean
