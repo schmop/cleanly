@@ -4,6 +4,9 @@ import { TaskLog } from '@/models/TaskLog';
 import { isTaskLog } from '@/models/TaskLog.guard';
 import { Store } from '@/store';
 import { AuthClient } from './auth-client';
+import { isRawTaskLogResponse, isTaskLogResponse } from './response/TaskLogResponse.guard';
+import { RawTaskLog, TaskLogResponse } from './response/TaskLogResponse';
+import { notNull } from '@/types/NotNull';
 
 export class TaskClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
@@ -19,7 +22,7 @@ export class TaskClient {
                 duration,
                 stars,
             },
-            {method: 'POST'}
+            { method: 'POST' }
         );
 
         if (response.status !== 200) {
@@ -36,7 +39,7 @@ export class TaskClient {
                 duration,
                 stars,
             },
-            {method: 'POST'}
+            { method: 'POST' }
         );
 
         if (response.status !== 200) {
@@ -54,47 +57,42 @@ export class TaskClient {
         }
     }
 
-    async fetchTaskLog(householdId: number): Promise<void> {
-        const household: undefined|Household = this.store.getters.householdById.value(householdId);
+    async fetchTaskLog(householdId: number, fetchFrom: string | null): Promise<TaskLogResponse> {
+        const household: undefined | Household = this.store.getters.householdById.value(householdId);
         if (null == household) {
             throw new Error('Cannot fetch tasklogs of an unknown household!');
         }
-        const response = await this.client.request(`api/task/log/${householdId}`);
+        const response = await this.client.request(`api/task/log/${householdId}/${fetchFrom ?? ''}`);
         if (response.status !== 200) {
             console.error('Could not fetch task logs', response.statusText);
             throw new Error('Could not fetch task logs, ' + response.statusText);
         }
 
-        const rawLogs = (await response.json()).logs;
-        // flatmap allows to map and filter at the same time!
-        const logs: TaskLog[] = rawLogs.flatMap((log: any): TaskLog[] => {
-            const keysOfData = Object.keys(log);
-            const requiredKeys = ['uuid', 'timestamp', 'user', 'task', 'stars'];
-            if (!requiredKeys.every((requiredKey: string) => keysOfData.includes(requiredKey))) {
-                throw new Error('Invalid task log data given, not all required keys were given!');
-            }
-            const user = household.users.find((user) => user.id === log.user);
-            const task = household.tasks.find((task) => task.id === log.task);
-            if (null == task) {
-                console.warn(
-                    "Tasklog found, that doesn't not belong to a task!",
-                    log.task,
-                );
-                return []; // ignore
-            }
-            const taskLog = {
+        const data = await response.json();
+        if (!isRawTaskLogResponse(data)) {
+            throw new Error('Invalid data received fetching task logs!');
+        }
+
+        const hydratedLogs = data.logs
+            .map((log: RawTaskLog) => ({
                 uuid: log.uuid,
                 timestamp: log.timestamp,
-                user,
-                task,
+                user: household.users.find((user) => user.id === log.user),
+                task: household.tasks.find((task) => task.id === log.task),
                 stars: log.stars,
-            };
-            if (!isTaskLog(taskLog)) {
-                throw new Error('Invalid data generated for task logs!');
-            }
-            return [taskLog];
-        });
-        this.store.logs(logs, householdId);
+            }))
+            .filter((hydratedLog: any): hydratedLog is TaskLog => isTaskLog(hydratedLog));
+
+        const taskLogResponse = {
+            logs: hydratedLogs,
+            upToId: data.upToId,
+        };
+
+        if (!isTaskLogResponse(taskLogResponse)) {
+            throw new Error('Invalid data given when fetching task logs!');
+        }
+
+        return taskLogResponse;
     }
 
     /**

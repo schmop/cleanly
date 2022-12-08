@@ -62,7 +62,7 @@ export class PushService {
         Push.hasPermission()
         .then((res: any) => {
             if (res.isEnabled) {
-                console.log('We have permission to send push notifications');
+                console.info('We have permission to send push notifications');
             } else {
                 console.warn('We do not have permission to send push notifications');
             }
@@ -76,7 +76,7 @@ export class PushService {
         }
         this.pushIdPromise = new Promise((resolve) => {
             this.pushObject!.on('registration').subscribe((registration: any) => {
-                console.log('Device registered', registration);
+                console.info('Device registered', registration);
                 resolve();
                 if (typeof registration.registrationId !== 'string' || registration.registrationType !== 'FCM') {
                     console.error('Could not retrieve pushId!');
@@ -85,7 +85,7 @@ export class PushService {
                 this.pushId = registration.registrationId as string;
             });
         })
-        this.pushObject.on('notification').subscribe((notification: any) => console.log('Received a notification', notification));
+        this.pushObject.on('notification').subscribe((notification: any) => console.info('Received a notification', notification));
         this.pushObject.on('error').subscribe((error: any) => console.error('Error with Push plugin', error));
     }
 }

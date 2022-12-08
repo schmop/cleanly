@@ -117,5 +117,6 @@ export default {
     'Promote to admin': 'Zum Admin ernennen',
     'Promote to moderator': 'Zum Moderator ernennen',
     'Demote to user': 'Zum Nutzer degradieren',
+    'Dismiss': 'Ausblenden',
     '': '',
 } as { [english: string]: string };

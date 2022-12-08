@@ -3,7 +3,6 @@ import { User } from '../models/User';
 import { Invite } from '../models/Invite';
 import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
-import { TaskLog } from '@/models/TaskLog';
 import { reactive, computed, App, ComputedRef, InjectionKey } from 'vue';
 import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/injection-keys';
 import { UserSettings } from '@/models/UserSettings';
@@ -17,7 +16,6 @@ export class State {
     user: null | User = null;
     invites: Invite[] = [];
     pageTitle: null | string = null;
-    taskLogs: Record<string, TaskLog[]> = {};
     viewedHousehold: null | number = null;
     userSettings: UserSettings = {
         notifyInvites: true,
@@ -31,7 +29,6 @@ export class State {
 export type Getters = {
     checklist: (householdId: number) => Todo[],
     householdById: (householdId: number) => undefined | Household,
-    taskLogs: TaskLog[],
     household: undefined | Household,
     privileges:(household?: Household) => Record<UserId, PrivilegeLevel>,
     privilege: (userId?: UserId, household?: Household) => PrivilegeLevel,
@@ -57,14 +54,6 @@ const getters: GetterFunctions = {
     },
     householdById: () => (householdId: number): undefined | Household => {
         return store.state.households.find((household: Household) => household.id === householdId);
-    },
-    taskLogs: (): TaskLog[] => {
-        const { viewedHousehold } = store.state;
-        if (null === viewedHousehold) {
-            return [];
-        }
-
-        return store.state.taskLogs[viewedHousehold] ?? [];
     },
     household: (): undefined | Household => {
         const { viewedHousehold } = store.state;
@@ -150,14 +139,6 @@ export class Store {
     }
     viewHousehold(householdId: null | number) {
         this.state.viewedHousehold = householdId;
-    }
-    logs(logs: TaskLog[], householdId: number) {
-        const household = this.state.households.find((household) => household.id === householdId);
-        if (null == household) {
-            throw new Error('Could not mutate logs, invalid household id given!');
-        }
-
-        this.state.taskLogs[householdId] = logs;
     }
     removeTask(taskId: number) {
         const household = this.state

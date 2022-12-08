@@ -2,6 +2,14 @@
 
 Das Ändern der Sterne einer Aufgabe ändert die erarbeiteten Sterne nicht mehr rückwirkend für alle Mitglieder des Haushaltes.
 
+Der Aktivitäts-Tab lädt nicht mehr alle Aktivitätseinträge auf einmal, sondern lädt beim Scrollen in die Vergangenheit Einträge nach.
+
+![Infinite scroll](assets/changelog/infinite-scroll.png)
+
+Erfolgs-, Warnungs- und Fehlermeldungen können nun frühzeitig ausgeblendet werden.
+
+![Dismiss](assets/changelog/dismiss.png)
+
 # 1.6 - 04.12.2022
 
 Beim Erledigen einer Aufgabe wurde die Wischgeste mit einem Antippen ersetzt.
