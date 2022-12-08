@@ -1,6 +1,7 @@
 import { Household } from '@/models/Household';
 import { Task } from '@/models/Task';
 import { TaskLog } from '@/models/TaskLog';
+import { isTaskLog } from '@/models/TaskLog.guard';
 import { Store } from '@/store';
 import { AuthClient } from './auth-client';
 
@@ -68,7 +69,7 @@ export class TaskClient {
         // flatmap allows to map and filter at the same time!
         const logs: TaskLog[] = rawLogs.flatMap((log: any): TaskLog[] => {
             const keysOfData = Object.keys(log);
-            const requiredKeys = ['uuid', 'timestamp', 'user', 'task'];
+            const requiredKeys = ['uuid', 'timestamp', 'user', 'task', 'stars'];
             if (!requiredKeys.every((requiredKey: string) => keysOfData.includes(requiredKey))) {
                 throw new Error('Invalid task log data given, not all required keys were given!');
             }
@@ -81,15 +82,17 @@ export class TaskClient {
                 );
                 return []; // ignore
             }
-            return [
-                {
-                    uuid: log.uuid,
-                    timestamp: log.timestamp,
-                    user,
-                    task
-
-                } as TaskLog
-            ];
+            const taskLog = {
+                uuid: log.uuid,
+                timestamp: log.timestamp,
+                user,
+                task,
+                stars: log.stars,
+            };
+            if (!isTaskLog(taskLog)) {
+                throw new Error('Invalid data generated for task logs!');
+            }
+            return [taskLog];
         });
         this.store.logs(logs, householdId);
     }
