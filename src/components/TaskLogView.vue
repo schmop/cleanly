@@ -13,7 +13,7 @@
         {{ relativeInterval }}
         {{_t('for')}}
         <ion-text color="warning">
-          <i>{{task.stars}} <ion-icon :icon="starOutline"/></i>
+          <i>{{log.stars}} <ion-icon :icon="starOutline"/></i>
         </ion-text>
       </ion-card-title>
     </ion-card-header>

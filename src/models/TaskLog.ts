@@ -7,4 +7,5 @@ export interface TaskLog {
     user: User|undefined,
     task: Task,
     timestamp: number, // unix timestamp in seconds
+    stars: number,
 }
