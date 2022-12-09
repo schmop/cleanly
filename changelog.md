@@ -1,4 +1,9 @@
-# 1.8 - Aktuell
+# 1.8.1 - Aktuell
+
+Push-Benachrichtigungen, die man bei laufender App erhalten hat, können nun auch angeklickt werden.
+Wie gewohnt öffnen sie darauf die App und werden entfernt.
+
+# 1.8 - 10.12.2022
 
 Aufgaben können nun ohne Wiederholungsdatum eingestellt werden!
 

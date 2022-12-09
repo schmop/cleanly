@@ -17,7 +17,7 @@
     "@capacitor/device": "^4.1.0",
     "@capacitor/haptics": "^4.1.0",
     "@capacitor/keyboard": "^4.1.0",
-    "@capacitor/push-notifications": "^4.1.2",
+    "@capacitor/push-notifications": "file:../3rdparty/capacitor-plugins/push-notifications",
     "@capacitor/status-bar": "^4.1.1",
     "@ionic/core": "^6.4.0",
     "@ionic/vue": "^6.4.0",
