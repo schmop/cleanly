@@ -145,7 +145,7 @@ export class AuthClient {
 
     async registerPush() {
         const pushId = await this.push.getPushId()
-        const deviceId = this.push.getDeviceId();
+        const deviceId = await this.push.getDeviceId();
         if (null === pushId) {
             console.error('No push id given, cannot register push service!');
             return;

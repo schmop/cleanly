@@ -4,7 +4,12 @@ const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
   appName: 'cleanly',
   webDir: 'dist',
-  bundledWebRuntime: false
+  bundledWebRuntime: false,
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"]
+    },
+  },
 };
 
 export default config;

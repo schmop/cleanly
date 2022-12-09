@@ -1,50 +1,17 @@
-import { Push, PushObject, PushOptions } from '@awesome-cordova-plugins/push';
+import { PushNotifications, PushNotificationSchema, Token } from '@capacitor/push-notifications';
+import { Device } from '@capacitor/device';
 
-declare global {
-    let device: {
-        /** Get the version of Cordova running on the device. */
-        cordova: string;
-        /** Indicates that Cordova initialize successfully. */
-        available: boolean;
-        /**
-         * The device.model returns the name of the device's model or product. The value is set
-         * by the device manufacturer and may be different across versions of the same product.
-         */
-        model: string;
-        /** Get the device's operating system name. */
-        platform: string;
-        /** Get the device's Universally Unique Identifier (UUID). */
-        uuid: string;
-        /** Get the operating system version. */
-        version: string;
-        /** Get the device's manufacturer. */
-        manufacturer: string;
-        /** Whether the device is running on a simulator. */
-        isVirtual: boolean;
-        /** Get the device hardware serial number. */
-        serial: string;
-    };
-}
 
 export class PushService {
-    private pushObject: null|PushObject = null;
     private pushId: null|string = null;
     private pushIdPromise: null|Promise<void> = null;
 
     constructor() {
-        this.requestPermissions();
-        // to initialize push notifications
-        const options: PushOptions = {
-            android: {
-                forceShow: true,
-            },
-            ios: {
-                alert: 'true',
-                badge: true,
-                sound: 'false'
-            },
-        }
-        this.pushObject = Push.init(options);
+        this.init();
+    }
+
+    async init() {
+        await this.requestPermissions();
         this.registerListeners();
     }
 
@@ -54,38 +21,37 @@ export class PushService {
         return this.pushId;
     }
 
-    getDeviceId(): string {
-        return device.uuid;
+    async getDeviceId() {
+        return (await Device.getId()).uuid;
     }
 
-    requestPermissions() {
-        Push.hasPermission()
-        .then((res: any) => {
-            if (res.isEnabled) {
-                console.info('We have permission to send push notifications');
-            } else {
-                console.warn('We do not have permission to send push notifications');
-            }
-        });
-    }
+    async requestPermissions() {
+        let permissionStatus = await PushNotifications.checkPermissions();
 
-    registerListeners() {
-        if (null == this.pushObject) {
-            console.error('Tried to register pushlisteners, but no pushobject found!');
-            return;
+        if (permissionStatus.receive === 'prompt') {
+            permissionStatus = await PushNotifications.requestPermissions();
         }
-        this.pushIdPromise = new Promise((resolve) => {
-            this.pushObject!.on('registration').subscribe((registration: any) => {
-                console.info('Device registered', registration);
+
+        if (permissionStatus.receive === 'granted') {
+            console.info('We have permission to send push notifications');
+        } else {
+            console.warn('We do not have permission to send push notifications');
+        }
+    }
+
+    async registerListeners() {
+        this.pushIdPromise = new Promise((resolve, reject) => {
+            PushNotifications.addListener('registration', (token: Token) => {
+                console.info('Device registered', token);
+                this.pushId = token.value;
                 resolve();
-                if (typeof registration.registrationId !== 'string' || registration.registrationType !== 'FCM') {
-                    console.error('Could not retrieve pushId!');
-                    return;
-                }
-                this.pushId = registration.registrationId as string;
+            });
+            PushNotifications.addListener('registrationError', err => {
+                console.error('Registration error: ', err.error);
+                reject(err);
             });
         })
-        this.pushObject.on('notification').subscribe((notification: any) => console.info('Received a notification', notification));
-        this.pushObject.on('error').subscribe((error: any) => console.error('Error with Push plugin', error));
+        await PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => console.info('Received a notification', notification));
+        await PushNotifications.register();
     }
 }
