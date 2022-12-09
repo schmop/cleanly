@@ -18,7 +18,7 @@
         <ion-label>
           {{ null !== duration
               ? __t('Repeats every {0} {1}', duration, _t(durationModifier))
-              : _t('No repeating date')
+              : _t('Nonrepeating')
           }}
         </ion-label>
         <ion-icon slot="start" :icon="timeOutline" />
@@ -153,7 +153,7 @@ async function openDurationPicker() {
         role: "cancel",
       },
       {
-        text: _t("No repeating date"),
+        text: _t("Nonrepeating"),
         handler: () => {
           duration.value = null;
           durationModifier.value = 'days';

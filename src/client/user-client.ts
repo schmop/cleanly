@@ -7,12 +7,11 @@ export class UserClient {
     }
 
     async saveUserSettings(settings: UserSettings) {
-        const formData = new FormData();
-        formData.append('settings', JSON.stringify(settings));
-        const response = await this.client.request('api/user/settings', {
-            body: formData,
-            method: 'POST',
-        });
+        const response = await this.client.sendJson(
+            'api/user/settings',
+            settings,
+            {method: 'POST'},
+        );
 
         if (response.status !== 200) {
             console.error('Could not save user settings', response.statusText);

@@ -2,6 +2,26 @@ import { Task } from "@/models/Task";
 import { DAY_IN_SECONDS, secondsSince } from "./time";
 
 export function taskSortByPriority(a: Task, b: Task): number {
+    if (null == a.lastComplete && null == b.lastComplete) {
+        return 0;
+    }
+
+    if (null == a.lastComplete && null === b.duration) {
+        return -1;
+    }
+
+    if (null == b.lastComplete && null === a.duration) {
+        return 1;
+    }
+
+    if (taskOverDue(a) && !taskOverDue(b)) {
+        return -1;
+    }
+
+    if (!taskOverDue(a) && taskOverDue(b)) {
+        return 1;
+    }
+
     return Math.sign(secondsLeft(a) - secondsLeft(b));
 }
 

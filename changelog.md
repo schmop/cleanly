@@ -1,4 +1,12 @@
-# 1.7 - Aktuell
+# 1.8 - Aktuell
+
+Aufgaben können nun ohne Wiederholungsdatum eingestellt werden!
+
+Diese Aufgaben senden keine Push-Benachrichtigungen, wenn sie lange nicht erledigt werden, denn sie können nie *dringlich* werden.
+
+![nonrepeating](assets/changelog/nonrepeating.png)
+
+# 1.7 - 08.12.2022
 
 Das Ändern der Sterne einer Aufgabe ändert die erarbeiteten Sterne nicht mehr rückwirkend für alle Mitglieder des Haushaltes.
 

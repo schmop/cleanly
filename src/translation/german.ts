@@ -118,7 +118,7 @@ export default {
     'Promote to moderator': 'Zum Moderator ernennen',
     'Demote to user': 'Zum Nutzer degradieren',
     'Dismiss': 'Ausblenden',
-    'No repeating date': 'Ohne Wiederholungsdatum',
+    'Nonrepeating': 'Ohne Wiederholung',
     'Confirm': 'Bestätigen',
     'Last done {0}': 'Vor {0} erledigt',
     '': '',
