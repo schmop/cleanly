@@ -1,7 +1,8 @@
 <template>
     <ion-page>
         <ion-content v-if="household">
-            <TaskView v-for="(task, index) in sortedTasks" :task="task" :household="household" :key="index" :show-actions="true" />
+            <TaskView v-for="(task, index) in sortedTasks" :task="task" :household="household" :key="index"
+                :show-actions="true" />
 
             <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
                 <ion-fab-button @click="openTaskFormModal">
@@ -13,21 +14,18 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed } from 'vue';
-import {
-    IonContent,
-    IonPage,
-    IonFab,
-    IonFabButton,
-    IonIcon,
-    menuController,
-    modalController,
-} from "@ionic/vue";
-import TaskView from '../TaskView.vue';
 import { taskSortByPriority } from "@/common/task-priority";
-import { gettersSymbol, householdClientSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
+import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 import TaskForm from '@/modals/TaskForm.vue';
+import {
+    IonContent, IonFab,
+    IonFabButton,
+    IonIcon, IonPage, menuController,
+    modalController
+} from "@ionic/vue";
 import { add } from 'ionicons/icons';
+import { computed, inject } from 'vue';
+import TaskView from '../TaskView.vue';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -51,4 +49,5 @@ async function openTaskFormModal(): Promise<void> {
 </script>
 
 <style scoped>
+
 </style>

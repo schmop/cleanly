@@ -6,25 +6,29 @@ export function taskSortByPriority(a: Task, b: Task): number {
 }
 
 export function secondsLeft(t: Task) {
-    if (t.lastComplete == null) {
+    if (null == t.lastComplete) {
         return 0;
+    }
+
+    if (null === t.duration) {
+        return -secondsSince(t.lastComplete);
     }
 
     return t.duration * DAY_IN_SECONDS - secondsSince(t.lastComplete);
 }
 
 export function taskProgress(t: Task): number {
-    const duration = t.duration * DAY_IN_SECONDS;
-    if (!t.lastComplete) {
+    if (null == t.lastComplete || null === t.duration) {
         return 0;
     }
+    const duration = t.duration * DAY_IN_SECONDS;
     const timeSinceLastComplete = secondsSince(t.lastComplete);
 
     return Math.max(0, duration - timeSinceLastComplete) / duration;
 }
 
 export function taskOverDue(task: Task): boolean {
-    if (!task.lastComplete) {
+    if (null == task.lastComplete || null === task.duration) {
         return false;
     }
     const sinceDays = secondsSince(task.lastComplete) / DAY_IN_SECONDS;

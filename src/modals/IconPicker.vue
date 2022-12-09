@@ -18,26 +18,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from "vue";
-import { closeCircleOutline } from "ionicons/icons";
-import {
-  IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonIcon,
-  IonButton,
-  IonFooter,
-  modalController,
-  menuController,
-} from "@ionic/vue";
-import icons from '../components/icons';
-import { translations } from "../translation";
 import { _t } from '@/translation/index';
+import {
+  IonContent,
+  IonHeader, IonIcon, IonItem, IonItemGroup, IonLabel, IonTitle, IonToolbar, modalController
+} from "@ionic/vue";
+import { closeCircleOutline } from "ionicons/icons";
+import icons from '../components/icons';
 
 const props = defineProps<{
   iconReceiver: EventTarget,
@@ -56,4 +43,5 @@ async function select(icon: string) {
 </script>
 
 <style scoped>
+
 </style>

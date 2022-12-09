@@ -34,7 +34,8 @@ export function isTask(obj: unknown, argumentName: string = "task"): obj is Task
         evaluate((typeof typedObj["lastComplete"] === "undefined" ||
             typedObj["lastComplete"] === null ||
             typeof typedObj["lastComplete"] === "number"), `${argumentName}["lastComplete"]`, "number | null | undefined", typedObj["lastComplete"]) &&
-        evaluate(typeof typedObj["duration"] === "number", `${argumentName}["duration"]`, "number", typedObj["duration"]) &&
+        evaluate((typedObj["duration"] === null ||
+            typeof typedObj["duration"] === "number"), `${argumentName}["duration"]`, "number | null", typedObj["duration"]) &&
         evaluate((typeof typedObj["assignedTo"] === "undefined" ||
             isUser(typedObj["assignedTo"]) as boolean), `${argumentName}["assignedTo"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | undefined", typedObj["assignedTo"]) &&
         evaluate(typeof typedObj["stars"] === "number", `${argumentName}["stars"]`, "number", typedObj["stars"])

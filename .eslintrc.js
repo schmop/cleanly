@@ -19,6 +19,7 @@ module.exports = {
     'vue/no-deprecated-slot-attribute': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
     'vue/script-setup-uses-vars': 'error',
   },
   overrides: [

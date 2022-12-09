@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { gettersSymbol, householdClientSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
+import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 import { Household } from "@/models/Household";
 import { PrivilegeLevel } from "@/models/HouseholdPrivilege";
 import { User } from "@/models/User";
@@ -37,11 +37,9 @@ const props = defineProps<{
     household: Household,
     member: User,
 }>();
-const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
-const user = computed(() => state.user);
 const memberPrivilege = computed(() => getters.privilege.value(props.member.id));
 
 async function dismiss(): Promise<boolean> {

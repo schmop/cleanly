@@ -51,35 +51,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, Ref, inject, watch } from 'vue';
+import { _t } from '@/translation';
 import {
-  closeCircleOutline,
-  personOutline,
-  searchOutline,
-  personAddOutline,
-} from "ionicons/icons";
-import {
-  IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonItemDivider,
-  IonList,
-  IonListHeader,
-  IonTitle,
-  IonIcon,
-  IonButton,
-  IonFooter,
-  modalController,
+IonButton, IonContent, IonFooter, IonHeader, IonIcon, IonInput, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList,
+IonListHeader,
+IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
-import { Household } from "../models/Household";
+import {
+closeCircleOutline, personAddOutline, personOutline,
+searchOutline
+} from "ionicons/icons";
+import { inject, ref, Ref, watch } from 'vue';
 import debounce from "../common/debounce";
-import { LookupResult } from "../models/LookupResult";
 import { authClientSymbol, householdClientSymbol } from '../dependency-injection/injection-keys';
-import { _t, __t } from '@/translation';
+import { Household } from "../models/Household";
+import { LookupResult } from "../models/LookupResult";
 
 const props = defineProps<{
   household: Household,

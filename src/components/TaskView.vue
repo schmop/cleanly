@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, computed, Ref } from 'vue';
+import { ref, inject, computed } from 'vue';
 import { ellipsisVertical, trashOutline, pencilOutline, starOutline } from "ionicons/icons";
 import {
   IonLabel,
@@ -72,7 +72,6 @@ import {
   IonButton,
   IonButtons,
   IonList,
-  IonItemSliding,
   IonPopover,
   IonCard,
   IonCardHeader,
@@ -110,13 +109,16 @@ const progressStyle = computed(() => `width: ${progress.value * 100}%`);
 const overdue = computed(() => taskOverDue(props.task));
 const durationText = computed(() => roundedRecurringInterval(props.task.duration));
 const dueInText = computed(() => {
-  const { lastComplete, duration } = props.task;
+  const { lastComplete } = props.task;
 
   if (null == lastComplete) {
     return _t('Never done before');
   }
   const lastCompleteHours = secondsSince(lastComplete) / HOUR_IN_SECONDS;
-  const durationHours = duration * DAY_IN_HOURS;
+  if (null === props.task.duration) {
+    return __t('Last done {0}', formatHours(lastCompleteHours));
+  }
+  const durationHours = props.task.duration * DAY_IN_HOURS;
   const hoursLeft = durationHours - lastCompleteHours;
   if (hoursLeft < 0) {
     return __t('Overdue for {0}', formatHours(-hoursLeft));

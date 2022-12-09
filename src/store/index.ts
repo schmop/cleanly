@@ -3,7 +3,7 @@ import { User } from '../models/User';
 import { Invite } from '../models/Invite';
 import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
-import { reactive, computed, App, ComputedRef, InjectionKey } from 'vue';
+import { reactive, computed, App, ComputedRef } from 'vue';
 import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/injection-keys';
 import { UserSettings } from '@/models/UserSettings';
 import { HouseholdId, StarsRecord } from '@/types';

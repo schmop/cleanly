@@ -29,30 +29,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount } from "vue";
-import {
-  checkmarkCircleOutline,
-  listCircleOutline,
-  peopleOutline,
-  analyticsOutline
-} from "ionicons/icons";
-import {
-  IonPage,
-  IonTabs,
-  IonTabBar,
-  IonTabButton,
-  IonLabel,
-  IonBadge,
-  IonRouterOutlet,
-  IonIcon,
-} from "@ionic/vue";
-import { _t } from '../translation';
-import { taskSortByPriority, taskOverDue } from "@/common/task-priority";
+import { taskOverDue, taskSortByPriority } from "@/common/task-priority";
+import { gettersSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import router from "@/router";
-import { gettersSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import {
+IonBadge, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar,
+IonTabButton, IonTabs
+} from "@ionic/vue";
+import {
+analyticsOutline, checkmarkCircleOutline,
+listCircleOutline,
+peopleOutline
+} from "ionicons/icons";
+import { computed, inject, onBeforeUnmount } from "vue";
+import { _t } from '../translation';
 
 const store = inject(storeSymbol)!;
-const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
 
 const household = computed(() => getters.household.value);

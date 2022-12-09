@@ -20,33 +20,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from "vue";
-import {
-  addCircleOutline,
-} from "ionicons/icons";
-import router from "../router";
-import {
-  IonPage,
-  IonContent,
-  IonCardHeader,
-  IonCardContent,
-  IonCard,
-  IonCardTitle,
-  IonButton,
-  IonIcon,
-  modalController,
-  menuController,
-} from "@ionic/vue";
-import HouseholdPreview from "../components/HouseholdPreview.vue";
-import { _t } from "../translation";
-import CreateHousehold from "../modals/CreateHousehold.vue";
-import { authClientSymbol, householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import { Household } from "@/models/Household";
+import {
+  IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonIcon, IonPage, menuController, modalController
+} from "@ionic/vue";
+import {
+  addCircleOutline
+} from "ionicons/icons";
+import { computed, inject } from "vue";
+import HouseholdPreview from "../components/HouseholdPreview.vue";
+import CreateHousehold from "../modals/CreateHousehold.vue";
+import router from "../router";
+import { _t } from "../translation";
 
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
-const authClient = inject(authClientSymbol)!;
 
 const households = computed(() => state.households);
 
@@ -60,14 +50,6 @@ async function openCreateHouseholdModal() {
   await createHouseholdModal.onDidDismiss();
   await householdClient.dashboardInfo();
 }
-function logout() {
-  close();
-  authClient.logout();
-  router.push("/login");
-}
-function close() {
-  menuController.close("menu");
-}
 function openHousehold(household: Household) {
   store.viewHousehold(household.id);
   router.push({ name: 'household-view' });
@@ -75,4 +57,5 @@ function openHousehold(household: Household) {
 </script>
 
 <style scoped>
+
 </style>

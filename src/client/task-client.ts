@@ -4,15 +4,14 @@ import { TaskLog } from '@/models/TaskLog';
 import { isTaskLog } from '@/models/TaskLog.guard';
 import { Store } from '@/store';
 import { AuthClient } from './auth-client';
-import { isRawTaskLogResponse, isTaskLogResponse } from './response/TaskLogResponse.guard';
 import { RawTaskLog, TaskLogResponse } from './response/TaskLogResponse';
-import { notNull } from '@/types/NotNull';
+import { isRawTaskLogResponse, isTaskLogResponse } from './response/TaskLogResponse.guard';
 
 export class TaskClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
-    async addNewTask(householdId: number, name: string, icon: string, duration: number, stars: number) {
+    async addNewTask(householdId: number, name: string, icon: string, duration: number|null, stars: number) {
         const response = await this.client.sendJson(
             'api/task/create',
             {
@@ -30,7 +29,7 @@ export class TaskClient {
         }
     }
 
-    async editTask(task: Task, name: string, icon: string, duration: number, stars: number) {
+    async editTask(task: Task, name: string, icon: string, duration: number|null, stars: number) {
         const response = await this.client.sendJson(
             `api/task/edit/${task.id}`,
             {

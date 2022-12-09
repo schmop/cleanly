@@ -87,7 +87,10 @@ export function formatDays(days: number, maxDepth = 3): string {
     return formatInterval(days, DAY_FORMATTING_SIZES, maxDepth);
 }
 
-export function roundedRecurringInterval(days: number): string {
+export function roundedRecurringInterval(days: number|null): string {
+    if (null === days) {
+        return _t('never');
+    }
     if (days <= 1) {
         return _t('everyday');
     }

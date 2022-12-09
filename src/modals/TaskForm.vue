@@ -16,7 +16,10 @@
       </ion-item>
       <ion-item button @click="openDurationPicker">
         <ion-label>
-          {{ __t('Repeats every {0} {1}', duration, _t(durationModifier)) }}
+          {{ null !== duration
+              ? __t('Repeats every {0} {1}', duration, _t(durationModifier))
+              : _t('No repeating date')
+          }}
         </ion-label>
         <ion-icon slot="start" :icon="timeOutline" />
       </ion-item>
@@ -86,13 +89,19 @@ const taskClient = inject(taskClientSymbol)!;
 
 const durationModifiers = DURATION_SIZES;
 const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
-const duration = ref(1);
+const duration = ref(null as number|null);
 const icon = ref('checkmark');
 const taskName = ref('');
 const stars = ref('0');
 
 const valid = computed(() => icon.value in icons);
-const calculatedDuration = computed(() => duration.value * durationModifiers[durationModifier.value]);
+const calculatedDuration = computed(() => {
+  if (null === duration.value) {
+    return null;
+  }
+
+  return duration.value * durationModifiers[durationModifier.value];
+});
 const isEditing = computed(() => null != props.task);
 
 
@@ -144,6 +153,13 @@ async function openDurationPicker() {
         role: "cancel",
       },
       {
+        text: _t("No repeating date"),
+        handler: () => {
+          duration.value = null;
+          durationModifier.value = 'days';
+        },
+      },
+      {
         text: _t("Confirm"),
         handler: ({ count, modifier }) => {
           duration.value = count.value;
@@ -178,11 +194,16 @@ if (null == props.id && null == props.task) {
 }
 if (isEditing.value) {
   taskName.value = props.task!.name;
-  const recurring = exactRecurringInterval(props.task!.duration);
-  duration.value = recurring.times;
-  durationModifier.value = recurring.format;
+
   icon.value = props.task!.icon;
   stars.value = props.task!.stars.toString();
+  if (null === props.task!.duration) {
+    duration.value = null;
+  } else {
+    const recurring = exactRecurringInterval(props.task!.duration);
+    duration.value = recurring.times;
+    durationModifier.value = recurring.format;
+  }
 }
 </script>
 
