@@ -10,7 +10,7 @@ module.exports = defineConfig({
                     use: 'raw-loader',
                 }
             ]
-        }
+        },
     }
 });
 
