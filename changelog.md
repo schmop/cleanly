@@ -1,4 +1,18 @@
-# 1.8.1 - Aktuell
+# 1.9 - Aktuell
+
+Es gibt ein neuer Tab in Haushalten - **Statistiken**.
+
+![statistics](assets/changelog/statistics.png)
+
+Dort kann man sich anschauen, wie *Pünktlich* man die Aufgaben im Schnitt in der Vergangenheit erledigt hat.
+
+![punctuality](assets/changelog/punctuality.png)
+
+Zusätzlich kann man die Beitragsverhältnisse der Mitglieder an den jeweiligen Aufgaben ablesen.
+
+![participation](assets/changelog/participation.png)
+
+# 1.8.1 - 11.12.2022
 
 Push-Benachrichtigungen, die man bei laufender App erhalten hat, können nun auch angeklickt werden.
 Wie gewohnt öffnen sie darauf die App und werden entfernt.

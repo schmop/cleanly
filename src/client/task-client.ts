@@ -1,4 +1,6 @@
 import { Household } from '@/models/Household';
+import { HouseholdStats } from '@/models/HouseholdStats';
+import { isHouseholdStats } from '@/models/HouseholdStats.guard';
 import { Task } from '@/models/Task';
 import { TaskLog } from '@/models/TaskLog';
 import { isTaskLog } from '@/models/TaskLog.guard';
@@ -92,6 +94,25 @@ export class TaskClient {
         }
 
         return taskLogResponse;
+    }
+
+    async fetchStatsForHousehold(householdId: number): Promise<HouseholdStats> {
+        const household: undefined | Household = this.store.getters.householdById.value(householdId);
+        if (null == household) {
+            throw new Error('Cannot fetch task stats of an unknown household!');
+        }
+        const response = await this.client.request(`api/task/stats/${householdId}`);
+        if (response.status !== 200) {
+            console.error('Could not fetch task stats', response.statusText);
+            throw new Error('Could not fetch task stats, ' + response.statusText);
+        }
+
+        const data = await response.json();
+        if (!isHouseholdStats(data)) {
+            throw new Error('Invalid data received fetching task stats!');
+        }
+
+        return data;
     }
 
     /**

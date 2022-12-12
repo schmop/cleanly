@@ -19,6 +19,11 @@
           <ion-label>{{ _t('Activity') }}</ion-label>
         </ion-tab-button>
 
+        <ion-tab-button tab="statistics" :href="href('statistics')">
+          <ion-icon :icon="barChartOutline"></ion-icon>
+          <ion-label>{{ _t('Statistics') }}</ion-label>
+        </ion-tab-button>
+
         <ion-tab-button tab="household" :href="href('info')">
           <ion-icon :icon="peopleOutline"></ion-icon>
           <ion-label>{{ _t('Household') }}</ion-label>
@@ -37,7 +42,7 @@ IonBadge, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar,
 IonTabButton, IonTabs
 } from "@ionic/vue";
 import {
-analyticsOutline, checkmarkCircleOutline,
+analyticsOutline, barChartOutline, checkmarkCircleOutline,
 listCircleOutline,
 peopleOutline
 } from "ionicons/icons";

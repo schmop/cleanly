@@ -9,6 +9,10 @@ export function secondsSince(timestampInSeconds: number): number {
     return Date.now() / 1000 - timestampInSeconds;
 }
 
+export function secondsToDays(seconds: number) {
+    return Math.floor(seconds / DAY_IN_SECONDS);
+}
+
 export const DAY_FORMATTING_SIZES: { [durationName: string]: number } = {
     days: 1,
     months: 30,

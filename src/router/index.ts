@@ -8,6 +8,7 @@ import HouseholdView from '@/views/HouseholdView.vue';
 import ChangelogsView from '@/views/ChangelogsView.vue';
 import TaskList from '@/components/HouseholdView/TaskList.vue';
 import ActivityView from '@/components/HouseholdView/ActivityView.vue';
+import StatisticsView from '@/components/HouseholdView/StatisticsView.vue';
 import CheckList from '@/components/HouseholdView/CheckList.vue';
 import HouseholdInfo from '@/components/HouseholdView/HouseholdInfo.vue';
 
@@ -57,6 +58,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'activity',
         component: ActivityView,
         name: 'activity',
+      },
+      {
+        path: 'statistics',
+        component: StatisticsView,
+        name: 'statistics',
       },
       {
         path: 'checklist',
