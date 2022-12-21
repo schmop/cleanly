@@ -9,7 +9,7 @@ export interface Household {
     name: string,
     users: User[],
     tasks: Task[],
-    picture?: string | null,
+    webhookUrl: string|null,
     privileges: HouseholdPrivilege[],
     checklist: Todo[],
 }

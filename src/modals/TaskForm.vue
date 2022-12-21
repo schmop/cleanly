@@ -73,10 +73,10 @@ import {
   modalController,
   pickerController,
 } from "@ionic/vue";
-import icons from "../components/icons";
-import { DURATION_SIZES, exactRecurringInterval } from '../common/time';
-import { _t, __t } from "../translation";
-import { Task } from '../models/Task';
+import icons from "@/components/icons";
+import { DURATION_SIZES, exactRecurringInterval } from '@/common/time';
+import { _t, __t } from "@/translation";
+import { Task } from '@/models/Task';
 import IconPicker from "./IconPicker.vue";
 import { taskClientSymbol } from "@/dependency-injection/injection-keys";
 import toast from "@/toast";
@@ -90,7 +90,7 @@ const taskClient = inject(taskClientSymbol)!;
 const durationModifiers = DURATION_SIZES;
 const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
 const duration = ref(null as number|null);
-const icon = ref('checkmark');
+const icon = ref(_t('checkmark'));
 const taskName = ref('');
 const stars = ref('0');
 
@@ -120,7 +120,7 @@ async function iconPicker() {
   iconPicker.present();
   await iconPicker.onDidDismiss();
 
-  icon.value = newIcon ?? icon.value;
+  icon.value = _t(newIcon ?? icon.value);
 }
 function dismiss() {
   modalController.dismiss();
@@ -195,7 +195,7 @@ if (null == props.id && null == props.task) {
 if (isEditing.value) {
   taskName.value = props.task!.name;
 
-  icon.value = props.task!.icon;
+  icon.value = _t(props.task!.icon);
   stars.value = props.task!.stars.toString();
   if (null === props.task!.duration) {
     duration.value = null;

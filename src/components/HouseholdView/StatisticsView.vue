@@ -133,7 +133,6 @@ function selectTask(event: SelectCustomEvent<TaskId>) {
 
 function selectAnalysis(event: SelectCustomEvent<Analysis>) {
     analysis.value = event.detail.value;
-    console.log(analysis.value);
 }
 
 async function fetchStatistics() {

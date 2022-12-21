@@ -62,9 +62,24 @@ export async function error(message: string, duration = 5000): Promise<void> {
      return toast.present();
 }
 
+export async function showThrownError(exception: unknown, context?: string): Promise<void> {
+     let message = undefined === context
+          ? 'Unknown error'
+          : `Unknown error occured while ${context}`;
+
+     if (exception instanceof Error) {
+          message = `Error occured while ${context}: ${exception.message}`;
+     } else if (typeof exception === 'string') {
+          message = `Error occured while ${context}: ${exception}`;
+     }
+
+     return error(message);
+}
+
 export default {
      info,
      success,
      warning,
-     error
+     error,
+     showThrownError,
 };

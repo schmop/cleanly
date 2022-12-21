@@ -39,9 +39,8 @@ export function isHousehold(obj: unknown, argumentName: string = "household"): o
             typedObj["tasks"].every((e: any) =>
                 isTask(e) as boolean
             ), `${argumentName}["tasks"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Task\").Task[]", typedObj["tasks"]) &&
-        evaluate((typeof typedObj["picture"] === "undefined" ||
-            typedObj["picture"] === null ||
-            typeof typedObj["picture"] === "string"), `${argumentName}["picture"]`, "string | null | undefined", typedObj["picture"]) &&
+        evaluate((typedObj["webhookUrl"] === null ||
+            typeof typedObj["webhookUrl"] === "string"), `${argumentName}["webhookUrl"]`, "string | null", typedObj["webhookUrl"]) &&
         evaluate(Array.isArray(typedObj["privileges"]) &&
             typedObj["privileges"].every((e: any) =>
                 isHouseholdPrivilege(e) as boolean

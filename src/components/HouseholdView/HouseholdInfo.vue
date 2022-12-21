@@ -19,6 +19,10 @@
                     <ion-icon slot="start" :icon="trashOutline" />
                     {{ _t('Delete household') }}
                 </ion-item>
+                <ion-item v-if="canManageHousehold" button @click="openSetWebhookPrompt">
+                    <ion-icon slot="start" :icon="globeOutline" />
+                    {{ _t('Set webhook') }}
+                </ion-item>
             </ion-list>
             <ion-list>
                 <ion-list-header>{{ _t('Members') }}</ion-list-header>
@@ -40,21 +44,23 @@
 </template>
 
 <script setup lang="ts">
-import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
+import { confirmablePrompt, stringPrompt } from "@/alert/prompt";
+import { gettersSymbol, householdClientSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
 import InviteModal from "@/modals/InviteModal.vue";
 import TaskForm from "@/modals/TaskForm.vue";
+import { PrivilegeLevel } from '@/models/HouseholdPrivilege';
 import { User } from "@/models/User";
 import router from "@/router";
 import toast from "@/toast";
 import { _t } from "@/translation";
+import { Clipboard } from '@capacitor/clipboard';
 import {
-alertController, IonBadge, IonContent, IonIcon, IonItem, IonList, IonListHeader, IonPage, IonText, menuController,
-modalController, popoverController
+IonBadge, IonContent, IonIcon, IonItem, IonList, IonListHeader, IonPage, IonText,
+menuController,
+modalController, popoverController, toastController
 } from "@ionic/vue";
-import { addCircleOutline, cogOutline, colorWandOutline, personAddOutline, personOutline, starOutline, trashOutline, walkOutline } from "ionicons/icons";
+import { addCircleOutline, clipboardOutline, cogOutline, colorWandOutline, globeOutline, personAddOutline, personOutline, starOutline, trashOutline, walkOutline } from "ionicons/icons";
 import { computed, inject, watch } from 'vue';
-import { stateSymbol } from '../../dependency-injection/injection-keys';
-import { PrivilegeLevel } from '../../models/HouseholdPrivilege';
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 
 const getters = inject(gettersSymbol)!;
@@ -101,62 +107,87 @@ watch(
     {immediate: true}
 );
 
+async function showSecretToast(secret: string) {
+    const secretToast = await toastController.create({
+        color: 'primary',
+        header: _t('Authentication secret'),
+        message: _t('Please copy and save this, you will not be able to retrieve this again later!'),
+        buttons: [
+            {
+                text: _t('Copy'),
+                role: 'copy',
+                icon: clipboardOutline,
+            },
+            _t('Dismiss'),
+        ],
+    });
+
+    await secretToast.present();
+    const toastDismiss = await secretToast.onDidDismiss();
+    if (toastDismiss.role === 'copy') {
+        await Clipboard.write({
+            string: secret,
+        });
+        toast.success('Secret was successfully copied to the clipboard!');
+    }
+}
+
+async function openSetWebhookPrompt() {
+    if (!canManageHousehold.value || null == household.value) {
+        console.error("Tried to set webhook, but couldn't!");
+        return;
+    }
+
+    const url = await stringPrompt(
+        _t('Please enter the domain of your webhook endpoint, starting with "https://"'),
+        _t('You can read more about webhooks in cleanly at <a href="https://cleanly.schmoppo.de/webhook/doc">https://cleanly.schmoppo.de/webhook/doc</a>'),
+        _t('URL'),
+    );
+
+    if (false === url) {
+        return;
+    }
+    try {
+        const response = await householdClient.setWebhook(household.value.id, url);
+
+        await showSecretToast(response.secret);
+    } catch (err) {
+        toast.showThrownError(err, 'setting webhook');
+    }
+}
+
 async function openDeleteHouseholdPrompt() {
     if (!canManageHousehold.value || null == household.value) {
         console.error("Tried to delete household, but couldn't!");
         return;
     }
-    const alert = await alertController.create({
-        header: _t('Do you want to delete the household permanently? This cannot be undone!'),
-        buttons: [
-            {
-                text: _t('Ok'),
-                role: 'confirm',
-            },
-            _t('Cancel'),
-        ]
-    });
-    await alert.present();
-    if ((await alert.onDidDismiss()).role === 'confirm') {
-        if (await householdClient.removeHousehold(household.value.id)) {
-            householdClient.dashboardInfo();
-            router.push({ name: 'dashboard' });
-            toast.success(_t('Successfully deleted the household!'));
-
-            return;
-        }
-        await toast.error(_t('There was an error deleting the household!'));
+    if (!confirmablePrompt(_t('Do you want to delete the household permanently? This cannot be undone!'))) {
+        return;
     }
+    if (!await householdClient.removeHousehold(household.value.id)) {
+        await toast.error(_t('There was an error deleting the household!'));
+
+        return;
+    }
+    householdClient.dashboardInfo();
+    router.push({ name: 'dashboard' });
+    toast.success(_t('Successfully deleted the household!'));
 }
 async function openLeaveHouseholdPrompt() {
     if (null == household.value) {
         console.error("Tried to leave household, but couldn't!");
         return;
     }
-    const alert = await alertController.create({
-        header: _t('Do you want to leave the household?'),
-        buttons: [
-            {
-                text: _t('Ok'),
-                role: 'confirm',
-            },
-            _t('Cancel'),
-        ]
-    });
-    await alert.present();
-    if ((await alert.onDidDismiss()).role === 'confirm') {
-        try {
-            await householdClient.leaveHousehold(household.value.id);
-            householdClient.dashboardInfo();
-            router.push({ name: 'dashboard' });
-            toast.success(_t('Successfully left the household!'));
-        } catch (error: any) {
-            if (typeof error.message === 'string') {
-                await toast.error(error.message);
-            } else {
-                await toast.error(_t('There was an error leaving the household!'));
-            }
-        }
+    if (!confirmablePrompt(_t('Do you want to leave the household?'))) {
+        return;
+    }
+    try {
+        await householdClient.leaveHousehold(household.value.id);
+        householdClient.dashboardInfo();
+        router.push({ name: 'dashboard' });
+        toast.success(_t('Successfully left the household!'));
+    } catch (error) {
+        toast.showThrownError(error, 'leaving the household');
     }
 }
 async function openMemberActionMenu(member: User) {

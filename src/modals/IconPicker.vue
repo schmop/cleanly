@@ -10,7 +10,7 @@
   <ion-content color="light">
     <ion-item-group>
       <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(`${name}`)">
-        <ion-label>{{ name }}</ion-label>
+        <ion-label>{{ _t(`${name}`) }}</ion-label>
         <ion-icon :icon="icon" />
       </ion-item>
     </ion-item-group>
@@ -24,7 +24,7 @@ import {
   IonHeader, IonIcon, IonItem, IonItemGroup, IonLabel, IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
 import { closeCircleOutline } from "ionicons/icons";
-import icons from '../components/icons';
+import icons from '@/components/icons';
 
 const props = defineProps<{
   iconReceiver: EventTarget,

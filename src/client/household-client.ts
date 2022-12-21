@@ -5,6 +5,8 @@ import { Store } from '@/store';
 import { error } from '@/toast';
 import { isDashboardInfo } from '@/models/DashboardInfo.guard';
 import { PrivilegeLevel } from '@/models/HouseholdPrivilege';
+import { WebhookResponse } from './response/WebhookResponse';
+import { isWebhookResponse } from './response/WebhookResponse.guard';
 
 export class HouseholdClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {}
@@ -171,5 +173,36 @@ export class HouseholdClient {
         }
 
         return true;
+    }
+
+    async setWebhook(householdId: number, url: string): Promise<WebhookResponse> {
+        const response = await this.client.sendJson(
+            `api/household/webhook/${householdId}`,
+            {webhook_url: url},
+            {method: 'POST'},
+        );
+
+        if (response.status !== 200) {
+            try {
+                const data = await response.json();
+                if (typeof data.reason === 'string') {
+                    throw data.reason;
+                }
+            } catch (err) {
+                /** Ignore invalid JSON, no extra info about failure */
+                if (typeof err === 'string') {
+                    throw new Error(err);
+                }
+            }
+
+            throw new Error(`Could not set webhook, ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!isWebhookResponse(data)) {
+            throw new Error('Invalid response given when setting webhook!');
+        }
+
+        return data;
     }
 }

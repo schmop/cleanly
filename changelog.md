@@ -1,4 +1,14 @@
-# 1.9 - Aktuell
+# 1.10 - Aktuell
+
+Eine Webhook-Funktionalität pro Haushalt wurde hinzugefügt!
+Bei dieser kann man seine eigenen Services über erledigte Aufgaben informieren lassen.
+Mehr dazu hier: http://cleanly.schmoppo.de/webhook/doc
+
+![webhooks](assets/changelog/webhooks.png)
+
+Icon-Namen sind nun übersetzt.
+
+# 1.9 - 12.12.2022
 
 Es gibt ein neuer Tab in Haushalten - **Statistiken**.
 
