@@ -20,6 +20,7 @@
     "@capacitor/keyboard": "^4.1.0",
     "@capacitor/push-notifications": "file:../3rdparty/capacitor-plugins/push-notifications",
     "@capacitor/status-bar": "^4.1.1",
+    "@capawesome/capacitor-app-update": "^2.0.1",
     "@ionic/core": "^6.4.0",
     "@ionic/vue": "^6.4.0",
     "@ionic/vue-router": "^6.4.0",

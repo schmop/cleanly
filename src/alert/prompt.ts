@@ -4,12 +4,12 @@ import { alertController } from '@ionic/vue';
 /**
  * @returns {bool} true when confirmed, false else
  */
-export async function confirmablePrompt(message: string): Promise<boolean> {
+export async function confirmablePrompt(message: string, confirmText?: string): Promise<boolean> {
     const alert = await alertController.create({
         header: message,
         buttons: [
             {
-                text: _t('Ok'),
+                text: confirmText ?? _t('Ok'),
                 role: 'confirm',
             },
             _t('Cancel'),

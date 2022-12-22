@@ -54,14 +54,15 @@ import {
   IonToolbar,
   RefresherCustomEvent
 } from '@ionic/vue';
-import MenuView from './components/MenuView.vue';
+import MenuView from '@/components/MenuView.vue';
 import { computed, inject, ref, watch } from 'vue';
 import { mailOutline, homeOutline } from 'ionicons/icons';
-import { Household } from './models/Household';
-import { _t } from './translation';
-import LoadingScreen from './views/LoadingScreen.vue';
+import { Household } from '@/models/Household';
+import { _t } from '@/translation';
+import LoadingScreen from '@/views/LoadingScreen.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { householdClientSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
+import { checkAppVersion } from '@/update/update';
 
 
 let triedSessionRestore = ref(false);
@@ -103,6 +104,8 @@ async function forceReload(event: RefresherCustomEvent) {
 function showInvites() {
   router.push({ name: 'invite-view' });
 }
+
+checkAppVersion();
 
 </script>
 <style scoped>

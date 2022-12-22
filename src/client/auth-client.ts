@@ -16,7 +16,6 @@ export class AuthClient {
     }
 
     get HOST() {
-        return "https://cleanly.schmoppo.de";
         if (process.env.NODE_ENV === 'production') {
             return "https://cleanly.schmoppo.de";
         }

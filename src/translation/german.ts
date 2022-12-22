@@ -173,5 +173,7 @@ export default {
     'Please copy and save this, you will not be able to retrieve this again later!': 'Bitte merke und speichere ihn dir, du wirst ihn später nicht wiederherstellen können.',
     'Authentication secret': 'Authentifizierungsgeheimnis',
     'Copy': 'Kopieren',
+    'A new app version is available. Update now?': 'Eine neue App-Version ist verfügbar. Jetzt aktualisieren?',
+    'Update': 'Aktualisieren',
     '': '',
 } as { [english: string]: string };
