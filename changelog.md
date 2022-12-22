@@ -6,6 +6,8 @@ Einladungen werden ohne aktives Neuladen in der Oberfläche angezeigt.
 
 Das Aufrufen der App aus dem Hintergrund aktualisiert nun den Zustand aller Haushalte.
 
+Fehler behoben, bei dem man die Login-Maske durch Aktualisieren der Seite vor dem Einloggen umgehen konnte.
+
 # 1.11 - 22.12.2022
 
 Eine Webhook-Funktionalität pro Haushalt wurde hinzugefügt!

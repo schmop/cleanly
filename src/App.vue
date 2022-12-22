@@ -27,7 +27,7 @@
         </ion-header>
       </template>
       <ion-content id="main">
-        <ion-refresher slot="fixed" @ionRefresh="forceReload">
+        <ion-refresher v-if="loggedIn" slot="fixed" @ionRefresh="forceReload">
           <ion-refresher-content />
         </ion-refresher>
         <ion-router-outlet ref="outlet" />
