@@ -61,7 +61,7 @@ import { Household } from '@/models/Household';
 import { _t } from '@/translation';
 import LoadingScreen from '@/views/LoadingScreen.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { householdClientSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
+import { foregroundListenerSymbol, householdClientSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
 import { checkAppVersion } from '@/update/update';
 
 
@@ -71,6 +71,7 @@ const state = inject(stateSymbol)!;
 const route = useRoute();
 const router = useRouter();
 const householdClient = inject(householdClientSymbol)!;
+const foregroundListener = inject(foregroundListenerSymbol)!;
 
 const isDashboard = computed(() => route.name === 'dashboard');
 const isLoginPage = computed(() => route.name === 'login');
@@ -106,6 +107,7 @@ function showInvites() {
 }
 
 checkAppVersion();
+foregroundListener.register();
 
 </script>
 <style scoped>

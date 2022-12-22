@@ -1,3 +1,4 @@
+import { ForegroundListener } from "@/app-state/foreground-listener";
 import { AuthClient } from "@/client/auth-client";
 import { HouseholdClient } from "@/client/household-client";
 import { SseClient } from "@/client/sse-client";
@@ -16,3 +17,4 @@ export const sseClientSymbol = Symbol() as InjectionKey<SseClient>;
 export const taskClientSymbol = Symbol() as InjectionKey<TaskClient>;
 export const userClientSymbol = Symbol() as InjectionKey<UserClient>;
 export const pushSymbol = Symbol() as InjectionKey<PushService>;
+export const foregroundListenerSymbol = Symbol() as InjectionKey<ForegroundListener>;

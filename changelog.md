@@ -4,6 +4,8 @@ Die erzwungene Wartezeit zwischen dem mehrmaligen Erledigen derselben Aufgabe is
 
 Einladungen werden ohne aktives Neuladen in der Oberfläche angezeigt.
 
+Das Aufrufen der App aus dem Hintergrund aktualisiert nun den Zustand aller Haushalte.
+
 # 1.11 - 22.12.2022
 
 Eine Webhook-Funktionalität pro Haushalt wurde hinzugefügt!

@@ -22,7 +22,7 @@ export class HouseholdClient {
         return response.status === 200;
     }
 
-    async dashboardInfo(): Promise<any> {
+    async dashboardInfo(): Promise<void> {
         const response = await this.client.request('api/dashboard');
         if (response.status !== 200) {
             error("Could not authenticate!");

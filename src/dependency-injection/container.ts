@@ -7,8 +7,9 @@ import { AuthClient } from '../client/auth-client';
 import { HouseholdClient } from '../client/household-client';
 import { SseClient } from '../client/sse-client';
 import { TaskClient } from '../client/task-client';
-import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol, pushSymbol, userClientSymbol } from './injection-keys';
+import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol, pushSymbol, userClientSymbol, foregroundListenerSymbol } from './injection-keys';
 import { InviteEventProcessor } from '@/invite/invite-event-processor';
+import { ForegroundListener } from '@/app-state/foreground-listener';
 
 class Container {
     authClient?: AuthClient;
@@ -19,6 +20,7 @@ class Container {
     todoEventProcessor?: TodoEventProcessor;
     inviteEventProcessor?: InviteEventProcessor;
     push?: PushService;
+    foregroundListener?: ForegroundListener;
 
     /** Installation as Vue plugin */
     install(app: App) {
@@ -28,6 +30,7 @@ class Container {
         app.provide(householdClientSymbol, this.getHouseholdClient());
         app.provide(userClientSymbol, this.getUserClient());
         app.provide(pushSymbol, this.getPush());
+        app.provide(foregroundListenerSymbol, this.getForegroundListener());
     }
 
     getStore(): Store {
@@ -64,6 +67,10 @@ class Container {
 
     getTaskClient(): TaskClient {
         return this.taskClient = this.taskClient ?? new TaskClient(this.getAuthClient(), store);
+    }
+
+    getForegroundListener(): ForegroundListener {
+        return this.foregroundListener = this.foregroundListener ?? new ForegroundListener(this.getHouseholdClient());
     }
 }
 
