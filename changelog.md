@@ -1,4 +1,4 @@
-# 1.10 - Aktuell
+# 1.11 - Aktuell
 
 Eine Webhook-Funktionalität pro Haushalt wurde hinzugefügt!
 Bei dieser kann man seine eigenen Services über erledigte Aufgaben informieren lassen.
@@ -7,6 +7,12 @@ Mehr dazu hier: http://cleanly.schmoppo.de/webhook/doc
 ![webhooks](assets/changelog/webhooks.png)
 
 Icon-Namen sind nun übersetzt.
+
+Die App weist auf Aktualisierungen hin.
+
+Push-Benachrichtigungsrechte werden wieder korrekt angefragt.
+
+Kollaborativen Arbeiten in der Checkliste repariert.
 
 # 1.9 - 12.12.2022
 

@@ -3,11 +3,16 @@ import { TodoEventProcessor } from '../checklist/todo-event-processor';
 
 export class SseClient {
     source: EventSource|null;
+    retries = 0;
     get HOST() {
         if (process.env.NODE_ENV === 'production') {
             return "https://cleanly.schmoppo.de:3333";
         }
         return "http://127.0.0.1:3334";
+    }
+
+    get MAX_RETRIES() {
+        return 10;
     }
 
     get _token() {
@@ -18,8 +23,8 @@ export class SseClient {
         this.source = null;
     }
 
-    register() {
-        if (null !== this.source) {
+    register(force: boolean = false) {
+        if (null !== this.source && !force) {
             return;
         }
         /**
@@ -42,8 +47,12 @@ export class SseClient {
             }
         };
 
-        this.source.onerror = function () {
-            console.warn("EventSource failed.");
+        this.source.onerror = (event: Event) => {
+            console.warn("EventSource failed.", event);
+            this.retries++;
+            if (this.retries < this.MAX_RETRIES) {
+                this.register(true);
+            }
         };
     }
 }
