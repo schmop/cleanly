@@ -1,5 +1,6 @@
-import { AuthClient } from './auth-client';
-import { TodoEventProcessor } from '../checklist/todo-event-processor';
+import { AuthClient } from '@/client/auth-client';
+import { TodoEventProcessor } from '@/checklist/todo-event-processor';
+import { InviteEventProcessor } from '@/invite/invite-event-processor';
 
 export class SseClient {
     source: EventSource|null;
@@ -19,7 +20,11 @@ export class SseClient {
         return this.authClient.getToken();
     }
 
-    constructor(private authClient: AuthClient, private eventProcessor: TodoEventProcessor) {
+    constructor(
+        private authClient: AuthClient,
+        private todoEventProcessor: TodoEventProcessor,
+        private inviteEventProcessor: InviteEventProcessor,
+    ) {
         this.source = null;
     }
 
@@ -42,13 +47,17 @@ export class SseClient {
             const payload = data.payload;
             switch (data.type) {
                 case 'checklist':
-                    this.eventProcessor.processBatch(payload.events, payload.household_id);
+                    this.todoEventProcessor.processBatch(payload.events, payload.household_id);
+                    break;
+                case 'invites':
+                    this.inviteEventProcessor.process(payload);
                     break;
             }
         };
 
         this.source.onerror = (event: Event) => {
             console.warn("EventSource failed.", event);
+            this.source?.close();
             this.retries++;
             if (this.retries < this.MAX_RETRIES) {
                 this.register(true);

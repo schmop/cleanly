@@ -8,6 +8,7 @@ import { HouseholdClient } from '../client/household-client';
 import { SseClient } from '../client/sse-client';
 import { TaskClient } from '../client/task-client';
 import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol, pushSymbol, userClientSymbol } from './injection-keys';
+import { InviteEventProcessor } from '@/invite/invite-event-processor';
 
 class Container {
     authClient?: AuthClient;
@@ -15,7 +16,8 @@ class Container {
     sseClient?: SseClient;
     taskClient?: TaskClient;
     userClient?: UserClient;
-    eventProcessor?: TodoEventProcessor;
+    todoEventProcessor?: TodoEventProcessor;
+    inviteEventProcessor?: InviteEventProcessor;
     push?: PushService;
 
     /** Installation as Vue plugin */
@@ -49,11 +51,15 @@ class Container {
     }
 
     getSseClient(): SseClient {
-        return this.sseClient = this.sseClient ?? new SseClient(this.getAuthClient(), this.getEventProcessor());
+        return this.sseClient = this.sseClient ?? new SseClient(this.getAuthClient(), this.getTodoEventProcessor(), this.getInviteEventProcessor());
     }
 
-    getEventProcessor(): TodoEventProcessor {
-        return this.eventProcessor = this.eventProcessor ?? new TodoEventProcessor(store, this.getHouseholdClient());
+    getTodoEventProcessor(): TodoEventProcessor {
+        return this.todoEventProcessor = this.todoEventProcessor ?? new TodoEventProcessor(store, this.getHouseholdClient());
+    }
+
+    getInviteEventProcessor(): InviteEventProcessor {
+        return this.inviteEventProcessor = this.inviteEventProcessor ?? new InviteEventProcessor(store, this.getHouseholdClient());
     }
 
     getTaskClient(): TaskClient {

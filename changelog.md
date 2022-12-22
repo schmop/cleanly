@@ -1,4 +1,10 @@
-# 1.11 - Aktuell
+# 1.12 - Aktuell
+
+Die erzwungene Wartezeit zwischen dem mehrmaligen Erledigen derselben Aufgabe ist nun benutzerbezogen.
+
+Einladungen werden ohne aktives Neuladen in der Oberfläche angezeigt.
+
+# 1.11 - 22.12.2022
 
 Eine Webhook-Funktionalität pro Haushalt wurde hinzugefügt!
 Bei dieser kann man seine eigenen Services über erledigte Aufgaben informieren lassen.

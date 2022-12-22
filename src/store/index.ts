@@ -161,6 +161,9 @@ export class Store {
             task.lastComplete = timestamp;
         }
     }
+    addInvite(invite: Invite) {
+        this.state.invites.push(invite);
+    }
     dashboard(households: Household[], user: User, invites: Invite[]) {
         this.state.households = households;
         this.state.user = user;
