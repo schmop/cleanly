@@ -23,5 +23,5 @@ export function green() {
 }
 
 export function colorAsString({r,g,b,a}: Color): string {
-    return `rgba(${r},${g},${b},${a})`; 
+    return `rgba(${r},${g},${b},${a})`;
 }

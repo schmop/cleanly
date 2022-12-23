@@ -29,8 +29,8 @@ export function isTask(obj: unknown, argumentName: string = "task"): obj is Task
         evaluate(typeof typedObj["name"] === "string", `${argumentName}["name"]`, "string", typedObj["name"]) &&
         evaluate(typeof typedObj["id"] === "number", `${argumentName}["id"]`, "number", typedObj["id"]) &&
         evaluate(typeof typedObj["icon"] === "string", `${argumentName}["icon"]`, "string", typedObj["icon"]) &&
-        evaluate((typeof typedObj["color"] === "undefined" ||
-            typeof typedObj["color"] === "string"), `${argumentName}["color"]`, "string | undefined", typedObj["color"]) &&
+        evaluate((typedObj["color"] === null ||
+            typeof typedObj["color"] === "string"), `${argumentName}["color"]`, "string | null", typedObj["color"]) &&
         evaluate((typeof typedObj["lastComplete"] === "undefined" ||
             typedObj["lastComplete"] === null ||
             typeof typedObj["lastComplete"] === "number"), `${argumentName}["lastComplete"]`, "number | null | undefined", typedObj["lastComplete"]) &&

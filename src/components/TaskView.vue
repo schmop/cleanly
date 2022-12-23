@@ -44,7 +44,7 @@
     <ion-card-content class="flex">
       <div class="w-100">
         <div class="progress-background soft">
-          <div class="progress" :style="progressStyle">
+          <div class="progress" :style="taskColor">
             {{ dueInText }}
           </div>
         </div>
@@ -61,33 +61,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, computed } from 'vue';
-import { ellipsisVertical, trashOutline, pencilOutline, starOutline } from "ionicons/icons";
-import {
-  IonLabel,
-  IonItem,
-  IonContent,
-  IonText,
-  IonIcon,
-  IonButton,
-  IonButtons,
-  IonList,
-  IonPopover,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  modalController,
-} from "@ionic/vue";
-import { Task } from "@/models/Task";
-import TaskForm from "@/modals/TaskForm.vue";
+import { taskOverDue } from "@/common/task-priority";
+import { DAY_IN_HOURS, HOUR_IN_SECONDS, formatHours, roundedRecurringInterval, secondsSince } from "@/common/time";
 import icons from "@/components/icons";
-import { taskOverDue, taskProgress } from "@/common/task-priority";
-import { DAY_IN_HOURS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
-import { _t, __t } from "@/translation";
-import { Household } from "@/models/Household";
-import toast from "@/toast";
 import { gettersSymbol, householdClientSymbol, stateSymbol, storeSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
+import TaskForm from "@/modals/TaskForm.vue";
+import { Household } from "@/models/Household";
+import { Task } from "@/models/Task";
+import toast from "@/toast";
+import { __t, _t } from "@/translation";
+import {
+IonButton,
+IonButtons,
+IonCard,
+IonCardContent,
+IonCardHeader,
+IonCardTitle,
+IonContent,
+IonIcon,
+IonItem,
+IonLabel,
+IonList,
+IonPopover,
+IonText,
+modalController,
+} from "@ionic/vue";
+import { ellipsisVertical, pencilOutline, starOutline, trashOutline } from "ionicons/icons";
+import { computed, inject, ref } from 'vue';
 
 const props = defineProps<{
   task: Task,
@@ -104,9 +104,28 @@ let actionsVisible = ref(false);
 
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
 const canManageTasks = computed(() => null !== state.user && getters.canManageTasks.value(state.user.id, props.household));
-const progress = computed(() => taskProgress(props.task));
-const progressStyle = computed(() => `width: ${progress.value * 100}%`);
 const overdue = computed(() => taskOverDue(props.task));
+/**
+ * @link Accessible color generator: https://www.learnui.design/tools/accessible-color-generator.html
+ * @link Name that color: https://chir.ag/projects/name-that-color/#3F5C69
+ */
+const colors = [
+  {code: '#3f5c69', name: _t('Fiord')},
+  {code: '#b40008', name: _t('Bright Red')},
+  {code: '#b3003b', name: _t('Shiraz')},
+  {code: '#921aa6', name: _t('Seance')},
+  {code: '#673AB7', name: _t('Purple Heart')},
+  {code: '#3c4fb3', name: _t('Azure')},
+  {code: '#0058ac', name: _t('Endeavour')},
+  {code: '#006076', name: _t('Orient')},
+  {code: '#006709', name: _t('Camarone')},
+  {code: '#4b6100', name: _t('Verdun Green')},
+  {code: '#794e00', name: _t('Cinnamon')},
+  {code: '#745144', name: _t('Roman Coffee')},
+  {code: '#585858', name: _t('Scorpion')},
+];
+const defaultColor = colors[0];
+const taskColor = computed(() => `background-color: ${props.task.color ?? defaultColor.code}`);
 const durationText = computed(() => roundedRecurringInterval(props.task.duration));
 const dueInText = computed(() => {
   const { lastComplete } = props.task;
@@ -213,24 +232,10 @@ function closeActions(event: FocusEvent) {
   padding: 4px;
   text-align: center;
   color: var(--ion-color-danger-contrast);
-  background-color: rgb(35, 133, 35);
+  margin: 4px 2px 4px 2px;
   white-space: nowrap;
   display: flex;
   align-items: center;
-}
-
-.soft>.progress {
-  background-color: rgb(48, 129, 223);
-}
-
-.progress-background {
-  border-radius: 4px;
-  margin: 4px 2px 4px 2px;
-  background-color: rgb(100, 21, 21);
-}
-
-.progress-background.soft {
-  background-color: rgb(32, 59, 177);
 }
 
 .danger {

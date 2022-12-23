@@ -8,6 +8,11 @@ Das Aufrufen der App aus dem Hintergrund aktualisiert nun den Zustand aller Haus
 
 Fehler behoben, bei dem man die Login-Maske durch Aktualisieren der Seite vor dem Einloggen umgehen konnte.
 
+Die Fortschrittsanzeige bei Aufgaben mit Wiederholungsintervall wurden durch farbige Balken mit einstellbaren Farben ersetzt.
+
+![task-colors](assets/changelog/task-colors.png)
+
+
 # 1.11 - 22.12.2022
 
 Eine Webhook-Funktionalität pro Haushalt wurde hinzugefügt!

@@ -60,6 +60,7 @@ function createTestTask(name: string, duration: number | null, lastComplete: num
     name,
     id: 0,
     icon: 'some-icon',
+    color: '#550000',
     lastComplete,
     duration,
     stars: 0,
