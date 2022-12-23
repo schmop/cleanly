@@ -89,13 +89,25 @@ watch(
   { immediate: true }
 );
 
+function openHousehold(household: Household) {
+  store.viewHousehold(household.id);
+  router.push({ name: 'household-view' });
+}
+
 async function sessionRestoreSuccess() {
   try {
     await householdClient.dashboardInfo();
+    const households = store.state.households;
+    if (households.length === 1) {
+      openHousehold(households[0]);
+    } else {
+      router.replace({ name: 'dashboard' });
+    }
+  } catch (error) {
+    router.replace({ name: 'login' });
   } finally {
     triedSessionRestore.value = true;
   }
-  router.replace({ name: 'dashboard' });
 }
 function sessionRestoreFail() {
   triedSessionRestore.value = true;

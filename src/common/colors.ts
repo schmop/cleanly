@@ -26,7 +26,7 @@ export function colorAsString({ r, g, b, a }: Color): string {
     return `rgba(${r},${g},${b},${a})`;
 }
 
-class RGB {
+export class RGB {
     constructor(
         public r: number,
         public g: number,
@@ -41,26 +41,72 @@ class RGB {
     }
 }
 
-class HSL {
-    /**
-     * @param {number} hue [0, 360)
-     * @param {number} saturation [0, 100]
-     * @param {number} lightness [0, 100]
-     */
-    constructor(
-        public readonly hue: number,
-        public readonly saturation: number,
-        public readonly lightness: number,
-    ) {
+export class HSL {
+    private _hue: number = 0;
+    private _saturation: number = 0;
+    private _luminosity: number = 0;
+    private _alpha: number = 1;
+
+    public get hue() {
+        return this._hue;
+    }
+
+    public set hue(hue) {
         if (hue < 0 || hue >= 360) {
             throw new Error('Invalid hue, needs to be between 0 and 360');
         }
+        this._hue = hue;
+    }
+
+    public get luminosity() {
+        return this._luminosity;
+    }
+
+    public set luminosity(luminosity) {
+        if (luminosity < 0 || luminosity > 100) {
+            throw new Error('Invalid luminosity, needs to be between 0 and 100');
+        }
+        this._luminosity = luminosity;
+    }
+
+    public get saturation() {
+        return this._saturation;
+    }
+
+    public set saturation(saturation) {
         if (saturation < 0 || saturation > 100) {
             throw new Error('Invalid saturation, needs to be between 0 and 100');
         }
-        if (lightness < 0 || lightness > 100) {
-            throw new Error('Invalid lightness, needs to be between 0 and 100');
+        this._saturation = saturation;
+    }
+
+    public get alpha() {
+        return this._alpha;
+    }
+
+    public set alpha(alpha) {
+        if (alpha < 0 || alpha > 1) {
+            throw new Error('Invalid alpha, needs to be between 0 and 1');
         }
+        this._alpha = alpha;
+    }
+
+    /**
+     * @param {number} hue [0, 360)
+     * @param {number} saturation [0, 100]
+     * @param {number} luminosity [0, 100]
+     * @param {number} alpha [0,1]
+     */
+    constructor(
+        hue: number,
+        saturation: number,
+        luminosity: number,
+        alpha: number = 1,
+    ) {
+        this.hue = hue;
+        this.saturation = saturation;
+        this.luminosity = luminosity;
+        this.alpha = alpha;
     }
 
     /**
@@ -68,12 +114,14 @@ class HSL {
      * @source Computer Graphics and Geometric from Max K. Agoston, Page 306
      */
     toRgb() {
-        const { hue: h, saturation: s, lightness: l } = this;
+        const { hue: h, saturation, luminosity } = this;
+        const s = saturation / 100;
+        const l = luminosity / 100;
         if (s <= 0) {
             return new RGB(l, l, l);
         }
 
-        const v = l <= 50
+        const v = l <= 0.5
             ? (l * (1 + s))
             : (l + s - l * s);
 
@@ -84,7 +132,7 @@ class HSL {
         const min = 2 * l - v;
         const sv = (v - min) / v;
         /** @var sixthH [0, 6) */
-        const sixthH = (h % 360) / 60;
+        const sixthH = ((h + 360) % 360) / 60;
         const sextant = Math.floor(sixthH);
         const fract = sixthH - sextant;
         const vsf = v * sv * fract;

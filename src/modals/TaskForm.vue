@@ -87,7 +87,7 @@ import IconPicker from "./IconPicker.vue";
 import ColorPicker from "./ColorPicker.vue";
 import { taskClientSymbol } from "@/dependency-injection/injection-keys";
 import toast from "@/toast";
-import { getDefaultTaskColor } from "@/common/task-colors";
+import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
 
 const props = defineProps<{
   id?: number,
@@ -99,10 +99,11 @@ const durationModifiers = DURATION_SIZES;
 const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
 const duration = ref<number|null>(null);
 const icon = ref('checkmark');
-const color = ref<string|null>(getDefaultTaskColor().code);
+const hue = ref<number>(getDefaultTaskHue());
 const taskName = ref('');
 const stars = ref('0');
 
+const color = computed(() => taskColorFromHue(hue.value).toHex());
 const valid = computed(() => icon.value in icons);
 const calculatedDuration = computed(() => {
   if (null === duration.value) {
@@ -116,26 +117,27 @@ const isEditing = computed(() => null != props.task);
 
 async function colorPicker() {
   const colorReceiver = new EventTarget();
-  let newColor: string|null = null;
+  let newHue: number|null = null;
   colorReceiver.addEventListener('color', (event) => {
-    newColor = (event as CustomEvent).detail;
+    newHue = (event as CustomEvent<number>).detail;
   });
   const colorPicker = await modalController.create({
     component: ColorPicker,
     componentProps: {
       colorReceiver,
+      startHue: hue.value,
     }
   });
   colorPicker.present();
   await colorPicker.onDidDismiss();
 
-  color.value = newColor ?? color.value;
+  hue.value = Math.floor(newHue ?? hue.value);
 }
 async function iconPicker() {
   const iconReceiver = new EventTarget();
   let newIcon: string|null = null;
   iconReceiver.addEventListener('icon', (event) => {
-    newIcon = (event as CustomEvent).detail;
+    newIcon = (event as CustomEvent<string>).detail;
   });
   const iconPicker = await modalController.create({
     component: IconPicker,
@@ -199,14 +201,14 @@ async function openDurationPicker() {
 async function submit() {
   if (isEditing.value) {
     try {
-      await taskClient.editTask(props.task!, taskName.value, icon.value, color.value, calculatedDuration.value, parseInt(stars.value));
+      await taskClient.editTask(props.task!, taskName.value, icon.value, hue.value, calculatedDuration.value, parseInt(stars.value));
       toast.success(_t('Task edited successfully'));
     } catch (e) {
       toast.error(_t('Could not edit task'));
     }
   } else {
     try {
-      await taskClient.addNewTask(props.id!, taskName.value, icon.value, color.value, calculatedDuration.value, parseInt(stars.value));
+      await taskClient.addNewTask(props.id!, taskName.value, icon.value, hue.value, calculatedDuration.value, parseInt(stars.value));
       toast.success(_t('Task created successfully'));
     } catch (e) {
       toast.error(_t('Could not add task'));
@@ -222,7 +224,7 @@ if (isEditing.value) {
   taskName.value = props.task!.name;
 
   icon.value = props.task!.icon;
-  color.value = props.task!.color ?? getDefaultTaskColor().code;
+  hue.value = props.task!.hue ?? getDefaultTaskHue();
   stars.value = props.task!.stars.toString();
   if (null === props.task!.duration) {
     duration.value = null;

@@ -189,5 +189,6 @@ export default {
     'Scorpion': 'Skorpion',
     'Fiord': 'Fjord',
     'Color': 'Farbe',
+    'Select': 'Auswählen',
     '': '',
 } as { [english: string]: string };

@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { getDefaultTaskHue, taskColorFromHue } from "@/common/task-colors";
 import { taskOverDue } from "@/common/task-priority";
 import { DAY_IN_HOURS, HOUR_IN_SECONDS, formatHours, roundedRecurringInterval, secondsSince } from "@/common/time";
 import icons from "@/components/icons";
@@ -105,27 +106,7 @@ let actionsVisible = ref(false);
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
 const canManageTasks = computed(() => null !== state.user && getters.canManageTasks.value(state.user.id, props.household));
 const overdue = computed(() => taskOverDue(props.task));
-/**
- * @link Accessible color generator: https://www.learnui.design/tools/accessible-color-generator.html
- * @link Name that color: https://chir.ag/projects/name-that-color/#3F5C69
- */
-const colors = [
-  {code: '#3f5c69', name: _t('Fiord')},
-  {code: '#b40008', name: _t('Bright Red')},
-  {code: '#b3003b', name: _t('Shiraz')},
-  {code: '#921aa6', name: _t('Seance')},
-  {code: '#673AB7', name: _t('Purple Heart')},
-  {code: '#3c4fb3', name: _t('Azure')},
-  {code: '#0058ac', name: _t('Endeavour')},
-  {code: '#006076', name: _t('Orient')},
-  {code: '#006709', name: _t('Camarone')},
-  {code: '#4b6100', name: _t('Verdun Green')},
-  {code: '#794e00', name: _t('Cinnamon')},
-  {code: '#745144', name: _t('Roman Coffee')},
-  {code: '#585858', name: _t('Scorpion')},
-];
-const defaultColor = colors[0];
-const taskColor = computed(() => `background-color: ${props.task.color ?? defaultColor.code}`);
+const taskColor = computed(() => `background-color: ${taskColorFromHue(props.task.hue ?? getDefaultTaskHue()).toHex()}`);
 const durationText = computed(() => roundedRecurringInterval(props.task.duration));
 const dueInText = computed(() => {
   const { lastComplete } = props.task;
@@ -231,7 +212,7 @@ function closeActions(event: FocusEvent) {
   height: 40px;
   padding: 4px;
   text-align: center;
-  color: var(--ion-color-danger-contrast);
+  color: var(--ion-text-color, #000);
   margin: 4px 2px 4px 2px;
   white-space: nowrap;
   display: flex;

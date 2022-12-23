@@ -7,52 +7,127 @@
       </ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content color="light" class="content">
+  <ion-content color="light">
     <div class="content">
-      <button v-for="color in getTaskColors()" :key="color.code" class="color-button"
-        :style="`background-color: ${color.code}`" @click="select(color.code)">
-        {{ color.name }}
-      </button>
+      <color-picker class="color-picker" @input="onColorChange" @select="select()" :hue="color.hue"
+        :saturation="color.saturation" :luminosity="color.luminosity">
+      </color-picker>
+      <div class="preview-container dark-preview">
+        <div class="preview" :style="`background-color: ${darkColor}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
+      </div>
+      <div class="preview-container light-preview">
+        <div class="preview" :style="`background-color: ${lightColor}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
+      </div>
     </div>
   </ion-content>
+  <ion-footer>
+    <ion-toolbar>
+      <ion-button color="primary" @click="select()">
+        <ion-icon :icon="colorPaletteOutline" slot="start" />
+        {{ _t('Select') }}
+      </ion-button>
+      <ion-button color="light" @click="dismiss()">
+        <ion-icon :icon="closeCircleOutline" slot="start" />
+        {{ _t('Cancel') }}
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
 </template>
 
 <script setup lang="ts">
-import { getTaskColors } from '@/common/task-colors';
-import { _t } from '@/translation/index';
+import { HSL } from '@/common/colors';
+import { taskColorFromHue, getDefaultTaskHue, lightLuminosity, darkLuminosity } from '@/common/task-colors';
+import { __t, _t } from '@/translation/index';
 import {
-IonContent,
-IonHeader, IonIcon,
-IonTitle, IonToolbar, modalController
+  IonButton,
+  IonContent,
+  IonFooter,
+  IonHeader, IonIcon,
+  IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
-import { closeCircleOutline } from "ionicons/icons";
-
-const props = defineProps<{
-  colorReceiver: EventTarget,
-}>();
+import ColorPicker from '@radial-color-picker/vue-color-picker';
+import { closeCircleOutline, colorPaletteOutline } from "ionicons/icons";
+import { reactive, ref, computed } from 'vue';
 
 const emit = defineEmits(['select']);
+const props = defineProps<{
+  colorReceiver: EventTarget,
+  startHue: number | null,
+}>();
+
+const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+
+let darkScheme = ref<boolean>(mediaQueryList.matches);
+
+mediaQueryList.addEventListener('change', (event) => {
+  darkScheme.value = event.matches;
+});
+
+const color = reactive(taskColorFromHue(props.startHue ?? getDefaultTaskHue()));
+const darkColor = computed(() => (new HSL(color.hue, 100, darkLuminosity())).toHex());
+const lightColor = computed(() => new HSL(color.hue, 100, lightLuminosity()).toHex());
+
 
 function dismiss() {
   modalController.dismiss();
 }
-async function select(colorCode: string) {
-  props.colorReceiver.dispatchEvent(new CustomEvent('color', { detail: colorCode }));
-  emit('select', colorCode);
+function onColorChange(hue: number) {
+  color.hue = hue;
+}
+async function select() {
+  const hue = color.hue;
+  props.colorReceiver.dispatchEvent(new CustomEvent('color', { detail: hue }));
+  emit('select', hue);
   dismiss();
 }
 </script>
 
 <style scoped>
+@import '@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css';
+
 .content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  min-height: 100%;
 }
 
-.color-button {
-  display: block;
+.color-picker {
+  aspect-ratio: 1;
+  margin: 16px 0;
+}
+
+.preview-container {
+  width: fill-available;
+  padding: 16px;
+  margin: 4px 16px;
+  border-radius: 4px;
+}
+
+.preview {
+  width: 100%;
+  height: 40px;
+  padding: 4px;
   text-align: center;
-  height: 80px;
-  border-bottom: 2px solid rgb(204, 204, 204);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+</style>
+
+<style>
+.md .dark-preview {
+  color: #fff;
+  background-color: #121212;
+}
+
+.ios .dark-preview {
+  color: #fff;
+  background-color: #000;
+}
+
+.light-preview {
+  color: #000;
+  background-color: #fff;
 }
 </style>

@@ -28,7 +28,7 @@ import {
 import {
   addCircleOutline
 } from "ionicons/icons";
-import { computed, inject } from "vue";
+import { computed, inject, onBeforeMount } from "vue";
 import HouseholdPreview from "../components/HouseholdPreview.vue";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 import router from "../router";
@@ -39,7 +39,6 @@ const state = inject(stateSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 const households = computed(() => state.households);
-
 
 async function openCreateHouseholdModal() {
   menuController.close("menu");

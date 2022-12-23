@@ -25,6 +25,7 @@
     "@ionic/core": "^6.4.0",
     "@ionic/vue": "^6.4.0",
     "@ionic/vue-router": "^6.4.0",
+    "@radial-color-picker/vue-color-picker": "^5.0.1",
     "chart.js": "^4.0.1",
     "core-js": "^3.6.5",
     "module-alias": "^2.2.2",

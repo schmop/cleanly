@@ -13,14 +13,14 @@ export class TaskClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
-    async addNewTask(householdId: number, name: string, icon: string, color: string|null, duration: number|null, stars: number) {
+    async addNewTask(householdId: number, name: string, icon: string, hue: number|null, duration: number|null, stars: number) {
         const response = await this.client.sendJson(
             'api/task/create',
             {
                 household_id: householdId,
                 name,
                 icon,
-                color,
+                hue,
                 duration,
                 stars,
             },
@@ -32,13 +32,13 @@ export class TaskClient {
         }
     }
 
-    async editTask(task: Task, name: string, icon: string, color: string|null, duration: number|null, stars: number) {
+    async editTask(task: Task, name: string, icon: string, hue: number|null, duration: number|null, stars: number) {
         const response = await this.client.sendJson(
             `api/task/edit/${task.id}`,
             {
                 name,
                 icon,
-                color,
+                hue,
                 duration,
                 stars,
             },
