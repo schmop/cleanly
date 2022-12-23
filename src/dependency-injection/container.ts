@@ -70,7 +70,7 @@ class Container {
     }
 
     getForegroundListener(): ForegroundListener {
-        return this.foregroundListener = this.foregroundListener ?? new ForegroundListener(this.getHouseholdClient());
+        return this.foregroundListener = this.foregroundListener ?? new ForegroundListener(this.getHouseholdClient(), store);
     }
 }
 

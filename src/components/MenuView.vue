@@ -22,7 +22,7 @@
           <ion-icon slot="start" :icon="settingsOutline" />
           {{ _t('Settings') }}
         </ion-item>
-        <ion-item button @click="gotoChangelog">
+        <ion-item button @click="openChangelog">
           <ion-icon slot="start" :icon="documentTextOutline" />
           {{ _t('Changes') }}
         </ion-item>
@@ -32,6 +32,13 @@
         </ion-item>
       </ion-list>
     </ion-content>
+    <ion-footer>
+      <ion-item>
+        <ion-label slot="end">
+          <p>{{ `Version: ${appVersion}` }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-footer>
   </ion-menu>
 </template>
 
@@ -48,6 +55,8 @@ import {
   IonItem,
   IonContent,
   IonMenu,
+  IonLabel,
+  IonFooter,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -59,23 +68,27 @@ import {
 import CreateHousehold from "../modals/CreateHousehold.vue";
 import { _t } from "@/translation";
 import { householdClientSymbol, authClientSymbol } from '../dependency-injection/injection-keys';
-import { inject } from "vue";
+import { inject, onBeforeMount, ref } from "vue";
 import { routerKey } from "vue-router";
+import { App } from '@capacitor/app';
+import { openChangelogBrowser } from "@/changelog/changelog-browser";
 
 const householdClient = inject(householdClientSymbol)!;
 const authClient = inject(authClientSymbol)!;
 const router = inject(routerKey)!;
 
+const appVersion = ref('');
+
 async function close() {
   return menuController.close("menu");
 }
-function gotoChangelog() {
+async function openChangelog() {
+  await openChangelogBrowser();
   close();
-  router.push({name: 'changelogs'});
 }
 function gotoSettings() {
   close();
-  router.push({name: 'settings'});
+  router.push({ name: 'settings' });
 }
 async function openCreateHouseholdModal() {
   close()
@@ -91,7 +104,18 @@ async function logout() {
   authClient.logout();
   router.replace({ name: 'login' });
 }
+
+onBeforeMount(async () => {
+  try {
+    const appInfo = await App.getInfo();
+    appVersion.value = appInfo.version;
+  } catch (err) {
+    console.warn(err);
+    appVersion.value = 'Unknown Version'
+  }
+});
 </script>
 
 <style scoped>
+
 </style>

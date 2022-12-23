@@ -1,15 +1,13 @@
 import { AuthClient } from '@/client/auth-client';
 import { TodoEventProcessor } from '@/checklist/todo-event-processor';
 import { InviteEventProcessor } from '@/invite/invite-event-processor';
+import { getSseHost } from '@/client/host';
 
 export class SseClient {
     source: EventSource|null;
     retries = 0;
     get HOST() {
-        if (process.env.NODE_ENV === 'production') {
-            return "https://cleanly.schmoppo.de:3333";
-        }
-        return "http://127.0.0.1:3334";
+        return getSseHost();
     }
 
     get MAX_RETRIES() {

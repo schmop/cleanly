@@ -90,8 +90,11 @@ watch(
 );
 
 async function sessionRestoreSuccess() {
-  await householdClient.dashboardInfo();
-  triedSessionRestore.value = true;
+  try {
+    await householdClient.dashboardInfo();
+  } finally {
+    triedSessionRestore.value = true;
+  }
   router.replace({ name: 'dashboard' });
 }
 function sessionRestoreFail() {

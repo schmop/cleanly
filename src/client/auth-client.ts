@@ -2,6 +2,7 @@ import router from '../router';
 import { container } from '../dependency-injection/container';
 import { Store } from '@/store';
 import { PushService } from '@/push';
+import { getWebHost } from '@/client/host';
 
 export class AuthClient {
     private _token: null | string = null;
@@ -16,11 +17,7 @@ export class AuthClient {
     }
 
     get HOST() {
-        if (process.env.NODE_ENV === 'production') {
-            return "https://cleanly.schmoppo.de";
-        }
-        //return "http://127.0.0.1:8000";
-        return "http://192.168.2.107:8000";
+        return getWebHost();
     }
 
     async restoreState(): Promise<void> {
