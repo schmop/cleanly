@@ -35,8 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { HSL } from '@/common/colors';
-import { darkLuminosity, getDefaultTaskHue, lightLuminosity, taskColorFromHue } from '@/common/task-colors';
+import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
 import { stateSymbol } from '@/dependency-injection/injection-keys';
 import { __t, _t } from '@/translation/index';
 import {
@@ -92,7 +91,7 @@ async function select() {
 }
 
 .preview-container {
-  width: fill-available;
+  width: stretch;
   padding: 16px;
   margin: 4px 16px;
   border-radius: 4px;

@@ -23,12 +23,12 @@
 import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import { Household } from "@/models/Household";
 import {
-  IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonIcon, IonPage, menuController, modalController
+IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonIcon, IonPage, menuController, modalController
 } from "@ionic/vue";
 import {
-  addCircleOutline
+addCircleOutline
 } from "ionicons/icons";
-import { computed, inject, onBeforeMount } from "vue";
+import { computed, inject } from "vue";
 import HouseholdPreview from "../components/HouseholdPreview.vue";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 import router from "../router";

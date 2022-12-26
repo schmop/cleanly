@@ -3,12 +3,12 @@
         <ion-content>
             <ion-loading backdropDismiss v-if="statistics === null || household === undefined" />
             <template v-else>
-                <ion-select interface="action-sheet" :placeholder="_t('Select analysis')" @ionChange="selectAnalysis">
+                <ion-select :value="analysis" interface="action-sheet" :placeholder="_t('Select analysis')" @ionChange="selectAnalysis">
                     <ion-select-option value="participations">{{ _t('Participations') }}</ion-select-option>
                     <ion-select-option value="punctuality">{{ _t('Punctuality') }}</ion-select-option>
                 </ion-select>
-                <ion-select interface="action-sheet" :placeholder="_t('Select task')" @ionChange="selectTask">
-                    <ion-select-option v-for="task in household.tasks" :key="task.id" :value="task.id">
+                <ion-select :value="selectedTaskId" interface="action-sheet" :placeholder="_t('Select task')" @ionChange="selectTask">
+                    <ion-select-option v-for="task in sortedTasks" :key="task.id" :value="task.id">
                         {{ task.name }}
                     </ion-select-option>
                 </ion-select>
@@ -47,8 +47,8 @@ import {
 } from 'chart.js';
 import { computed, inject, ref } from "vue";
 import { Doughnut, Bar } from 'vue-chartjs';
-import { TaskId } from '../../types/index';
-import { secondsToDays } from '../../common/time';
+import { TaskId } from '@/types/index';
+import { secondsToDays } from '@/common/time';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Colors);
 
@@ -66,6 +66,9 @@ let statistics = ref<HouseholdStats | null>(null);
 const options = { responsive: true };
 
 const household = computed(() => getters.household.value);
+const sortedTasks = computed(() => household.value?.tasks.concat().sort((a, b) => {
+    return a.name.localeCompare(b.name);
+}));
 const selectedTask = computed(() => household.value?.tasks.find((task) => task.id === selectedTaskId.value));
 const participationData = computed<DoughnutChartData>(() => {
     const task = selectedTask.value;
@@ -74,12 +77,14 @@ const participationData = computed<DoughnutChartData>(() => {
         return { labels: [], datasets: [] };
     }
     const participations = statistics.value.userParticipations[task.id];
+    const userIds = household.value?.users.map((user) => user.id) ?? [];
+    const participationCounts = userIds.map((userId) => participations[userId] ?? 0);
 
     return {
-        labels: userIdsToUserNames(Object.keys(participations)),
+        labels: userIdsToUserNames(userIds),
         datasets: [{
             label: __t('Participations at {0}', task.name),
-            data: Object.values(participations),
+            data: participationCounts,
         }],
     }
 });
@@ -114,14 +119,9 @@ const punctualityData = computed<BarChartData>(() => {
     }
 });
 
-function userIdsToUserNames(ids: string[]): string[] {
-    const householdModel = household.value;
-    if (undefined === householdModel) {
-        return ids;
-    }
-
+function userIdsToUserNames(ids: number[]): string[] {
     return ids.map((id) => {
-        const user = householdModel.users.find((user) => user.id.toString() === id);
+        const user = household.value?.users.find((user) => user.id === id);
 
         return user?.name ?? `user-${id}`
     });
@@ -153,7 +153,7 @@ async function fetchStatistics() {
 }
 
 function selectFirstTask() {
-    selectedTaskId.value = household.value?.tasks[0]?.id ?? null;
+    selectedTaskId.value = sortedTasks.value?.[0].id ?? null;
 }
 
 onIonViewWillEnter(() => {
