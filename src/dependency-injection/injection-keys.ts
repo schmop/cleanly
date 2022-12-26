@@ -1,3 +1,4 @@
+import { ColorschemeListener } from "@/app-state/colorscheme-listener";
 import { ForegroundListener } from "@/app-state/foreground-listener";
 import { AuthClient } from "@/client/auth-client";
 import { HouseholdClient } from "@/client/household-client";
@@ -18,3 +19,4 @@ export const taskClientSymbol = Symbol() as InjectionKey<TaskClient>;
 export const userClientSymbol = Symbol() as InjectionKey<UserClient>;
 export const pushSymbol = Symbol() as InjectionKey<PushService>;
 export const foregroundListenerSymbol = Symbol() as InjectionKey<ForegroundListener>;
+export const colorschemeListenerSymbol = Symbol() as InjectionKey<ColorschemeListener>;

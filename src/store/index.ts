@@ -24,6 +24,7 @@ export class State {
         language: 'de',
     };
     stars: Record<HouseholdId, StarsRecord> = {};
+    darkmode = false;
 }
 
 export type Getters = {
@@ -184,6 +185,9 @@ export class Store {
     }
     setSettings(settings: UserSettings) {
         this.state.userSettings = settings;
+    }
+    setDarkmode(darkmode: boolean) {
+        this.state.darkmode = darkmode;
     }
 
     /**

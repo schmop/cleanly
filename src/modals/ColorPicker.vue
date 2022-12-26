@@ -13,10 +13,10 @@
         :saturation="color.saturation" :luminosity="color.luminosity">
       </color-picker>
       <div class="preview-container dark-preview">
-        <div class="preview" :style="`background-color: ${darkColor}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
+        <div class="preview" :style="`background-color: ${darkColor.toHex()}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
       </div>
       <div class="preview-container light-preview">
-        <div class="preview" :style="`background-color: ${lightColor}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
+        <div class="preview" :style="`background-color: ${lightColor.toHex()}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
       </div>
     </div>
   </ion-content>
@@ -36,18 +36,19 @@
 
 <script setup lang="ts">
 import { HSL } from '@/common/colors';
-import { taskColorFromHue, getDefaultTaskHue, lightLuminosity, darkLuminosity } from '@/common/task-colors';
+import { darkLuminosity, getDefaultTaskHue, lightLuminosity, taskColorFromHue } from '@/common/task-colors';
+import { stateSymbol } from '@/dependency-injection/injection-keys';
 import { __t, _t } from '@/translation/index';
 import {
-  IonButton,
-  IonContent,
-  IonFooter,
-  IonHeader, IonIcon,
-  IonTitle, IonToolbar, modalController
+IonButton,
+IonContent,
+IonFooter,
+IonHeader, IonIcon,
+IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
 import ColorPicker from '@radial-color-picker/vue-color-picker';
 import { closeCircleOutline, colorPaletteOutline } from "ionicons/icons";
-import { reactive, ref, computed } from 'vue';
+import { computed, inject, ref } from 'vue';
 
 const emit = defineEmits(['select']);
 const props = defineProps<{
@@ -55,29 +56,22 @@ const props = defineProps<{
   startHue: number | null,
 }>();
 
-const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+const state = inject(stateSymbol)!;
 
-let darkScheme = ref<boolean>(mediaQueryList.matches);
-
-mediaQueryList.addEventListener('change', (event) => {
-  darkScheme.value = event.matches;
-});
-
-const color = reactive(taskColorFromHue(props.startHue ?? getDefaultTaskHue()));
-const darkColor = computed(() => (new HSL(color.hue, 100, darkLuminosity())).toHex());
-const lightColor = computed(() => new HSL(color.hue, 100, lightLuminosity()).toHex());
-
+let hue = ref(props.startHue ?? getDefaultTaskHue());
+const darkColor = computed(() => taskColorFromHue(hue.value, true));
+const lightColor = computed(() => taskColorFromHue(hue.value, false));
+const color = computed(() => state.darkmode ? darkColor.value : lightColor.value);
 
 function dismiss() {
   modalController.dismiss();
 }
-function onColorChange(hue: number) {
-  color.hue = hue;
+function onColorChange(newHue: number) {
+  hue.value = newHue;
 }
 async function select() {
-  const hue = color.hue;
-  props.colorReceiver.dispatchEvent(new CustomEvent('color', { detail: hue }));
-  emit('select', hue);
+  props.colorReceiver.dispatchEvent(new CustomEvent('color', { detail: hue.value }));
+  emit('select', hue.value);
   dismiss();
 }
 </script>

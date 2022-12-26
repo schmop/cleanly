@@ -7,9 +7,10 @@ import { AuthClient } from '../client/auth-client';
 import { HouseholdClient } from '../client/household-client';
 import { SseClient } from '../client/sse-client';
 import { TaskClient } from '../client/task-client';
-import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol, pushSymbol, userClientSymbol, foregroundListenerSymbol } from './injection-keys';
+import { authClientSymbol, sseClientSymbol, taskClientSymbol, householdClientSymbol, pushSymbol, userClientSymbol, foregroundListenerSymbol, colorschemeListenerSymbol } from './injection-keys';
 import { InviteEventProcessor } from '@/invite/invite-event-processor';
 import { ForegroundListener } from '@/app-state/foreground-listener';
+import { ColorschemeListener } from '@/app-state/colorscheme-listener';
 
 class Container {
     authClient?: AuthClient;
@@ -21,6 +22,7 @@ class Container {
     inviteEventProcessor?: InviteEventProcessor;
     push?: PushService;
     foregroundListener?: ForegroundListener;
+    colorschemeListener?: ColorschemeListener;
 
     /** Installation as Vue plugin */
     install(app: App) {
@@ -31,6 +33,7 @@ class Container {
         app.provide(userClientSymbol, this.getUserClient());
         app.provide(pushSymbol, this.getPush());
         app.provide(foregroundListenerSymbol, this.getForegroundListener());
+        app.provide(colorschemeListenerSymbol, this.getColorschemeListener());
     }
 
     getStore(): Store {
@@ -71,6 +74,10 @@ class Container {
 
     getForegroundListener(): ForegroundListener {
         return this.foregroundListener = this.foregroundListener ?? new ForegroundListener(this.getHouseholdClient(), store);
+    }
+
+    getColorschemeListener(): ColorschemeListener {
+        return this.colorschemeListener = this.colorschemeListener ?? new ColorschemeListener(store);
     }
 }
 

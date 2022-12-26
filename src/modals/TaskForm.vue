@@ -85,7 +85,7 @@ import { _t, __t } from "@/translation";
 import { Task } from '@/models/Task';
 import IconPicker from "./IconPicker.vue";
 import ColorPicker from "./ColorPicker.vue";
-import { taskClientSymbol } from "@/dependency-injection/injection-keys";
+import { stateSymbol, taskClientSymbol } from "@/dependency-injection/injection-keys";
 import toast from "@/toast";
 import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
 
@@ -93,6 +93,7 @@ const props = defineProps<{
   id?: number,
   task?: Task,
 }>();
+const state = inject(stateSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
 const durationModifiers = DURATION_SIZES;
@@ -103,7 +104,7 @@ const hue = ref<number>(getDefaultTaskHue());
 const taskName = ref('');
 const stars = ref('0');
 
-const color = computed(() => taskColorFromHue(hue.value).toHex());
+const color = computed(() => taskColorFromHue(hue.value, state.darkmode).toHex());
 const valid = computed(() => icon.value in icons);
 const calculatedDuration = computed(() => {
   if (null === duration.value) {

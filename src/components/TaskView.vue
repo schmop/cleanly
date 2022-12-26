@@ -106,7 +106,7 @@ let actionsVisible = ref(false);
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
 const canManageTasks = computed(() => null !== state.user && getters.canManageTasks.value(state.user.id, props.household));
 const overdue = computed(() => taskOverDue(props.task));
-const taskColor = computed(() => `background-color: ${taskColorFromHue(props.task.hue ?? getDefaultTaskHue()).toHex()}`);
+const taskColor = computed(() => `background-color: ${taskColorFromHue(props.task.hue ?? getDefaultTaskHue(), state.darkmode).toHex()}`);
 const durationText = computed(() => roundedRecurringInterval(props.task.duration));
 const dueInText = computed(() => {
   const { lastComplete } = props.task;
