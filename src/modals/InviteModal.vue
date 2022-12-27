@@ -3,7 +3,7 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ _t('Invite') }}
-        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
+        <CircleXIcon @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -11,14 +11,14 @@
     <ion-item-group>
       <ion-item>
         <ion-label position="stacked">
-          <ion-icon :icon="searchOutline" slot="start" />
+          <UserSearchIcon slot="start" />
           {{ _t('Search for username') }}
         </ion-label>
         <ion-input type="text" v-model="inviteSearch" />
       </ion-item>
       <ion-list v-if="suggestions.length > 0">
         <ion-item button v-for="(suggestion, index) in suggestions" @click="add(suggestion)" :key="index">
-          <ion-icon slot="start" :icon="personOutline" />
+          <UserIcon slot="start" />
           <ion-label> {{ suggestion.name }} </ion-label>
         </ion-item>
       </ion-list>
@@ -26,7 +26,7 @@
       <ion-item v-if="selection != null">
         <ion-list>
           <ion-list-header>
-            <ion-icon :icon="personOutline" slot="start" />
+            <UserIcon slot="start" />
             {{ _t('Selected user to invite:') }}
           </ion-list-header>
           <ion-item>
@@ -39,11 +39,11 @@
   <ion-footer>
     <ion-toolbar>
       <ion-button color="primary" @click="invite()">
-        <ion-icon :icon="personAddOutline" slot="start" />
+        <UserPlusIcon slot="start" />
         {{ _t('Invite') }}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
-        <ion-icon :icon="closeCircleOutline" slot="start" />
+        <CircleXIcon slot="start" />
         {{ _t('Cancel') }}
       </ion-button>
     </ion-toolbar>
@@ -53,15 +53,12 @@
 <script setup lang="ts">
 import { _t } from '@/translation';
 import {
-IonButton, IonContent, IonFooter, IonHeader, IonIcon, IonInput, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList,
-IonListHeader,
-IonTitle, IonToolbar, modalController
+  IonButton, IonContent, IonFooter, IonHeader, IonInput, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList,
+  IonListHeader,
+  IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
-import {
-closeCircleOutline, personAddOutline, personOutline,
-searchOutline
-} from "ionicons/icons";
-import { inject, ref, Ref, watch } from 'vue';
+import { Ref, inject, ref, watch } from 'vue';
+import { CircleXIcon, UserIcon, UserPlusIcon, UserSearchIcon } from 'vue-tabler-icons';
 import debounce from "../common/debounce";
 import { authClientSymbol, householdClientSymbol } from '../dependency-injection/injection-keys';
 import { Household } from "../models/Household";
@@ -111,4 +108,5 @@ async function invite() {
 </script>
 
 <style scoped>
+
 </style>

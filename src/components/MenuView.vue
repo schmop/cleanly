@@ -4,30 +4,30 @@
       <ion-toolbar color="primary">
         <ion-title>
           {{ _t('Menu') }}
-          <ion-icon :icon="closeCircleOutline" color="dark" @click="close" style="float: right" />
+          <CircleXIcon @click="close" style="float: right" />
         </ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <ion-list>
         <ion-item router-link="/" router-direction="back" button @click="close">
-          <ion-icon slot="start" :icon="homeOutline" />
+          <HomeIcon slot="start" />
           {{ _t('Dashboard') }}
         </ion-item>
         <ion-item button @click="openCreateHouseholdModal">
-          <ion-icon slot="start" :icon="addCircleOutline" />
+          <CirclePlusIcon slot="start" />
           {{ _t('Create household') }}
         </ion-item>
         <ion-item button @click="gotoSettings">
-          <ion-icon slot="start" :icon="settingsOutline" />
+          <SettingsIcon slot="start" />
           {{ _t('Settings') }}
         </ion-item>
         <ion-item button @click="openChangelog">
-          <ion-icon slot="start" :icon="documentTextOutline" />
+          <NewsIcon slot="start" />
           {{ _t('Changes') }}
         </ion-item>
         <ion-item button @click="logout">
-          <ion-icon slot="start" :icon="logOutOutline" />
+          <LogoutIcon slot="start" />
           {{ _t('Logout') }}
         </ion-item>
       </ion-list>
@@ -43,35 +43,27 @@
 </template>
 
 <script setup lang="ts">
+import { openChangelogBrowser } from "@/changelog/changelog-browser";
+import { _t } from "@/translation";
+import { App } from '@capacitor/app';
 import {
-  addCircleOutline,
-  closeCircleOutline,
-  logOutOutline,
-  homeOutline,
-  settingsOutline,
-  documentTextOutline,
-} from "ionicons/icons";
-import {
-  IonItem,
   IonContent,
-  IonMenu,
-  IonLabel,
   IonFooter,
   IonHeader,
-  IonToolbar,
-  IonTitle,
+  IonItem,
+  IonLabel,
   IonList,
-  IonIcon,
+  IonMenu,
+  IonTitle,
+  IonToolbar,
   menuController,
-  modalController,
+  modalController
 } from "@ionic/vue";
-import CreateHousehold from "../modals/CreateHousehold.vue";
-import { _t } from "@/translation";
-import { householdClientSymbol, authClientSymbol } from '../dependency-injection/injection-keys';
 import { inject, onBeforeMount, ref } from "vue";
 import { routerKey } from "vue-router";
-import { App } from '@capacitor/app';
-import { openChangelogBrowser } from "@/changelog/changelog-browser";
+import { CirclePlusIcon, CircleXIcon, HomeIcon, LogoutIcon, NewsIcon, SettingsIcon } from "vue-tabler-icons";
+import { authClientSymbol, householdClientSymbol } from '../dependency-injection/injection-keys';
+import CreateHousehold from "../modals/CreateHousehold.vue";
 
 const householdClient = inject(householdClientSymbol)!;
 const authClient = inject(authClientSymbol)!;

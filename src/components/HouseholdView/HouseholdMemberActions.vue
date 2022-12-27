@@ -2,19 +2,19 @@
     <ion-list>
         <ion-list-header>{{ __t('Actions for {0}', member?.name ?? '<unknown>') }}</ion-list-header>
         <ion-item button @click="openPromoteToAdmin">
-            <ion-icon slot="start" :icon="arrowUpCircleOutline" />
+            <ChefHatIcon slot="start" />
             <ion-label>{{ _t('Promote to admin') }}</ion-label>
         </ion-item>
         <ion-item button @click="openPromoteToModerator" v-if="memberPrivilege === PrivilegeLevel.USER">
-            <ion-icon slot="start" :icon="arrowUpCircleOutline" />
+            <WandIcon slot="start" />
             <ion-label>{{ _t('Promote to moderator') }}</ion-label>
         </ion-item>
         <ion-item button @click="openDemoteToUser" v-if="memberPrivilege === PrivilegeLevel.MODERATOR">
-            <ion-icon slot="start" :icon="arrowDownCircleOutline" />
+            <ArrowDownCircleIcon slot="start" />
             <ion-label>{{ _t('Demote to user') }}</ion-label>
         </ion-item>
         <ion-item button @click="openKickMemberPrompt">
-            <ion-icon slot="start" :icon="personRemoveOutline" />
+            <UserMinusIcon slot="start" />
             <ion-label>{{ _t('Kick member') }}</ion-label>
         </ion-item>
     </ion-list>
@@ -26,12 +26,14 @@ import { Household } from "@/models/Household";
 import { PrivilegeLevel } from "@/models/HouseholdPrivilege";
 import { User } from "@/models/User";
 import toast from "@/toast";
-import { _t, __t } from "@/translation";
+import { __t, _t } from "@/translation";
 import {
-alertController, IonIcon, IonItem, IonLabel, IonList, IonListHeader, popoverController
+    IonItem, IonLabel, IonList, IonListHeader,
+    alertController,
+    popoverController
 } from "@ionic/vue";
-import { arrowDownCircleOutline, arrowUpCircleOutline, personRemoveOutline } from "ionicons/icons";
 import { computed, inject } from "vue";
+import { ArrowDownCircleIcon, ChefHatIcon, UserMinusIcon, WandIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
     household: Household,
@@ -105,4 +107,5 @@ async function openKickMemberPrompt() {
 </script>
 
 <style scoped>
+
 </style>

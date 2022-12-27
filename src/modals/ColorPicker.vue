@@ -3,7 +3,7 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ _t('Color') }}
-        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
+        <CircleXIcon @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -13,21 +13,23 @@
         :saturation="color.saturation" :luminosity="color.luminosity">
       </color-picker>
       <div class="preview-container dark-preview">
-        <div class="preview" :style="`background-color: ${darkColor.toHex()}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
+        <div class="preview" :style="`background-color: ${darkColor.toHex()}`">{{ __t('{0} left', '0 ' + _t('hours')) }}
+        </div>
       </div>
       <div class="preview-container light-preview">
-        <div class="preview" :style="`background-color: ${lightColor.toHex()}`">{{ __t('{0} left', '0 ' + _t('hours')) }}</div>
+        <div class="preview" :style="`background-color: ${lightColor.toHex()}`">{{ __t('{0} left', '0 ' + _t('hours'))
+}}</div>
       </div>
     </div>
   </ion-content>
   <ion-footer>
     <ion-toolbar>
       <ion-button color="primary" @click="select()">
-        <ion-icon :icon="colorPaletteOutline" slot="start" />
+        <PaletteIcon slot="start" />
         {{ _t('Select') }}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
-        <ion-icon :icon="closeCircleOutline" slot="start" />
+        <CircleXIcon slot="start" />
         {{ _t('Cancel') }}
       </ion-button>
     </ion-toolbar>
@@ -39,15 +41,15 @@ import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
 import { stateSymbol } from '@/dependency-injection/injection-keys';
 import { __t, _t } from '@/translation/index';
 import {
-IonButton,
-IonContent,
-IonFooter,
-IonHeader, IonIcon,
-IonTitle, IonToolbar, modalController
+  IonButton,
+  IonContent,
+  IonFooter,
+  IonHeader,
+  IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
 import ColorPicker from '@radial-color-picker/vue-color-picker';
-import { closeCircleOutline, colorPaletteOutline } from "ionicons/icons";
 import { computed, inject, ref } from 'vue';
+import { CircleXIcon, PaletteIcon } from 'vue-tabler-icons';
 
 const emit = defineEmits(['select']);
 const props = defineProps<{

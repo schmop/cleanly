@@ -10,7 +10,7 @@
         <ion-card-content>
           {{ _t('To start, join a household or create one:') }}
           <ion-button color="primary" @click="openCreateHouseholdModal">
-            <ion-icon slot="start" :icon="addCircleOutline" />
+            <CirclePlusIcon slot="start" />
             {{ _t('Create household') }}
           </ion-button>
         </ion-card-content>
@@ -23,16 +23,14 @@
 import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import { Household } from "@/models/Household";
 import {
-IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonIcon, IonPage, menuController, modalController
+  IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonPage, menuController, modalController
 } from "@ionic/vue";
-import {
-addCircleOutline
-} from "ionicons/icons";
 import { computed, inject } from "vue";
-import HouseholdPreview from "../components/HouseholdPreview.vue";
-import CreateHousehold from "../modals/CreateHousehold.vue";
-import router from "../router";
-import { _t } from "../translation";
+import { CirclePlusIcon } from 'vue-tabler-icons';
+import HouseholdPreview from "@/components/HouseholdPreview.vue";
+import CreateHousehold from "@/modals/CreateHousehold.vue";
+import router from "@/router";
+import { _t } from "@/translation";
 
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;

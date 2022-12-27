@@ -3,7 +3,7 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ _t('Icon') }}
-        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
+        <CircleXIcon @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -11,20 +11,21 @@
     <ion-item-group>
       <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(`${name}`)">
         <ion-label>{{ _t(`${name}`) }}</ion-label>
-        <ion-icon :icon="icon" />
+        <component :is="icon" />
       </ion-item>
     </ion-item-group>
   </ion-content>
 </template>
 
 <script setup lang="ts">
+import { icons } from '@/components/icons';
 import { _t } from '@/translation/index';
 import {
   IonContent,
-  IonHeader, IonIcon, IonItem, IonItemGroup, IonLabel, IonTitle, IonToolbar, modalController
+  IonHeader,
+  IonItem, IonItemGroup, IonLabel, IonTitle, IonToolbar, modalController
 } from "@ionic/vue";
-import { closeCircleOutline } from "ionicons/icons";
-import icons from '@/components/icons';
+import { CircleXIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
   iconReceiver: EventTarget,

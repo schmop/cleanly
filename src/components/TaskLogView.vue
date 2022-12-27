@@ -2,7 +2,7 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>
-        <ion-icon :icon="icons[task.icon]" />
+        <component :is="icon" />
         <ion-text color="secondary">
           <i>{{ userName }}</i>
         </ion-text>
@@ -11,9 +11,9 @@
           <i>{{ task.name }}</i>
         </ion-text>
         {{ relativeInterval }}
-        {{_t('for')}}
+        {{ _t('for') }}
         <ion-text color="warning">
-          <i>{{log.stars}} <ion-icon :icon="starOutline"/></i>
+          <i>{{ log.stars }} <StarIcon size="18" /></i>
         </ion-text>
       </ion-card-title>
     </ion-card-header>
@@ -21,20 +21,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { HOUR_IN_SECONDS, formatHours, secondsSince } from "@/common/time";
+import { isValidIcon } from '@/components/icons';
+import { TaskLog } from '@/models/TaskLog';
+import { __t, _t } from "@/translation";
 import {
-  IonText,
-  IonIcon,
   IonCard,
   IonCardHeader,
   IonCardTitle,
+  IonText,
 } from "@ionic/vue";
-import icons from "@/components/icons";
-import { _t, __t } from "@/translation";
-import { TaskLog } from '../models/TaskLog';
-import { formatHours, secondsSince } from "@/common/time";
-import { HOUR_IN_SECONDS } from '../common/time';
-import { starOutline } from "ionicons/icons";
+import { computed } from "vue";
+import { StarIcon } from 'vue-tabler-icons';
 
 
 const props = defineProps<{
@@ -46,6 +44,7 @@ const task = computed(() => {
   }
   return props.log.task;
 });
+const icon = computed(() => isValidIcon(task.value.icon) ? task.value.icon : 'check');
 const userName = computed(() => {
   return props.log.user?.name ?? _t('<former member>');
 });
@@ -59,4 +58,5 @@ const relativeInterval = computed(() => {
 </script>
 
 <style scoped>
+
 </style>

@@ -19,7 +19,8 @@
           <ion-input v-model="retype" type="password" />
         </ion-item>
         <ion-item button @click="sendForm" color="primary" :disabled="!formValid">
-          <ion-icon slot="start" :icon="isRegistering ? logInOutline : personAddOutline" />
+          <UserPlusIcon v-if="isRegistering" slot="start" />
+          <LoginIcon v-else slot="start" />
           {{ actionText }}
         </ion-item>
       </ion-item-group>
@@ -34,16 +35,10 @@
           -->
           <ion-toggle ref="toggle" :key="isRegistering + (new Date()).toISOString()" @ionChange="onToggle"
             :checked="isRegistering" />
-          <ion-button
-            class="align-center"
-            slot="end"
-            target="_blank"
-            href="https://cleanly.schmoppo.de/reset-password"
-            fill="clear"
-            size="small"
-          >
-            <ion-icon class="mr-1" :icon="openOutline"/>
-            {{_t('Forgot password?')}}
+          <ion-button class="align-center" slot="end" target="_blank" href="https://cleanly.schmoppo.de/reset-password"
+            fill="clear" size="small">
+            <ExternalLinkIcon class="mr-1" />
+            {{ _t('Forgot password?') }}
           </ion-button>
         </ion-item>
       </ion-item-group>
@@ -52,24 +47,23 @@
 </template>
 
 <script setup lang="ts">
-import { logInOutline, personAddOutline, openOutline } from "ionicons/icons";
-import { computed, inject, ref } from "vue";
+import { authClientSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
+import router from "@/router";
 import toast from "@/toast";
+import { _t } from "@/translation";
 import {
-  IonPage,
-  IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
+  IonButton,
   IonContent,
   IonFooter,
+  IonInput,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
+  IonPage,
   IonToggle,
-  IonButton,
-  IonIcon,
 } from "@ionic/vue";
-import router from "@/router";
-import { _t } from "@/translation";
-import { authClientSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
+import { computed, inject, ref } from "vue";
+import { ExternalLinkIcon, LoginIcon, UserPlusIcon } from 'vue-tabler-icons';
 
 const authClient = inject(authClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -131,6 +125,7 @@ async function login() {
 .mr-1 {
   margin-right: 4px;
 }
+
 .align-center {
   align-self: center;
 }

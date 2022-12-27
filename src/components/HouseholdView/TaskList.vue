@@ -6,7 +6,7 @@
 
             <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
                 <ion-fab-button @click="openTaskFormModal">
-                    <ion-icon :icon="add" />
+                    <PlusIcon />
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
@@ -20,11 +20,11 @@ import TaskForm from '@/modals/TaskForm.vue';
 import {
     IonContent, IonFab,
     IonFabButton,
-    IonIcon, IonPage, menuController,
+    IonPage, menuController,
     modalController
 } from "@ionic/vue";
-import { add } from 'ionicons/icons';
 import { computed, inject } from 'vue';
+import { PlusIcon } from 'vue-tabler-icons';
 import TaskView from '../TaskView.vue';
 
 const getters = inject(gettersSymbol)!;

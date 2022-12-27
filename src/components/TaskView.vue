@@ -4,8 +4,8 @@
     <ion-card-header v-if="task">
       <ion-card-title>
         <div>
-          <ion-icon :icon="icons[task.icon]" />
-          {{ task.name }}
+          <component class="vertical-center" :is="icons[icon]" />
+          <span class="vertical-center">{{ task.name }}</span>
         </div>
         <div class="center">
           <span class="small row">
@@ -13,24 +13,24 @@
           </span>
           <div class="flex-end row">
             <ion-text color="warning">
-              {{ task.stars }}
-              <ion-icon :icon="starOutline" />
+              <span class="vertical-center">{{ task.stars }}</span>
+              <StarIcon class="vertical-center"/>
             </ion-text>
             <template v-if="canManageTasks && showActions">
               <ion-buttons>
                 <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
-                  <ion-icon slot="icon-only" :icon="ellipsisVertical" />
+                  <DotsVerticalIcon slot="icon-only" />
                 </ion-button>
               </ion-buttons>
               <ion-popover :trigger="contextMenuId" dismiss-on-select>
                 <ion-content>
                   <ion-list>
                     <ion-item button @click="editTask" lines="none">
-                      <ion-icon slot="start" :icon="pencilOutline" />
+                      <PencilIcon slot="start" />
                       <ion-label> {{ _t('Edit task') }} </ion-label>
                     </ion-item>
                     <ion-item button @click="deleteTask" lines="none">
-                      <ion-icon slot="start" :icon="trashOutline" />
+                      <TrashXIcon slot="start" />
                       <ion-label> {{ _t('Delete task') }} </ion-label>
                     </ion-item>
                   </ion-list>
@@ -64,7 +64,7 @@
 import { getDefaultTaskHue, taskColorFromHue } from "@/common/task-colors";
 import { taskOverDue } from "@/common/task-priority";
 import { DAY_IN_HOURS, HOUR_IN_SECONDS, formatHours, roundedRecurringInterval, secondsSince } from "@/common/time";
-import icons from "@/components/icons";
+import { icons, isValidIcon } from "@/components/icons";
 import { gettersSymbol, householdClientSymbol, stateSymbol, storeSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 import TaskForm from "@/modals/TaskForm.vue";
 import { Household } from "@/models/Household";
@@ -72,23 +72,22 @@ import { Task } from "@/models/Task";
 import toast from "@/toast";
 import { __t, _t } from "@/translation";
 import {
-IonButton,
-IonButtons,
-IonCard,
-IonCardContent,
-IonCardHeader,
-IonCardTitle,
-IonContent,
-IonIcon,
-IonItem,
-IonLabel,
-IonList,
-IonPopover,
-IonText,
-modalController,
+  IonButton,
+  IonButtons,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonContent,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPopover,
+  IonText,
+  modalController,
 } from "@ionic/vue";
-import { ellipsisVertical, pencilOutline, starOutline, trashOutline } from "ionicons/icons";
 import { computed, inject, ref } from 'vue';
+import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
   task: Task,
@@ -103,6 +102,7 @@ const householdClient = inject(householdClientSymbol)!;
 
 let actionsVisible = ref(false);
 
+const icon = computed(() => isValidIcon(props.task.icon) ? props.task.icon : 'check');
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
 const canManageTasks = computed(() => null !== state.user && getters.canManageTasks.value(state.user.id, props.household));
 const overdue = computed(() => taskOverDue(props.task));
@@ -194,6 +194,12 @@ function closeActions(event: FocusEvent) {
 </script>
 
 <style scoped>
+.vertical-center {
+  vertical-align: middle;
+  display: inline-block;
+  margin: 2px;
+}
+
 .focus-no-highlight:focus-visible {
   outline: none;
 }

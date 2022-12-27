@@ -4,23 +4,23 @@
             <ion-list>
                 <ion-list-header>{{ _t('Household settings') }}</ion-list-header>
                 <ion-item v-if="canManageTasks" button @click="openTaskFormModal">
-                    <ion-icon slot="start" :icon="addCircleOutline" />
+                    <CirclePlusIcon slot="start" />
                     {{ _t('Add task') }}
                 </ion-item>
                 <ion-item v-if="canManageHousehold" button @click="openInviteModal">
-                    <ion-icon slot="start" :icon="personAddOutline" />
+                    <UserPlusIcon slot="start" />
                     {{ _t('Send invite') }}
                 </ion-item>
                 <ion-item button @click="openLeaveHouseholdPrompt">
-                    <ion-icon slot="start" :icon="walkOutline" />
+                    <WalkIcon slot="start" />
                     {{ _t('Leave household') }}
                 </ion-item>
                 <ion-item v-if="canManageHousehold" button @click="openDeleteHouseholdPrompt">
-                    <ion-icon slot="start" :icon="trashOutline" />
+                    <TrashXIcon slot="start" />
                     {{ _t('Delete household') }}
                 </ion-item>
                 <ion-item v-if="canManageHousehold" button @click="openSetWebhookPrompt">
-                    <ion-icon slot="start" :icon="globeOutline" />
+                    <WebhookIcon slot="start"/>
                     {{ _t('Set webhook') }}
                 </ion-item>
             </ion-list>
@@ -28,14 +28,14 @@
                 <ion-list-header>{{ _t('Members') }}</ion-list-header>
                 <ion-item v-for="(member) in members" :key="member.id" :button="canPerformActionOn(member)"
                     @click="openMemberActionMenu(member)">
-                    <ion-icon slot="start" :icon="privilegeIcons[privilege(member)]" />
+                    <component slot="start" :is="privilegeIcons[privilege(member)]"></component>
                     {{ member.name }}
                     <ion-badge color="dark" slot="end" v-if="PrivilegeLevel.USER !== privilege(member)">
                         {{ privilegeLabels[privilege(member)] }}
                     </ion-badge>
                     <ion-badge slot="end" color="warning" class="vertical-center">
-                        <ion-text>{{stars[member.id] ?? 0}}</ion-text>
-                        <ion-icon class="ml-1" :icon="starOutline"/>
+                        <ion-text class="text-vertical-center">{{stars[member.id] ?? 0}}</ion-text>
+                        <StarIcon class="ml-1" size="16"/>
                     </ion-badge>
                 </ion-item>
             </ion-list>
@@ -55,12 +55,12 @@ import toast from "@/toast";
 import { _t } from "@/translation";
 import { Clipboard } from '@capacitor/clipboard';
 import {
-IonBadge, IonContent, IonIcon, IonItem, IonList, IonListHeader, IonPage, IonText,
+IonBadge, IonContent, IonItem, IonList, IonListHeader, IonPage, IonText,
 menuController,
 modalController, popoverController, toastController
 } from "@ionic/vue";
-import { addCircleOutline, clipboardOutline, cogOutline, colorWandOutline, globeOutline, personAddOutline, personOutline, starOutline, trashOutline, walkOutline } from "ionicons/icons";
 import { computed, inject, watch } from 'vue';
+import { ChefHatIcon, CirclePlusIcon, StarIcon, TrashXIcon, UserIcon, UserPlusIcon, WalkIcon, WandIcon, WebhookIcon } from "vue-tabler-icons";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 
 const getters = inject(gettersSymbol)!;
@@ -88,9 +88,9 @@ const privilegeLabels = {
     [PrivilegeLevel.ADMIN.valueOf()]: _t('Admin'),
 }
 const privilegeIcons = {
-    [PrivilegeLevel.ADMIN.valueOf()]: cogOutline,
-    [PrivilegeLevel.MODERATOR.valueOf()]: colorWandOutline,
-    [PrivilegeLevel.USER.valueOf()]: personOutline,
+    [PrivilegeLevel.ADMIN.valueOf()]: ChefHatIcon,
+    [PrivilegeLevel.MODERATOR.valueOf()]: WandIcon,
+    [PrivilegeLevel.USER.valueOf()]: UserIcon,
 }
 const stars = computed(() => getters.stars.value ?? {});
 
@@ -116,7 +116,6 @@ async function showSecretToast(secret: string) {
             {
                 text: _t('Copy'),
                 role: 'copy',
-                icon: clipboardOutline,
             },
             _t('Dismiss'),
         ],
@@ -161,7 +160,7 @@ async function openDeleteHouseholdPrompt() {
         console.error("Tried to delete household, but couldn't!");
         return;
     }
-    if (!confirmablePrompt(_t('Do you want to delete the household permanently? This cannot be undone!'))) {
+    if (!(await confirmablePrompt(_t('Do you want to delete the household permanently? This cannot be undone!')))) {
         return;
     }
     if (!await householdClient.removeHousehold(household.value.id)) {
@@ -178,7 +177,7 @@ async function openLeaveHouseholdPrompt() {
         console.error("Tried to leave household, but couldn't!");
         return;
     }
-    if (!confirmablePrompt(_t('Do you want to leave the household?'))) {
+    if (!(await confirmablePrompt(_t('Do you want to leave the household?')))) {
         return;
     }
     try {
@@ -240,6 +239,11 @@ async function openInviteModal(): Promise<void> {
 }
 .vertical-center {
     display: flex;
+}
+.text-vertical-center {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }
 .ml-1 {
     margin-left: 2px;

@@ -5,7 +5,7 @@
         <ion-card-header>
           <ion-card-title>
             <ion-text color="secondary">
-              <i>{{ invite.inviter.name }}</i>
+              <i>{{ invite.inviter?.name ?? _t('Someone') }}</i>
             </ion-text>
             {{ _t('invited you to') }}
             <ion-text color="secondary">
@@ -20,11 +20,11 @@
           <ion-toolbar>
             <ion-buttons slot="end">
               <ion-button color="success" @click="accept(invite)">
-                <ion-icon slot="start" :icon="enterOutline" />
+                <DoorEnterIcon slot="start" />
                 {{ _t('Join') }}
               </ion-button>
               <ion-button color="danger" @click="decline(invite)">
-                <ion-icon slot="start" :icon="closeOutline" />
+                <CircleXIcon slot="start" />
                 {{ _t('Decline') }}
               </ion-button>
             </ion-buttons>
@@ -36,27 +36,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject } from "vue";
-import { closeOutline, enterOutline } from "ionicons/icons";
-import toast from "../toast";
-import router from "../router";
+import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import { Invite } from "@/models/Invite";
+import router from "@/router";
+import toast from "@/toast";
+import { _t } from "@/translation";
 import {
-  IonPage,
-  IonContent,
-  IonCardHeader,
-  IonCardContent,
-  IonCard,
+  IonButton,
   IonButtons,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
   IonCardTitle,
+  IonContent,
+  IonPage,
   IonText,
   IonToolbar,
-  IonButton,
-  IonCardSubtitle,
-  IonIcon,
 } from "@ionic/vue";
-import { Invite } from "../models/Invite";
-import { _t } from "../translation";
-import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import { computed, inject } from "vue";
+import { CircleXIcon, DoorEnterIcon } from 'vue-tabler-icons';
 
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
@@ -94,4 +93,5 @@ async function decline(invite: Invite) {
 </script>
 
 <style scoped>
+
 </style>

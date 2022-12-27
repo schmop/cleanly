@@ -4,28 +4,28 @@
       <ion-router-outlet />
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="tasks" :href="href('tasks')">
-          <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+          <CheckboxIcon />
           <ion-label>{{ _t('Tasks') }}</ion-label>
-          <ion-badge v-if="numOverdueTasks > 0">{{ numOverdueTasks }}</ion-badge>
+          <ion-badge class="badge-with-custom-icon-fix" v-if="numOverdueTasks > 0">{{ numOverdueTasks }}</ion-badge>
         </ion-tab-button>
 
         <ion-tab-button tab="checklist" :href="href('checklist')">
-          <ion-icon :icon="listCircleOutline"></ion-icon>
+          <ChecklistIcon />
           <ion-label>{{ _t('Checklist') }}</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="activity" :href="href('activity')">
-          <ion-icon :icon="analyticsOutline"></ion-icon>
+          <TimelineIcon />
           <ion-label>{{ _t('Activity') }}</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="statistics" :href="href('statistics')">
-          <ion-icon :icon="barChartOutline"></ion-icon>
+          <ChartBarIcon />
           <ion-label>{{ _t('Statistics') }}</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="household" :href="href('info')">
-          <ion-icon :icon="peopleOutline"></ion-icon>
+          <HomeCogIcon />
           <ion-label>{{ _t('Household') }}</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
@@ -37,17 +37,13 @@
 import { taskOverDue, taskSortByPriority } from "@/common/task-priority";
 import { gettersSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import router from "@/router";
+import { _t } from '@/translation';
 import {
-IonBadge, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar,
-IonTabButton, IonTabs
+  IonBadge, IonLabel, IonPage, IonRouterOutlet, IonTabBar,
+  IonTabButton, IonTabs
 } from "@ionic/vue";
-import {
-analyticsOutline, barChartOutline, checkmarkCircleOutline,
-listCircleOutline,
-peopleOutline
-} from "ionicons/icons";
 import { computed, inject, onBeforeUnmount } from "vue";
-import { _t } from '../translation';
+import { ChartBarIcon, CheckboxIcon, ChecklistIcon, HomeCogIcon, TimelineIcon } from "vue-tabler-icons";
 
 const store = inject(storeSymbol)!;
 const getters = inject(gettersSymbol)!;
@@ -70,4 +66,8 @@ function href(path: string) {
 </script>
 
 <style scoped>
+.badge-with-custom-icon-fix {
+  left: calc(50% + 6px);
+  top: 8px;
+}
 </style>

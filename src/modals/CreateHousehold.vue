@@ -3,7 +3,7 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ _t('Create household') }}
-        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
+        <CircleXIcon @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -12,18 +12,18 @@
       <ion-item>
         <ion-label position="stacked">{{ _t('Name') }}</ion-label>
         <ion-input type="text" v-model="householdName" />
-        <ion-icon :icon="pencilOutline" slot="end" class="align-center" />
+        <PencilIcon slot="end" class="align-center" />
       </ion-item>
     </ion-item-group>
   </ion-content>
   <ion-footer>
     <ion-toolbar>
       <ion-button color="primary" @click="createHousehold()">
-        <ion-icon :icon="addCircleOutline" slot="start" />
+        <CirclePlusIcon slot="start" />
         {{ _t('Create') }}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
-        <ion-icon :icon="closeCircleOutline" slot="start" />
+        <CircleXIcon slot="start" />
         {{ _t('Cancel') }}
       </ion-button>
     </ion-toolbar>
@@ -31,24 +31,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue';
-import { addCircleOutline, closeCircleOutline, pencilOutline } from "ionicons/icons";
-import {
-  IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonIcon,
-  IonButton,
-  IonFooter,
-  modalController,
-} from "@ionic/vue";
-import { householdClientSymbol } from '../dependency-injection/injection-keys';
 import { _t } from '@/translation';
+import {
+IonButton,
+IonContent,
+IonFooter,
+IonHeader,
+IonInput,
+IonItem,
+IonItemGroup,
+IonLabel,
+IonTitle,
+IonToolbar,
+modalController,
+} from "@ionic/vue";
+import { inject, ref } from 'vue';
+import { CirclePlusIcon, CircleXIcon, PencilIcon } from 'vue-tabler-icons';
+import { householdClientSymbol } from '@/dependency-injection/injection-keys';
 
 const householdClient = inject(householdClientSymbol)!;
 

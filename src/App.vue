@@ -8,7 +8,7 @@
           <ion-toolbar>
             <ion-buttons slot="start" v-if="!isDashboard">
               <ion-button router-link="/" size="large" router-direction="back">
-                <ion-icon size="large" slot="icon-only" :icon="homeOutline" />
+                <HomeIcon />
               </ion-button>
             </ion-buttons>
             <ion-buttons slot="primary">
@@ -16,7 +16,7 @@
             </ion-buttons>
             <ion-buttons slot="secondary" v-if="invites.length > 0">
               <ion-button size="large" @click="showInvites">
-                <ion-icon size="large" slot="icon-only" :icon="mailOutline" />
+                <MailIcon />
                 <ion-badge color="danger" class="button-badge">
                   {{ invites.length }}
                 </ion-badge>
@@ -37,6 +37,12 @@
 </template>
 
 <script setup lang="ts">
+import MenuView from '@/components/MenuView.vue';
+import { colorschemeListenerSymbol, foregroundListenerSymbol, householdClientSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
+import { Household } from '@/models/Household';
+import { _t } from '@/translation';
+import { checkAppVersion } from '@/update/update';
+import LoadingScreen from '@/views/LoadingScreen.vue';
 import {
   IonApp,
   IonBadge,
@@ -44,7 +50,6 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
-  IonIcon,
   IonMenuButton,
   IonPage,
   IonRefresher,
@@ -54,15 +59,9 @@ import {
   IonToolbar,
   RefresherCustomEvent
 } from '@ionic/vue';
-import MenuView from '@/components/MenuView.vue';
 import { computed, inject, ref, watch } from 'vue';
-import { mailOutline, homeOutline } from 'ionicons/icons';
-import { Household } from '@/models/Household';
-import { _t } from '@/translation';
-import LoadingScreen from '@/views/LoadingScreen.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { colorschemeListenerSymbol, foregroundListenerSymbol, householdClientSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
-import { checkAppVersion } from '@/update/update';
+import { HomeIcon, MailIcon } from 'vue-tabler-icons';
 
 
 let triedSessionRestore = ref(false);
@@ -130,10 +129,10 @@ colorschemeListener.register();
 <style scoped>
 .button-badge {
   position: absolute;
-  right: -6px;
-  top: -9px;
-  width: 20px;
-  height: 20px;
+  right: -8px;
+  top: 0;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
 }
 </style>

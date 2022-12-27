@@ -3,50 +3,50 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ isEditing ? __t('Edit task') : _t('Add task') }}
-        <ion-icon :icon="closeCircleOutline" color="dark" @click="dismiss()" style="float: right" />
+        <CircleXIcon @click="dismiss()" style="float: right" />
       </ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content color="light" @keypress.enter="submit()">
     <ion-item-group>
       <ion-item>
-        <ion-label position="stacked">{{_t('Name')}}</ion-label>
+        <ion-label position="stacked">{{ _t('Name') }}</ion-label>
         <ion-input type="text" v-model="taskName" />
-        <ion-icon :icon="pencilOutline" slot="end" class="align-center" />
+        <PencilIcon slot="end" class="align-center" />
       </ion-item>
       <ion-item button @click="openDurationPicker">
         <ion-label>
           {{ null !== duration
-              ? __t('Repeats every {0} {1}', duration, _t(durationModifier))
-              : _t('Nonrepeating')
-          }}
+    ? __t('Repeats every {0} {1}', duration, _t(durationModifier))
+    : _t('Nonrepeating')
+}}
         </ion-label>
-        <ion-icon slot="start" :icon="timeOutline" />
+        <ClockIcon slot="start" />
       </ion-item>
       <ion-item button @click="iconPicker" lines="full">
         <ion-text>{{ _t(icon) }}</ion-text>
-        <ion-icon slot="end" :icon="icons[icon]" />
+        <component slot="end" :is="icons[icon]" />
       </ion-item>
       <ion-item button @click="colorPicker" lines="full" :style="`background-color: ${color}`">
         <ion-text>{{ _t('Color') }}</ion-text>
-        <input slot="end" type="color" disabled="true" :value="color"/>
-        <ion-icon slot="end" :icon="colorPaletteOutline" />
+        <input slot="end" type="color" disabled="true" :value="color" />
+        <PaletteIcon slot="end" />
       </ion-item>
       <ion-item>
-        <ion-label position="stacked">{{_t('Stars')}}</ion-label>
+        <ion-label position="stacked">{{ _t('Stars') }}</ion-label>
         <ion-input type="number" v-model="stars" />
-        <ion-icon :icon="starOutline" slot="end" class="align-center" />
+        <StarIcon slot="end" class="align-center" />
       </ion-item>
     </ion-item-group>
   </ion-content>
   <ion-footer>
     <ion-toolbar>
       <ion-button color="primary" @click="submit()" :disabled="!valid">
-        <ion-icon :icon="addCircleOutline" slot="start" />
+        <CirclePlusIcon slot="start" />
         {{ _t('Add') }}
       </ion-button>
       <ion-button color="light" @click="dismiss()">
-        <ion-icon :icon="closeCircleOutline" slot="start" />
+        <CircleXIcon slot="start" />
         {{ _t('Cancel') }}
       </ion-button>
     </ion-toolbar>
@@ -54,40 +54,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, Ref, ref } from "vue";
+import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
+import { DURATION_SIZES, exactRecurringInterval } from '@/common/time';
+import { IconName, icons, isValidIcon } from "@/components/icons";
+import { stateSymbol, taskClientSymbol } from "@/dependency-injection/injection-keys";
+import { Task } from '@/models/Task';
+import toast from "@/toast";
+import { __t, _t } from "@/translation";
 import {
-  addCircleOutline,
-  closeCircleOutline,
-  timeOutline,
-  pencilOutline,
-  starOutline,
-colorPaletteOutline,
-} from "ionicons/icons";
-import {
-  IonLabel,
-  IonInput,
-  IonItemGroup,
-  IonItem,
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonIcon,
   IonButton,
+  IonContent,
   IonFooter,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
   IonText,
+  IonTitle,
+  IonToolbar,
   modalController,
   pickerController,
 } from "@ionic/vue";
-import icons from "@/components/icons";
-import { DURATION_SIZES, exactRecurringInterval } from '@/common/time';
-import { _t, __t } from "@/translation";
-import { Task } from '@/models/Task';
-import IconPicker from "./IconPicker.vue";
+import { Ref, computed, inject, ref } from "vue";
+import { CirclePlusIcon, CircleXIcon, ClockIcon, PaletteIcon, PencilIcon, StarIcon } from 'vue-tabler-icons';
 import ColorPicker from "./ColorPicker.vue";
-import { stateSymbol, taskClientSymbol } from "@/dependency-injection/injection-keys";
-import toast from "@/toast";
-import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
+import IconPicker from "./IconPicker.vue";
 
 const props = defineProps<{
   id?: number,
@@ -98,8 +90,8 @@ const taskClient = inject(taskClientSymbol)!;
 
 const durationModifiers = DURATION_SIZES;
 const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
-const duration = ref<number|null>(null);
-const icon = ref('checkmark');
+const duration = ref<number | null>(null);
+const icon = ref<IconName>('check');
 const hue = ref<number>(getDefaultTaskHue());
 const taskName = ref('');
 const stars = ref('0');
@@ -118,7 +110,7 @@ const isEditing = computed(() => null != props.task);
 
 async function colorPicker() {
   const colorReceiver = new EventTarget();
-  let newHue: number|null = null;
+  let newHue: number | null = null;
   colorReceiver.addEventListener('color', (event) => {
     newHue = (event as CustomEvent<number>).detail;
   });
@@ -136,7 +128,7 @@ async function colorPicker() {
 }
 async function iconPicker() {
   const iconReceiver = new EventTarget();
-  let newIcon: string|null = null;
+  let newIcon: string | null = null;
   iconReceiver.addEventListener('icon', (event) => {
     newIcon = (event as CustomEvent<string>).detail;
   });
@@ -224,7 +216,7 @@ if (null == props.id && null == props.task) {
 if (isEditing.value) {
   taskName.value = props.task!.name;
 
-  icon.value = props.task!.icon;
+  icon.value = isValidIcon(props.task!.icon) ? props.task!.icon : 'check';
   hue.value = props.task!.hue ?? getDefaultTaskHue();
   stars.value = props.task!.stars.toString();
   if (null === props.task!.duration) {

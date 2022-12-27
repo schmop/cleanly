@@ -5,9 +5,10 @@
                 <TransitionGroup name="checklist">
                     <ion-item v-for="(todo, index) in todos" :key="todo.uuid">
                         <ion-button fill="clear" color="dark" shape="round" @click.stop="markAsCompleted(index)">
-                            <ion-icon slot="icon-only" :icon="ellipseOutline" />
+                            <CircleIcon slot="icon-only" />
                         </ion-button>
-                        <ion-input @ionInput="updateTodo(index, $event)" v-model="todo.content" :id="todo.uuid"></ion-input>
+                        <ion-input @ionInput="updateTodo(index, $event)" v-model="todo.content"
+                            :id="todo.uuid"></ion-input>
                         <ion-reorder slot="end">
                         </ion-reorder>
                     </ion-item>
@@ -16,7 +17,7 @@
             </ion-reorder-group>
             <ion-fab vertical="bottom" horizontal="end" slot="fixed">
                 <ion-fab-button @click="addTodo">
-                    <ion-icon :icon="add" />
+                    <PlusIcon />
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
@@ -25,28 +26,26 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed, watch, ref, Ref } from 'vue';
+import debounce from '@/common/debounce';
+import { uuid4 } from '@/common/uuid';
+import { gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
+import { Todo } from '@/models/Todo';
+import { TodoEvent } from "@/models/TodoEvent";
+import toast from "@/toast";
 import {
     IonButton,
+    IonContent,
     IonFab,
     IonFabButton,
-    IonIcon,
     IonInput,
     IonItem,
     IonPage,
     IonReorder,
     IonReorderGroup,
-    ItemReorderCustomEvent,
+    ItemReorderCustomEvent
 } from "@ionic/vue";
-import { Todo } from '../../models/Todo';
-import { add, ellipseOutline } from "ionicons/icons";
-import { uuid4 } from '../../common/uuid';
-import { IonContent } from '@ionic/vue';
-import debounce from '../../common/debounce';
-import toast from "@/toast";
-import { TodoEvent } from "@/models/TodoEvent";
-import { gettersSymbol } from '@/dependency-injection/injection-keys';
-import { householdClientSymbol } from '../../dependency-injection/injection-keys';
+import { Ref, computed, inject, ref, watch } from 'vue';
+import { CircleIcon, PlusIcon } from 'vue-tabler-icons';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -126,7 +125,7 @@ async function addTodo() {
         type: 'create',
         uuid: todo.uuid,
     });
-    setTimeout(() => (document.querySelector(`[id="${todo.uuid}"]`) as any|undefined)?.setFocus(), 100);
+    setTimeout(() => (document.querySelector(`[id="${todo.uuid}"]`) as any | undefined)?.setFocus(), 100);
 }
 </script>
 

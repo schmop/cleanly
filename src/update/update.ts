@@ -8,7 +8,7 @@ export async function checkAppVersion() {
     if (updateInfo.availableVersion <= updateInfo.currentVersion || updateInfo.updateAvailability !== AppUpdateAvailability.UPDATE_AVAILABLE) {
         return;
     }
-    if (!await confirmablePrompt(_t('A new app version is available. Update now?'), _t('Update'))) {
+    if (!(await confirmablePrompt(_t('A new app version is available. Update now?'), _t('Update')))) {
         return;
     }
     try {
