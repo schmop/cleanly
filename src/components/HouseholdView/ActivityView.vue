@@ -1,28 +1,36 @@
 <template>
     <ion-page>
         <ion-content>
+            <IonSpinner class="center" v-if="sortedTaskLogs.length === 0" />
             <TaskLogView v-for="(log, index) in sortedTaskLogs" :log="log" :key="index" />
             <ion-infinite-scroll @ionInfinite="ionInfinite">
                 <ion-infinite-scroll-content></ion-infinite-scroll-content>
             </ion-infinite-scroll>
+            <ion-refresher slot="fixed" @ionRefresh="reload">
+                <ion-refresher-content />
+            </ion-refresher>
         </ion-content>
     </ion-page>
 </template>
 
 <script setup lang="ts">
+import { stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
+import { error } from "@/toast";
+import { IonInfiniteScrollCustomEvent } from '@ionic/core';
 import {
     IonContent,
-    IonPage,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
-    onIonViewWillEnter,
+    IonPage,
+    IonRefresher,
+    IonRefresherContent,
+    IonSpinner,
+    RefresherCustomEvent,
+    onIonViewWillEnter
 } from "@ionic/vue";
-import TaskLogView from '../TaskLogView.vue';
 import { computed, inject, ref } from "vue";
-import { TaskLog } from '../../models/TaskLog';
-import { stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
-import { IonInfiniteScrollCustomEvent } from '@ionic/core';
-import { error } from "@/toast";
+import { TaskLog } from '@/models/TaskLog';
+import TaskLogView from '../TaskLogView.vue';
 
 const state = inject(stateSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
@@ -35,6 +43,11 @@ const sortedTaskLogs = computed(() => {
     const logs = taskLogs.value.concat();
     return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
 });
+
+async function reload(event: RefresherCustomEvent) {
+    await reset();
+    event.detail.complete();
+}
 
 async function fetchLogs() {
     const id = state.viewedHousehold;
@@ -65,15 +78,23 @@ async function ionInfinite(event: IonInfiniteScrollCustomEvent<void>) {
     event.target.complete();
 }
 
-onIonViewWillEnter(() => {
+async function reset() {
     upToFetchId = null;
     taskLogs.value = [];
     stopScrolling = false;
     fetchLogs();
+}
+
+onIonViewWillEnter(() => {
+    reset();
 });
 
 </script>
 
 <style scoped>
-
+.center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+}
 </style>

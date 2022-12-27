@@ -27,9 +27,6 @@
         </ion-header>
       </template>
       <ion-content id="main">
-        <ion-refresher v-if="loggedIn" slot="fixed" @ionRefresh="forceReload">
-          <ion-refresher-content />
-        </ion-refresher>
         <ion-router-outlet ref="outlet" />
       </ion-content>
     </ion-page>
@@ -112,10 +109,6 @@ async function sessionRestoreSuccess() {
 function sessionRestoreFail() {
   triedSessionRestore.value = true;
   router.replace({ name: 'login' });
-}
-async function forceReload(event: RefresherCustomEvent) {
-  await householdClient.dashboardInfo();
-  event.target.complete();
 }
 function showInvites() {
   router.push({ name: 'invite-view' });

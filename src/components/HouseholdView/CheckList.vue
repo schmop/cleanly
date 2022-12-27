@@ -20,12 +20,15 @@
                     <PlusIcon />
                 </ion-fab-button>
             </ion-fab>
+            <ion-refresher slot="fixed" @ionRefresh="forceReload">
+                <ion-refresher-content />
+            </ion-refresher>
         </ion-content>
-
     </ion-page>
 </template>
 
 <script setup lang="ts">
+import { forceReload } from '@/app-state/pull-to-refresh';
 import debounce from '@/common/debounce';
 import { uuid4 } from '@/common/uuid';
 import { gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
@@ -33,6 +36,8 @@ import { Todo } from '@/models/Todo';
 import { TodoEvent } from "@/models/TodoEvent";
 import toast from "@/toast";
 import {
+    IonRefresher,
+    IonRefresherContent,
     IonButton,
     IonContent,
     IonFab,

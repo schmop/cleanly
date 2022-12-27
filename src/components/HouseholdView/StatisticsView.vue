@@ -14,6 +14,9 @@
                 </ion-select>
                 <Doughnut v-if="analysis === 'participations'" :data="participationData" :options="options" />
                 <Bar v-else-if="analysis === 'punctuality'" :data="punctualityData" :options="options" />
+                <ion-refresher slot="fixed" @ionRefresh="reloadStatistics">
+                    <ion-refresher-content />
+                </ion-refresher>
             </template>
         </ion-content>
     </ion-page>
@@ -28,6 +31,8 @@ import {
     IonContent,
     IonLoading,
     IonPage,
+    IonRefresher,
+    IonRefresherContent,
     IonSelect,
     IonSelectOption,
     onIonViewWillEnter,
@@ -49,6 +54,7 @@ import { computed, inject, ref } from "vue";
 import { Doughnut, Bar } from 'vue-chartjs';
 import { TaskId } from '@/types/index';
 import { secondsToDays } from '@/common/time';
+import { RefresherCustomEvent } from '@ionic/vue';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Colors);
 
@@ -133,6 +139,11 @@ function selectTask(event: SelectCustomEvent<TaskId>) {
 
 function selectAnalysis(event: SelectCustomEvent<Analysis>) {
     analysis.value = event.detail.value;
+}
+
+async function reloadStatistics(event: RefresherCustomEvent) {
+    await fetchStatistics();
+    event.detail.complete();
 }
 
 async function fetchStatistics() {
