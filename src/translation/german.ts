@@ -218,5 +218,11 @@ export default {
     'Fiord': 'Fjord',
     'Color': 'Farbe',
     'Select': 'Auswählen',
+    'There are no tasks yet': 'Es gibt noch keine Aufgaben',
+    'Create task': 'Aufgabe anlegen',
+    'No checklist entry to be found': '',
+    'There are no checklist entries yet': 'Es gibt noch keine Checklisteneinträge',
+    'There was no activity yet in this household': 'Es gab noch keine Aktivität in diesem Haushalt',
+    'There are no tasks yet to analyze': 'Es gibt noch keine Aufgaben zum Analysieren',
     '': '',
 } as { [english: string]: string };

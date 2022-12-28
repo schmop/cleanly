@@ -5,7 +5,7 @@
                 <TransitionGroup name="checklist">
                     <ion-item v-for="(todo, index) in todos" :key="todo.uuid">
                         <ion-button fill="clear" color="dark" shape="round" @click.stop="markAsCompleted(index)">
-                            <CircleIcon slot="icon-only" />
+                            <SquareIcon slot="icon-only" />
                         </ion-button>
                         <ion-input @ionInput="updateTodo(index, $event)" v-model="todo.content"
                             :id="todo.uuid"></ion-input>
@@ -13,6 +13,14 @@
                         </ion-reorder>
                     </ion-item>
                 </TransitionGroup>
+
+                <Transition name="nothing-yet">
+                    <ion-card v-if="todos.length === 0">
+                        <ion-card-header>
+                            <ion-card-title> {{ _t('There are no checklist entries yet') }} </ion-card-title>
+                        </ion-card-header>
+                    </ion-card>
+                </Transition>
 
             </ion-reorder-group>
             <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -35,22 +43,26 @@ import { gettersSymbol, householdClientSymbol } from '@/dependency-injection/inj
 import { Todo } from '@/models/Todo';
 import { TodoEvent } from "@/models/TodoEvent";
 import toast from "@/toast";
+import { _t } from '@/translation';
 import {
-    IonRefresher,
-    IonRefresherContent,
     IonButton,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
     IonContent,
     IonFab,
     IonFabButton,
     IonInput,
     IonItem,
     IonPage,
+    IonRefresher,
+    IonRefresherContent,
     IonReorder,
     IonReorderGroup,
     ItemReorderCustomEvent
 } from "@ionic/vue";
 import { Ref, computed, inject, ref, watch } from 'vue';
-import { CircleIcon, PlusIcon } from 'vue-tabler-icons';
+import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -152,5 +164,15 @@ async function addTodo() {
 .checklist-leave-active {
     position: absolute;
     width: 100%;
+}
+
+.nothing-yet-enter-active {
+    transition: opacity 0.5s ease;
+}
+
+.nothing-yet-enter-from,
+.nothing-yet-leave-from,
+.nothing-yet-leave-active {
+    opacity: 0;
 }
 </style>

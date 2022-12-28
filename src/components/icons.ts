@@ -1,9 +1,10 @@
-import { AlarmIcon, BarbellIcon, BikeIcon, BookIcon, BooksIcon, CandleIcon, CarIcon, CheckIcon, DiceIcon, FlagIcon, HammerIcon, HeadphonesIcon, HeartIcon, HeartbeatIcon, HourglassEmptyIcon, MoonIcon, RadioIcon, ScissorsIcon, ShoeIcon, SunglassesIcon, VideoIcon, NewsIcon, AppleIcon, PawIcon, UserIcon, GlassIcon, ToolsKitchenIcon, FlowerIcon, SchoolIcon, ShirtIcon, TrainIcon, WalletIcon, DropletIcon, BucketIcon, BottleIcon, BathIcon, VacuumCleanerIcon, WashMachineIcon, HangerIcon, SockIcon, TeapotIcon, FridgeIcon } from 'vue-tabler-icons';
+import { AlarmIcon, BarbellIcon, BikeIcon, BookIcon, BooksIcon, CandleIcon, CarIcon, CheckIcon, DiceIcon, FlagIcon, HammerIcon, HeadphonesIcon, HeartIcon, HeartbeatIcon, HourglassEmptyIcon, MoonIcon, RadioIcon, ScissorsIcon, ShoeIcon, SunglassesIcon, VideoIcon, NewsIcon, AppleIcon, PawIcon, UserIcon, GlassIcon, ToolsKitchenIcon, FlowerIcon, SchoolIcon, ShirtIcon, TrainIcon, WalletIcon, DropletIcon, BucketIcon, BottleIcon, BathIcon, VacuumCleanerIcon, WashMachineIcon, HangerIcon, SockIcon, TeapotIcon, FridgeIcon, ToiletPaperIcon, MicrowaveIcon, BasketIcon, TrashIcon, Ironing2Icon } from 'vue-tabler-icons';
 
 export const icons = {
     'alarm': AlarmIcon,
     'apple': AppleIcon,
     'barbell': BarbellIcon,
+    'basket': BasketIcon,
     'bath': BathIcon,
     'bike': BikeIcon,
     'book': BookIcon,
@@ -25,6 +26,8 @@ export const icons = {
     'heart': HeartIcon,
     'heartbeat': HeartbeatIcon,
     'hourglass-empty': HourglassEmptyIcon,
+    'ironing-2': Ironing2Icon,
+    'microwave': MicrowaveIcon,
     'moon': MoonIcon,
     'news': NewsIcon,
     'paw': PawIcon,
@@ -36,8 +39,10 @@ export const icons = {
     'sock': SockIcon,
     'sunglasses': SunglassesIcon,
     'teapot': TeapotIcon,
+    'toilet-paper': ToiletPaperIcon,
     'tools-kitchen': ToolsKitchenIcon,
     'train': TrainIcon,
+    'trash': TrashIcon,
     'user': UserIcon,
     'vacuum': VacuumCleanerIcon,
     'video': VideoIcon,

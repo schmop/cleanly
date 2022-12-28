@@ -98,7 +98,7 @@ const getters: GetterFunctions = {
             return {};
         }
 
-        return store.state.stars[viewedHousehold];
+        return store.state.stars[viewedHousehold] ?? {};
     },
     tasks: (): Task[] => {
         return store.getters.household.value?.tasks ?? [];

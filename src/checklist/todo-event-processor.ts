@@ -67,6 +67,10 @@ export class TodoEventProcessor {
             return;
         }
         const [todo] = todos.splice(index, 1);
+        if (undefined === todo) {
+            this.error('sorting checklist entries');
+            return;
+        }
         if (insertBeforeIndex > index) {
             insertBeforeIndex--;
         }

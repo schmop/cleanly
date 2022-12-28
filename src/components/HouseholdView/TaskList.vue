@@ -14,6 +14,18 @@
             <TaskView v-for="(task) in filteredTasks" :task="task" :household="household" :key="task.id"
                 :show-actions="true" />
 
+            <ion-card v-if="sortedTasks.length === 0">
+                <ion-card-header>
+                    <ion-card-title> {{ _t('There are no tasks yet') }} </ion-card-title>
+                </ion-card-header>
+                <ion-card-content v-if="canManageTasks">
+                    <ion-button color="primary" @click="openTaskFormModal">
+                        <CirclePlusIcon slot="start" />
+                        {{ _t('Create task') }}
+                    </ion-button>
+                </ion-card-content>
+            </ion-card>
+
             <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
                 <ion-fab-button @click="openTaskFormModal">
                     <PlusIcon />
@@ -35,6 +47,11 @@ import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/inj
 import TaskForm from '@/modals/TaskForm.vue';
 import {
     IonChip,
+    IonCard,
+    IonCardHeader,
+    IonButton,
+    IonCardContent,
+    IonCardTitle,
     IonContent, IonFab,
     IonFabButton,
     IonPage,
@@ -43,8 +60,9 @@ import {
     modalController
 } from "@ionic/vue";
 import { computed, inject, ref } from 'vue';
-import { PlusIcon, XIcon } from 'vue-tabler-icons';
+import { CirclePlusIcon, PlusIcon, XIcon } from 'vue-tabler-icons';
 import TaskView from '../TaskView.vue';
+import { _t } from '@/translation';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;

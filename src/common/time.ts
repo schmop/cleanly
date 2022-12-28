@@ -58,7 +58,7 @@ function formatInterval(someTime: number, someDurations: { [durationName: string
     }
 
     if ('' === string) {
-        const smallestDurationName = sortedDurations[sortedDurations.length - 1][0];
+        const smallestDurationName = sortedDurations[sortedDurations.length - 1]?.[0] ?? 'hours';
 
         return `0 ${_t(smallestDurationName)}`;
     }

@@ -2,6 +2,11 @@
     <ion-page>
         <ion-content>
             <ion-loading backdropDismiss v-if="statistics === null || household === undefined" />
+            <ion-card v-else-if="(sortedTasks ?? []).length === 0">
+                <ion-card-header>
+                    <ion-card-title> {{ _t('There are no tasks yet to analyze') }} </ion-card-title>
+                </ion-card-header>
+            </ion-card>
             <template v-else>
                 <ion-select :value="analysis" interface="action-sheet" :placeholder="_t('Select analysis')" @ionChange="selectAnalysis">
                     <ion-select-option value="participations">{{ _t('Participations') }}</ion-select-option>
@@ -24,7 +29,7 @@
 
 <script setup lang="ts">
 import { gettersSymbol, stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
-import { HouseholdStats } from '@/models/HouseholdStats';
+import { HouseholdStats, TaskStats } from '@/models/HouseholdStats';
 import { error } from "@/toast";
 import { __t, _t } from '@/translation';
 import {
@@ -33,6 +38,9 @@ import {
     IonPage,
     IonRefresher,
     IonRefresherContent,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
     IonSelect,
     IonSelectOption,
     onIonViewWillEnter,
@@ -84,7 +92,7 @@ const participationData = computed<DoughnutChartData>(() => {
     }
     const participations = statistics.value.userParticipations[task.id];
     const userIds = household.value?.users.map((user) => user.id) ?? [];
-    const participationCounts = userIds.map((userId) => participations[userId] ?? 0);
+    const participationCounts = userIds.map((userId) => participations?.[userId] ?? 0);
 
     return {
         labels: userIdsToUserNames(userIds),
@@ -96,15 +104,15 @@ const participationData = computed<DoughnutChartData>(() => {
 });
 const punctualityData = computed<BarChartData>(() => {
     const task = selectedTask.value;
+    const durations: TaskStats = statistics.value?.durations[task?.id ?? -1]
+        ?? {num: 0, average: null, min: null, max: null};
     if ('punctuality' !== analysis.value
-        || null === statistics.value
         || undefined === task
-        || statistics.value.durations[task.id].num === 0
+        || durations.num === 0
     ) {
         console.warn('Could not show bar chart!', statistics.value, selectedTaskId.value)
         return { labels: [], datasets: [] };
     }
-    const durations = statistics.value.durations[task.id];
 
     return {
         labels: [
@@ -164,7 +172,7 @@ async function fetchStatistics() {
 }
 
 function selectFirstTask() {
-    selectedTaskId.value = sortedTasks.value?.[0].id ?? null;
+    selectedTaskId.value = sortedTasks.value?.[0]?.id ?? null;
 }
 
 onIonViewWillEnter(() => {

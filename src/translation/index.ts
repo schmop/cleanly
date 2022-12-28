@@ -17,13 +17,14 @@ export function _t(text: string) {
     if (language() !== 'de') {
         return text;
     }
-    if (!(text in german)) {
+    const translation = german[text];
+    if (typeof translation !== 'string') {
         console.warn('Untranslated text', text);
 
         return text;
     }
 
-    return german[text];
+    return translation;
 }
 
 export function __t(text: string, ...args: (string|number)[]) {
