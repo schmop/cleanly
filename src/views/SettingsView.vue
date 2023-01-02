@@ -14,29 +14,40 @@
                                 The timestamped key fixes the infinite update loop when programmatically setting the toggle value
                                 @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
                             -->
-                            <ion-toggle @ionChange="toggleNotifyTaskDue"
-                                :key="notifyTaskDue + (new Date()).toISOString()" :checked="notifyTaskDue"></ion-toggle>
+                            <ion-toggle
+                                @ionChange="toggleNotifyTaskDue"
+                                :key="notifyTaskDue + (new Date()).toISOString()" :checked="notifyTaskDue"
+                            ></ion-toggle>
                             <ion-label>
                                 {{ _t('Tasks are due') }}
                             </ion-label>
                         </ion-item>
                         <ion-item>
-                            <ion-toggle @ionChange="toggleNotifyTaskDone"
+                            <ion-toggle
+                                @ionChange="toggleNotifyTaskDone"
                                 :key="notifyTaskDone + (new Date()).toISOString()"
-                                :checked="notifyTaskDone"></ion-toggle>
+                                :checked="notifyTaskDone"
+                            ></ion-toggle>
                             <ion-label>
                                 {{ _t('Tasks are completed') }}
                             </ion-label>
                         </ion-item>
                         <ion-item>
-                            <ion-toggle @ionChange="toggleNotifyInvites"
-                                :key="notifyInvites + (new Date()).toISOString()" :checked="notifyInvites"></ion-toggle>
+                            <ion-toggle
+                                @ionChange="toggleNotifyInvites"
+                                :key="notifyInvites + (new Date()).toISOString()" :checked="notifyInvites"
+                            ></ion-toggle>
                             <ion-label>
                                 {{ _t('Invited to a household') }}
                             </ion-label>
                         </ion-item>
                         <ion-item>
-                            <ion-select :value="language" @ionChange="changeLanguage" :placeholder="_t('Language')" interface="popover">
+                            <ion-select
+                                :value="language"
+                                @ionChange="changeLanguage"
+                                :placeholder="_t('Language')"
+                                interface="popover"
+                            >
                                 <ion-select-option value="de">{{ _t('German') }}</ion-select-option>
                                 <ion-select-option value="en">{{ _t('English') }}</ion-select-option>
                             </ion-select>
@@ -59,8 +70,10 @@
 </template>
 
 <script setup lang="ts">
-import { storeSymbol } from "@/dependency-injection/injection-keys";
+import { storeSymbol, userClientSymbol } from "@/dependency-injection/injection-keys";
+import { UserSettings } from '@/models/UserSettings';
 import toast from '@/toast';
+import { _t } from '@/translation';
 import {
     IonButton,
     IonCard,
@@ -81,9 +94,6 @@ import {
 import { inject, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { CheckIcon, CircleXIcon } from 'vue-tabler-icons';
-import { userClientSymbol } from '@/dependency-injection/injection-keys';
-import { UserSettings } from '@/models/UserSettings';
-import { _t } from '@/translation/index';
 
 const store = inject(storeSymbol)!;
 const userClient = inject(userClientSymbol)!;
@@ -104,7 +114,7 @@ function resetUiToStore() {
 
 watch(store.state.userSettings, () => {
     resetUiToStore();
-}, { immediate: true, deep: true });
+}, {immediate: true, deep: true});
 
 function toggleNotifyTaskDue() {
     notifyTaskDue.value = !notifyTaskDue.value;
@@ -132,14 +142,14 @@ async function save() {
         };
         await userClient.saveUserSettings(newSettings);
         store.setSettings(newSettings);
-        router.push({ name: 'dashboard' });
+        router.push({name: 'dashboard'});
     } catch (error) {
         toast.error((error as Error).message);
     }
 }
 
 function cancel() {
-    router.push({ name: 'dashboard' });
+    router.push({name: 'dashboard'});
     resetUiToStore();
 }
 

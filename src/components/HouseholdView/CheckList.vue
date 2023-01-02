@@ -7,8 +7,11 @@
                         <ion-button fill="clear" color="dark" shape="round" @click.stop="markAsCompleted(index)">
                             <SquareIcon slot="icon-only" />
                         </ion-button>
-                        <ion-input @ionInput="updateTodo(index, $event)" v-model="todo.content"
-                            :id="todo.uuid"></ion-input>
+                        <ion-input
+                            @ionInput="updateTodo(index, $event)"
+                            v-model="todo.content"
+                            :id="todo.uuid"
+                        />
                         <ion-reorder slot="end">
                         </ion-reorder>
                     </ion-item>
@@ -17,7 +20,7 @@
                 <Transition name="nothing-yet">
                     <ion-card v-if="todos.length === 0">
                         <ion-card-header>
-                            <ion-card-title> {{ _t('There are no checklist entries yet') }} </ion-card-title>
+                            <ion-card-title> {{ _t('There are no checklist entries yet') }}</ion-card-title>
                         </ion-card-header>
                     </ion-card>
                 </Transition>
@@ -61,7 +64,7 @@ import {
     IonReorderGroup,
     ItemReorderCustomEvent
 } from "@ionic/vue";
-import { Ref, computed, inject, ref, watch } from 'vue';
+import { computed, inject, Ref, ref, watch } from 'vue';
 import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
 
 const getters = inject(gettersSymbol)!;
@@ -73,13 +76,13 @@ const originTodos = computed(() => household.value?.checklist);
 let todos: Ref<Todo[]> = ref([]);
 let eventQueue: Ref<TodoEvent[]> = ref([]);
 const requestFlushQueue = debounce(async () => {
-    if (null == household.value) {
+    if (undefined === household.value || eventQueue.value.length === 0) {
         return;
     }
     const sentEventQueue = eventQueue.value;
     eventQueue.value = [];
     if (!await householdClient.updateChecklist(household.value.id, sentEventQueue)) {
-        toast.error('Could not send updated checklist to server!');
+        await toast.error('Could not send updated checklist to server!');
     }
 }, 1000, false);
 
@@ -87,7 +90,7 @@ const requestFlushQueue = debounce(async () => {
 watch(
     originTodos,
     () => {
-        if (null != originTodos.value) {
+        if (undefined !== originTodos.value) {
             todos.value = originTodos.value;
         }
     },
@@ -101,8 +104,12 @@ function addToQueue(event: TodoEvent) {
     eventQueue.value.push(event);
     requestFlushQueue();
 }
+
 function updateTodo(index: number, event: any) {
     const todo = todos.value[index];
+    if (undefined === todo) {
+        throw new Error('Could not update nonexistent todo.');
+    }
     // just the last content update is relevant, clear the rest
     eventQueue.value = eventQueue.value.filter(
         (event: TodoEvent) => event.uuid !== todo.uuid || event.type !== 'update'
@@ -113,19 +120,29 @@ function updateTodo(index: number, event: any) {
         data: event.target.value,
     });
 }
+
 function markAsCompleted(index: number) {
     const [todo] = todos.value.splice(index, 1);
+    if (undefined === todo) {
+        throw new Error('Could not remove nonexistent todo.');
+    }
+    const creationSynced = !eventQueue.value.some(
+        (event) => event.uuid === todo.uuid && event.type === 'create'
+    );
     // These events won't have an effect after deletion
     eventQueue.value = eventQueue.value.filter(
         (event: TodoEvent) => event.uuid !== todo.uuid
     );
-    addToQueue({
-        type: 'delete',
-        uuid: todo.uuid,
-    });
+    if (creationSynced) {
+        addToQueue({
+            type: 'delete',
+            uuid: todo.uuid,
+        });
+    }
 }
+
 function reorder(event: ItemReorderCustomEvent) {
-    const { from, to } = event.detail;
+    const {from, to} = event.detail;
     const todo = todos.value[from];
     const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? undefined;
     addToQueue({
@@ -135,20 +152,21 @@ function reorder(event: ItemReorderCustomEvent) {
     });
     todos.value = event.detail.complete(todos.value);
 }
+
 async function addTodo() {
-    const todo: Todo = { uuid: uuid4(), content: '' };
+    const todo: Todo = {uuid: uuid4(), content: ''};
     todos.value.push(todo);
     addToQueue({
         type: 'create',
         uuid: todo.uuid,
     });
-    setTimeout(() => (document.querySelector(`[id="${todo.uuid}"]`) as any | undefined)?.setFocus(), 100);
+    setTimeout(() => (document.querySelector(`[id="${todo.uuid}"]`) as any|undefined)?.setFocus(), 100);
 }
 </script>
 
 <style scoped>
 .checklist-move,
-/* apply transition to moving elements */
+    /* apply transition to moving elements */
 .checklist-enter-active,
 .checklist-leave-active {
     transition: all 0.5s ease;

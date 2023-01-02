@@ -6,8 +6,10 @@
       </ion-toolbar>
     </ion-card-header>
     <ion-card-content>
-      <TaskView v-for="(task, index) in tasks" :task="task" :household="props.household" :key="index"
-        :show-actions="false" />
+      <TaskView
+        v-for="(task, index) in tasks" :task="task" :household="props.household" :key="index"
+        :show-actions="false"
+      />
     </ion-card-content>
   </ion-card>
 </template>
@@ -16,17 +18,11 @@
 import { taskSortByPriority } from "@/common/task-priority";
 import TaskView from "@/components/TaskView.vue";
 import { Household } from "@/models/Household";
-import {
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
-  IonToolbar
-} from "@ionic/vue";
+import { IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonToolbar } from "@ionic/vue";
 import { computed } from 'vue';
 
 const props = defineProps<{
-  household: Household
+    household: Household
 }>();
 const tasks = computed(() => props.household.tasks.concat().sort(taskSortByPriority).slice(0, 2));
 </script>

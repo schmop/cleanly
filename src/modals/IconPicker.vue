@@ -1,45 +1,51 @@
 <template>
-  <ion-header>
-    <ion-toolbar color="medium">
-      <ion-title>
-        {{ _t('Icon') }}
-        <CircleXIcon @click="dismiss()" style="float: right" />
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content color="light">
-    <ion-item-group>
-      <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(`${name}`)">
-        <ion-label>{{ _t(`${name}`) }}</ion-label>
-        <component :is="icon" />
-      </ion-item>
-    </ion-item-group>
-  </ion-content>
+    <ion-header>
+        <ion-toolbar color="medium">
+            <ion-title>
+                {{ _t('Icon') }}
+                <CircleXIcon @click="dismiss()" style="float: right" />
+            </ion-title>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content color="light">
+        <ion-item-group>
+            <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(`${name}`)">
+                <ion-label>{{ _t(`${name}`) }}</ion-label>
+                <component :is="icon" />
+            </ion-item>
+        </ion-item-group>
+    </ion-content>
 </template>
 
 <script setup lang="ts">
 import { icons } from '@/components/icons';
-import { _t } from '@/translation/index';
+import { _t } from '@/translation';
 import {
-  IonContent,
-  IonHeader,
-  IonItem, IonItemGroup, IonLabel, IonTitle, IonToolbar, modalController
+    IonContent,
+    IonHeader,
+    IonItem,
+    IonItemGroup,
+    IonLabel,
+    IonTitle,
+    IonToolbar,
+    modalController
 } from "@ionic/vue";
 import { CircleXIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
-  iconReceiver: EventTarget,
+    iconReceiver: EventTarget,
 }>();
 
 const emit = defineEmits(['select']);
 
 function dismiss() {
-  modalController.dismiss();
+    modalController.dismiss();
 }
+
 async function select(icon: string) {
-  props.iconReceiver.dispatchEvent(new CustomEvent('icon', { detail: icon }));
-  emit('select', icon);
-  dismiss();
+    props.iconReceiver.dispatchEvent(new CustomEvent('icon', {detail: icon}));
+    emit('select', icon);
+    dismiss();
 }
 </script>
 

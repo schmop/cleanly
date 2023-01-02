@@ -6,8 +6,10 @@
                 <ion-tab-button tab="tasks" :href="href('tasks')">
                     <CheckboxIcon />
                     <ion-label>{{ _t('Tasks') }}</ion-label>
-                    <ion-badge class="badge-with-custom-icon-fix" v-if="numOverdueTasks > 0">{{ numOverdueTasks
-}}</ion-badge>
+                    <ion-badge class="badge-with-custom-icon-fix" v-if="numOverdueTasks > 0">{{
+                            numOverdueTasks
+                        }}
+                    </ion-badge>
                 </ion-tab-button>
 
                 <ion-tab-button tab="checklist" :href="href('checklist')">
@@ -39,10 +41,7 @@ import { taskOverDue, taskSortByPriority } from "@/common/task-priority";
 import { gettersSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import router from "@/router";
 import { _t } from '@/translation';
-import {
-    IonBadge, IonLabel, IonPage, IonRouterOutlet, IonTabBar,
-    IonTabButton, IonTabs
-} from "@ionic/vue";
+import { IonBadge, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from "@ionic/vue";
 import { computed, inject, onBeforeUnmount } from "vue";
 import { ChartBarIcon, CheckboxIcon, ChecklistIcon, HomeCogIcon, TimelineIcon } from "vue-tabler-icons";
 
@@ -54,8 +53,8 @@ const tasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriorit
 const numOverdueTasks = computed(() => tasks.value.filter(task => taskOverDue(task)).length);
 
 
-if (household.value == null) {
-    router.push({ name: 'dashboard' });
+if (undefined === household.value) {
+    router.push({name: 'dashboard'});
 }
 onBeforeUnmount(() => {
     store.viewHousehold(null);

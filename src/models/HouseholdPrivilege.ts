@@ -1,4 +1,4 @@
-import { HouseholdId, UserId } from '../types/index';
+import { HouseholdId, UserId } from '@/types';
 
 /** @see {isHouseholdPrivilege} ts-auto-guard:type-guard */
 export interface HouseholdPrivilege {

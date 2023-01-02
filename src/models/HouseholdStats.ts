@@ -1,4 +1,4 @@
-import { JsonRecord, TaskId, UserId } from '@/types/index';
+import { JsonRecord, TaskId, UserId } from '@/types';
 
 export type UserParticipations = JsonRecord<UserId, number>;
 

@@ -2,7 +2,7 @@ import { _t } from '@/translation';
 import { alertController } from '@ionic/vue';
 
 /**
- * @returns {bool} true when confirmed, false else
+ * @returns {boolean} true when confirmed, false else
  */
 export async function confirmablePrompt(message: string, confirmText?: string): Promise<boolean> {
     const alert = await alertController.create({

@@ -1,6 +1,6 @@
 import { HouseholdClient } from '@/client/household-client';
+import { Store } from '@/store';
 import { App } from '@capacitor/app';
-import { Store } from '../store/index';
 
 export class ForegroundListener {
     constructor(

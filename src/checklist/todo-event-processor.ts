@@ -1,8 +1,8 @@
+import { HouseholdClient } from '@/client/household-client';
 import { Todo } from '@/models/Todo';
-import { TodoEvent } from '../models/TodoEvent';
-import toast from '@/toast';
-import { HouseholdClient } from '../client/household-client';
+import { TodoEvent } from '@/models/TodoEvent';
 import { Store } from '@/store';
+import toast from '@/toast';
 
 export class TodoEventProcessor {
     constructor(private store: Store, private householdClient: HouseholdClient) {

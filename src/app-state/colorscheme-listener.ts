@@ -1,4 +1,4 @@
-import { Store } from '../store/index';
+import { Store } from '@/store';
 
 export class ColorschemeListener {
     constructor(

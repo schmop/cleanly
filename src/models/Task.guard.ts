@@ -2,7 +2,6 @@
  * Generated type guards for "Task.ts".
  * WARNING: Do not manually change this file.
  */
-import { isUser } from "./User.guard";
 import { Task } from "./Task";
 
 function evaluate(
@@ -36,8 +35,8 @@ export function isTask(obj: unknown, argumentName: string = "task"): obj is Task
             typeof typedObj["lastComplete"] === "number"), `${argumentName}["lastComplete"]`, "number | null | undefined", typedObj["lastComplete"]) &&
         evaluate((typedObj["duration"] === null ||
             typeof typedObj["duration"] === "number"), `${argumentName}["duration"]`, "number | null", typedObj["duration"]) &&
-        evaluate((typeof typedObj["assignedTo"] === "undefined" ||
-            isUser(typedObj["assignedTo"]) as boolean), `${argumentName}["assignedTo"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | undefined", typedObj["assignedTo"]) &&
+        evaluate((typedObj["assignee"] === null ||
+            typeof typedObj["assignee"] === "number"), `${argumentName}["assignee"]`, "number | null", typedObj["assignee"]) &&
         evaluate(typeof typedObj["stars"] === "number", `${argumentName}["stars"]`, "number", typedObj["stars"])
     )
 }

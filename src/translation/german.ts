@@ -1,4 +1,4 @@
-export default {
+export const german = {
     'everyday': 'täglich',
     'every week': 'wöchentlich',
     'every month': 'monatlich',
@@ -224,5 +224,10 @@ export default {
     'There are no checklist entries yet': 'Es gibt noch keine Checklisteneinträge',
     'There was no activity yet in this household': 'Es gab noch keine Aktivität in diesem Haushalt',
     'There are no tasks yet to analyze': 'Es gibt noch keine Aufgaben zum Analysieren',
+    'Assign to': 'Zuweisen',
     '': '',
-} as { [english: string]: string };
+};
+
+export function hasTranslation(text: string): text is keyof typeof german {
+    return text in german;
+}

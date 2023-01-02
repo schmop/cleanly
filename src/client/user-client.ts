@@ -1,9 +1,8 @@
 import { UserSettings } from '@/models/UserSettings';
-import { Store } from '@/store';
 import { AuthClient } from './auth-client';
 
 export class UserClient {
-    constructor(private readonly client: AuthClient, private readonly store: Store) {
+    constructor(private readonly client: AuthClient) {
     }
 
     async saveUserSettings(settings: UserSettings) {
