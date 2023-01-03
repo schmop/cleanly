@@ -6,7 +6,7 @@ import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
 import { User } from '@/models/User';
 import { UserSettings } from '@/models/UserSettings';
-import { HouseholdId, StarsRecord, UserId } from '@/types';
+import { HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
 import { App, computed, ComputedRef, reactive } from 'vue';
 
 export class State {
@@ -157,11 +157,11 @@ export class Store {
         }
     }
 
-    markTaskDone(taskId: number, timestamp: number) {
+    markTaskDone(householdId: HouseholdId, taskId: TaskId, timestamp: number) {
         const task = this.state
             .households
-            .map((household: Household) => household.tasks)
-            .flat()
+            .find((household) => household.id === householdId)
+            ?.tasks
             .find((task: Task) => task.id === taskId);
 
         if (task) {
@@ -189,6 +189,18 @@ export class Store {
 
     removeInvite(inviteToRemove: Invite) {
         this.state.invites = this.state.invites.filter(invite => invite !== inviteToRemove);
+    }
+
+    assignTask(householdId: HouseholdId, taskId: TaskId, userId: UserId) {
+        const task = this.state
+            .households
+            .find((household) => household.id === householdId)
+            ?.tasks
+            .find((task: Task) => task.id === taskId);
+
+        if (task) {
+            task.assignee = userId;
+        }
     }
 
     joinHousehold(household: Household) {

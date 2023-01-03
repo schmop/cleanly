@@ -225,6 +225,8 @@ export const german = {
     'There was no activity yet in this household': 'Es gab noch keine Aktivität in diesem Haushalt',
     'There are no tasks yet to analyze': 'Es gibt noch keine Aufgaben zum Analysieren',
     'Assign to': 'Zuweisen',
+    'Task assigned successfully!': 'Aufgabe erfolgreich zugewiesen!',
+    'Unassign': 'Zuweisung aufheben',
     '': '',
 };
 

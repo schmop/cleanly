@@ -17,7 +17,8 @@
           {{ durationText }}
         </span>
         <span class="small row" v-if="assignee">
-          {{ assignee }}
+          <UserIcon />
+          {{ assignee.name }}
         </span>
         <div class="flex-end row">
           <ion-text color="warning">
@@ -84,7 +85,7 @@ import {
 import TaskForm from "@/modals/TaskForm.vue";
 import { Household } from "@/models/Household";
 import { Task } from "@/models/Task";
-import toast from "@/toast";
+import toast, { showThrownError, success } from "@/toast";
 import { __t, _t } from "@/translation";
 import {
     IonButton,
@@ -100,10 +101,12 @@ import {
     IonPopover,
     IonText,
     modalController,
+    PickerColumn,
+    PickerColumnOption,
     pickerController,
 } from "@ionic/vue";
 import { computed, inject, ref } from 'vue';
-import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon } from 'vue-tabler-icons';
+import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
     task: Task,
@@ -155,30 +158,54 @@ async function deleteTask() {
 }
 
 async function assignTo() {
+    const assigneeColumn: PickerColumn = {
+        name: 'assignee',
+        options: props.household.users.map(
+            (user) => ({
+                value: user.id,
+                text: user.name,
+            }),
+        ),
+    };
+    if (props.task.assignee !== null) {
+        assigneeColumn.selectedIndex = assigneeColumn.options.findIndex(
+            (option) => option.value === props.task.assignee
+        );
+    }
     const picker = await pickerController.create({
-        columns: [
-            {
-                name: "assignee",
-                selectedIndex: countSelectedIndex,
-                options: countOptions,
-            },
-        ],
+        columns: [assigneeColumn],
         buttons: [
             {
                 text: _t("Cancel"),
                 role: "cancel",
             },
             {
+                text: _t("Unassign"),
+                role: "unassign",
+            },
+            {
                 text: _t("Confirm"),
-                handler: ({count, modifier}) => {
-                    duration.value = count.value;
-                    durationModifier.value = modifier.value;
-                },
             },
         ],
     });
     await picker.present();
-    await taskClient.assignTo(props.task, assignee)
+    const dismiss = await picker.onDidDismiss<{assignee: PickerColumnOption}>();
+    if (dismiss.role === 'cancel') {
+        return;
+    }
+    let userId = dismiss.data?.assignee.value;
+    if (typeof userId !== 'number' || dismiss.role === 'unassign') {
+        userId = null;
+    }
+
+    try {
+        await taskClient.assignTo(props.task, userId);
+        store.assignTask(props.household.id, props.task.id, userId);
+        await success(_t('Task assigned successfully!'));
+    } catch (err) {
+        await showThrownError(err);
+    }
+
 }
 
 async function editTask() {
@@ -198,7 +225,7 @@ async function markDone() {
         try {
             actionsVisible.value = false;
             const newTimestamp = await taskClient.markTaskComplete(props.task.id);
-            store.markTaskDone(props.task.id, newTimestamp);
+            store.markTaskDone(props.household.id, props.task.id, newTimestamp);
             toast.success(_t('Task done'));
             const householdId = props.household.id;
             if (null != householdId) {

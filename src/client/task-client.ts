@@ -5,6 +5,7 @@ import { Task } from '@/models/Task';
 import { TaskLog } from '@/models/TaskLog';
 import { isTaskLog } from '@/models/TaskLog.guard';
 import { Store } from '@/store';
+import { UserId } from "@/types";
 import { AuthClient } from './auth-client';
 import { RawTaskLog, TaskLogResponse } from './response/TaskLogResponse';
 import { isRawTaskLogResponse, isTaskLogResponse } from './response/TaskLogResponse.guard';
@@ -50,7 +51,7 @@ export class TaskClient {
         }
     }
 
-    async assignTo(task: Task, assignee: number|null) {
+    async assignTo(task: Task, assignee: UserId|null) {
         const response = await this.client.sendJson(
             `api/task/assign/${task.id}`,
             {
