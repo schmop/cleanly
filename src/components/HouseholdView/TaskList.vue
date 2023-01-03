@@ -1,42 +1,46 @@
 <template>
-    <ion-page>
-        <ion-content v-if="household">
-            <div class="horizontal-scroll">
-                <div class="scroll-inner-container">
-                    <ion-chip v-for="(category) in categories"
-                        :color="selectedCategory === category ? 'success' : undefined" :key="category"
-                        @click="toggleFilter(category)">
-                        <component :is="icons[category]" />
-                        <XIcon v-if="selectedCategory === category" size="16" />
-                    </ion-chip>
-                </div>
-            </div>
-            <TaskView v-for="(task) in filteredTasks" :task="task" :household="household" :key="task.id"
-                :show-actions="true" />
+  <ion-page>
+    <ion-content v-if="household">
+      <div class="horizontal-scroll">
+        <div class="scroll-inner-container">
+          <ion-chip
+            v-for="(category) in categories"
+            :color="selectedCategory === category ? 'success' : undefined" :key="category"
+            @click="toggleFilter(category)"
+          >
+            <component :is="icons[category]" />
+            <XIcon v-if="selectedCategory === category" size="16" />
+          </ion-chip>
+        </div>
+      </div>
+      <TaskView
+        v-for="(task) in filteredTasks" :task="task" :household="household" :key="task.id"
+        :show-actions="true"
+      />
 
-            <ion-card v-if="sortedTasks.length === 0">
-                <ion-card-header>
-                    <ion-card-title> {{ _t('There are no tasks yet') }} </ion-card-title>
-                </ion-card-header>
-                <ion-card-content v-if="canManageTasks">
-                    <ion-button color="primary" @click="openTaskFormModal">
-                        <CirclePlusIcon slot="start" />
-                        {{ _t('Create task') }}
-                    </ion-button>
-                </ion-card-content>
-            </ion-card>
+      <ion-card v-if="sortedTasks.length === 0">
+        <ion-card-header>
+          <ion-card-title> {{ _t('There are no tasks yet') }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content v-if="canManageTasks">
+          <ion-button color="primary" @click="openTaskFormModal">
+            <CirclePlusIcon slot="start" />
+            {{ _t('Create task') }}
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
 
-            <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
-                <ion-fab-button @click="openTaskFormModal">
-                    <PlusIcon />
-                </ion-fab-button>
-            </ion-fab>
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
+        <ion-fab-button @click="openTaskFormModal">
+          <PlusIcon />
+        </ion-fab-button>
+      </ion-fab>
 
-            <ion-refresher slot="fixed" @ionRefresh="forceReload">
-                <ion-refresher-content />
-            </ion-refresher>
-        </ion-content>
-    </ion-page>
+      <ion-refresher slot="fixed" @ionRefresh="forceReload">
+        <ion-refresher-content />
+      </ion-refresher>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -45,29 +49,31 @@ import { taskSortByPriority } from "@/common/task-priority";
 import { IconName, icons, isValidIcon } from "@/components/icons";
 import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 import TaskForm from '@/modals/TaskForm.vue';
+import { _t } from '@/translation';
 import {
-    IonChip,
-    IonCard,
-    IonCardHeader,
     IonButton,
+    IonCard,
     IonCardContent,
+    IonCardHeader,
     IonCardTitle,
-    IonContent, IonFab,
+    IonChip,
+    IonContent,
+    IonFab,
     IonFabButton,
     IonPage,
-    IonRefresher, IonRefresherContent,
+    IonRefresher,
+    IonRefresherContent,
     menuController,
     modalController
 } from "@ionic/vue";
 import { computed, inject, ref } from 'vue';
 import { CirclePlusIcon, PlusIcon, XIcon } from 'vue-tabler-icons';
 import TaskView from '../TaskView.vue';
-import { _t } from '@/translation';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
-const selectedCategory = ref<IconName | null>(null);
+const selectedCategory = ref<IconName|null>(null);
 
 const household = computed(() => getters.household.value);
 const sortedTasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriority));

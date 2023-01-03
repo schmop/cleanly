@@ -5,6 +5,7 @@ import { Task } from '@/models/Task';
 import { TaskLog } from '@/models/TaskLog';
 import { isTaskLog } from '@/models/TaskLog.guard';
 import { Store } from '@/store';
+import { UserId } from "@/types";
 import { AuthClient } from './auth-client';
 import { RawTaskLog, TaskLogResponse } from './response/TaskLogResponse';
 import { isRawTaskLogResponse, isTaskLogResponse } from './response/TaskLogResponse.guard';
@@ -24,7 +25,7 @@ export class TaskClient {
                 duration,
                 stars,
             },
-            { method: 'POST' }
+            {method: 'POST'}
         );
 
         if (response.status !== 200) {
@@ -42,11 +43,25 @@ export class TaskClient {
                 duration,
                 stars,
             },
-            { method: 'POST' }
+            {method: 'POST'}
         );
 
         if (response.status !== 200) {
             throw new Error('Could not edit task, ' + response.statusText);
+        }
+    }
+
+    async assignTo(task: Task, assignee: UserId|null) {
+        const response = await this.client.sendJson(
+            `api/task/assign/${task.id}`,
+            {
+                assignee
+            },
+            {method: 'POST'}
+        );
+
+        if (response.status !== 200) {
+            throw new Error('Could not assign user to task, ' + response.statusText);
         }
     }
 
@@ -60,8 +75,8 @@ export class TaskClient {
         }
     }
 
-    async fetchTaskLog(householdId: number, fetchFrom: string | null): Promise<TaskLogResponse> {
-        const household: undefined | Household = this.store.getters.householdById.value(householdId);
+    async fetchTaskLog(householdId: number, fetchFrom: string|null): Promise<TaskLogResponse> {
+        const household: undefined|Household = this.store.getters.householdById.value(householdId);
         if (null == household) {
             throw new Error('Cannot fetch tasklogs of an unknown household!');
         }
@@ -99,7 +114,7 @@ export class TaskClient {
     }
 
     async fetchStatsForHousehold(householdId: number): Promise<HouseholdStats> {
-        const household: undefined | Household = this.store.getters.householdById.value(householdId);
+        const household: undefined|Household = this.store.getters.householdById.value(householdId);
         if (null == household) {
             throw new Error('Cannot fetch task stats of an unknown household!');
         }

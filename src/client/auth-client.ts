@@ -1,13 +1,13 @@
-import router from '../router';
-import { container } from '../dependency-injection/container';
-import { Store } from '@/store';
-import { PushService } from '@/push';
 import { getWebHost } from '@/client/host';
+import { container } from '@/dependency-injection/container';
+import { PushService } from '@/push';
+import { Store } from '@/store';
+import router from '../router';
 
 export class AuthClient {
-    private _token: null | string = null;
-    private _refreshToken: null | string = null;
-    private _mail: null | string = null;
+    private _token: null|string = null;
+    private _refreshToken: null|string = null;
+    private _mail: null|string = null;
 
     private get LOCALSTORAGE_STATE_KEY() {
         return 'Cleanly.State';
@@ -132,11 +132,11 @@ export class AuthClient {
         return null != this._token;
     }
 
-    getMail(): null | string {
+    getMail(): null|string {
         return this._mail;
     }
 
-    getToken(): null | string {
+    getToken(): null|string {
         return this._token;
     }
 

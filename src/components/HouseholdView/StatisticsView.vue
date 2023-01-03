@@ -4,15 +4,25 @@
             <ion-loading backdropDismiss v-if="statistics === null || household === undefined" />
             <ion-card v-else-if="(sortedTasks ?? []).length === 0">
                 <ion-card-header>
-                    <ion-card-title> {{ _t('There are no tasks yet to analyze') }} </ion-card-title>
+                    <ion-card-title> {{ _t('There are no tasks yet to analyze') }}</ion-card-title>
                 </ion-card-header>
             </ion-card>
             <template v-else>
-                <ion-select :value="analysis" interface="action-sheet" :placeholder="_t('Select analysis')" @ionChange="selectAnalysis">
+                <ion-select
+                    :value="analysis"
+                    interface="action-sheet"
+                    :placeholder="_t('Select analysis')"
+                    @ionChange="selectAnalysis"
+                >
                     <ion-select-option value="participations">{{ _t('Participations') }}</ion-select-option>
                     <ion-select-option value="punctuality">{{ _t('Punctuality') }}</ion-select-option>
                 </ion-select>
-                <ion-select :value="selectedTaskId" interface="action-sheet" :placeholder="_t('Select task')" @ionChange="selectTask">
+                <ion-select
+                    :value="selectedTaskId"
+                    interface="action-sheet"
+                    :placeholder="_t('Select task')"
+                    @ionChange="selectTask"
+                >
                     <ion-select-option v-for="task in sortedTasks" :key="task.id" :value="task.id">
                         {{ task.name }}
                     </ion-select-option>
@@ -28,22 +38,25 @@
 </template>
 
 <script setup lang="ts">
+import { secondsToDays } from '@/common/time';
 import { gettersSymbol, stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 import { HouseholdStats, TaskStats } from '@/models/HouseholdStats';
 import { error } from "@/toast";
 import { __t, _t } from '@/translation';
+import { TaskId } from '@/types';
 import {
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
     IonContent,
     IonLoading,
     IonPage,
     IonRefresher,
     IonRefresherContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonSelect,
     IonSelectOption,
     onIonViewWillEnter,
+    RefresherCustomEvent,
     SelectCustomEvent
 } from "@ionic/vue";
 import {
@@ -59,25 +72,22 @@ import {
     Tooltip
 } from 'chart.js';
 import { computed, inject, ref } from "vue";
-import { Doughnut, Bar } from 'vue-chartjs';
-import { TaskId } from '@/types/index';
-import { secondsToDays } from '@/common/time';
-import { RefresherCustomEvent } from '@ionic/vue';
+import { Bar, Doughnut } from 'vue-chartjs';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Colors);
 
 type DoughnutChartData = ChartData<"doughnut", number[], unknown>;
 type BarChartData = ChartData<"bar", number[], unknown>;
-type Analysis = "participations" | "punctuality";
+type Analysis = "participations"|"punctuality";
 
 const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
-let selectedTaskId = ref<TaskId | null>(null);
+let selectedTaskId = ref<TaskId|null>(null);
 let analysis = ref<Analysis>("participations");
-let statistics = ref<HouseholdStats | null>(null);
-const options = { responsive: true };
+let statistics = ref<HouseholdStats|null>(null);
+const options = {responsive: true};
 
 const household = computed(() => getters.household.value);
 const sortedTasks = computed(() => household.value?.tasks.concat().sort((a, b) => {
@@ -88,7 +98,7 @@ const participationData = computed<DoughnutChartData>(() => {
     const task = selectedTask.value;
     if (analysis.value !== 'participations' || null === statistics.value || undefined === task) {
         console.warn('Could not show pie chart!', statistics.value, selectedTaskId.value)
-        return { labels: [], datasets: [] };
+        return {labels: [], datasets: []};
     }
     const participations = statistics.value.userParticipations[task.id];
     const userIds = household.value?.users.map((user) => user.id) ?? [];
@@ -111,7 +121,7 @@ const punctualityData = computed<BarChartData>(() => {
         || durations.num === 0
     ) {
         console.warn('Could not show bar chart!', statistics.value, selectedTaskId.value)
-        return { labels: [], datasets: [] };
+        return {labels: [], datasets: []};
     }
 
     return {

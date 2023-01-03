@@ -1,4 +1,4 @@
-import {User} from "@/models/User";
+import { UserId } from "@/types";
 
 /** @see {isTask} ts-auto-guard:type-guard */
 export interface Task {
@@ -8,6 +8,6 @@ export interface Task {
     hue: number|null,
     lastComplete?: number|null, // unix timestamp in seconds
     duration: number|null, // in days, null if it has no due date
-    assignedTo?: User,
+    assignee: UserId|null,
     stars: number,
 }

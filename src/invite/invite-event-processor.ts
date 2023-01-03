@@ -1,10 +1,9 @@
 import { Store } from '@/store';
 import { error } from '@/toast';
-import { HouseholdClient } from '../client/household-client';
 import { isInviteEvent } from './InviteEvent.guard';
 
 export class InviteEventProcessor {
-    constructor(private store: Store, private householdClient: HouseholdClient) {
+    constructor(private store: Store) {
     }
 
 

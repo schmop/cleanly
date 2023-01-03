@@ -10,3 +10,7 @@ export type UserId = number;
 export type JsonRecord<_TKey, TValue> = Record<string, TValue>;
 
 export type StarsRecord = Record<UserId, number>;
+
+export function keyOf<K extends keyof any, _T>(key: keyof any, dictionary: Record<K, _T>): key is K {
+    return key in dictionary;
+}

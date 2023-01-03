@@ -1,5 +1,6 @@
 import { container } from '@/dependency-injection/container';
-import german from './german';
+import { keyOf } from "@/types";
+import { german } from './german';
 
 const state = container.getStore().state;
 
@@ -17,22 +18,21 @@ export function _t(text: string) {
     if (language() !== 'de') {
         return text;
     }
-    const translation = german[text];
-    if (typeof translation !== 'string') {
+    if (!keyOf(text, german)) {
         console.warn('Untranslated text', text);
 
         return text;
     }
 
-    return translation;
-}
-
-export function __t(text: string, ...args: (string|number)[]) {
-    return formatString(_t(text), ...args);
+    return german[text];
 }
 
 export function _n(singular: string, plural: string, num: number) {
     return num === 1 ? _t(singular) : _t(plural);
+}
+
+export function __t(text: string, ...args: (string|number)[]) {
+    return formatString(_t(text), ...args);
 }
 
 export function __n(singular: string, plural: string, num: number, ...args: (string|number)[]) {
@@ -41,7 +41,7 @@ export function __n(singular: string, plural: string, num: number, ...args: (str
 
 export const translations = {
     _t,
-    __t,
     _n,
+    __t,
     __n,
 };

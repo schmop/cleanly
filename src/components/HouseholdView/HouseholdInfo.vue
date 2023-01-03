@@ -20,22 +20,24 @@
                     {{ _t('Delete household') }}
                 </ion-item>
                 <ion-item v-if="canManageHousehold" button @click="openSetWebhookPrompt">
-                    <WebhookIcon slot="start"/>
+                    <WebhookIcon slot="start" />
                     {{ _t('Set webhook') }}
                 </ion-item>
             </ion-list>
             <ion-list>
                 <ion-list-header>{{ _t('Members') }}</ion-list-header>
-                <ion-item v-for="(member) in members" :key="member.id" :button="canPerformActionOn(member)"
-                    @click="openMemberActionMenu(member)">
+                <ion-item
+                    v-for="(member) in members" :key="member.id" :button="canPerformActionOn(member)"
+                    @click="openMemberActionMenu(member)"
+                >
                     <component slot="start" :is="privilegeIcons[privilege(member)]"></component>
                     {{ member.name }}
                     <ion-badge color="dark" slot="end" v-if="PrivilegeLevel.USER !== privilege(member)">
                         {{ privilegeLabels[privilege(member)] }}
                     </ion-badge>
                     <ion-badge slot="end" color="warning" class="vertical-center">
-                        <ion-text class="text-vertical-center">{{stars[member.id] ?? 0}}</ion-text>
-                        <StarIcon class="ml-1" size="16"/>
+                        <ion-text class="text-vertical-center">{{ stars[member.id] ?? 0 }}</ion-text>
+                        <StarIcon class="ml-1" size="16" />
                     </ion-badge>
                 </ion-item>
             </ion-list>
@@ -55,12 +57,30 @@ import toast from "@/toast";
 import { _t } from "@/translation";
 import { Clipboard } from '@capacitor/clipboard';
 import {
-IonBadge, IonContent, IonItem, IonList, IonListHeader, IonPage, IonText,
-menuController,
-modalController, popoverController, toastController
+    IonBadge,
+    IonContent,
+    IonItem,
+    IonList,
+    IonListHeader,
+    IonPage,
+    IonText,
+    menuController,
+    modalController,
+    popoverController,
+    toastController
 } from "@ionic/vue";
 import { computed, inject, watch } from 'vue';
-import { ChefHatIcon, CirclePlusIcon, StarIcon, TrashXIcon, UserIcon, UserPlusIcon, WalkIcon, WandIcon, WebhookIcon } from "vue-tabler-icons";
+import {
+    ChefHatIcon,
+    CirclePlusIcon,
+    StarIcon,
+    TrashXIcon,
+    UserIcon,
+    UserPlusIcon,
+    WalkIcon,
+    WandIcon,
+    WebhookIcon
+} from "vue-tabler-icons";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 
 const getters = inject(gettersSymbol)!;
@@ -71,7 +91,7 @@ const household = computed(() => getters.household.value);
 const user = computed(() => state.user);
 const privilege = (user: User) => getters.privilege.value(user.id);
 const members = computed(() => {
-    if (null == household.value) {
+    if (undefined === household.value) {
         return [];
     }
     return household.value.users.concat().sort((a: User, b: User) => {
@@ -132,7 +152,7 @@ async function showSecretToast(secret: string) {
 }
 
 async function openSetWebhookPrompt() {
-    if (!canManageHousehold.value || null == household.value) {
+    if (!canManageHousehold.value || undefined === household.value) {
         console.error("Tried to set webhook, but couldn't!");
         return;
     }
@@ -151,12 +171,12 @@ async function openSetWebhookPrompt() {
 
         await showSecretToast(response.secret);
     } catch (err) {
-        toast.showThrownError(err, 'setting webhook');
+        await toast.showThrownError(err, 'setting webhook');
     }
 }
 
 async function openDeleteHouseholdPrompt() {
-    if (!canManageHousehold.value || null == household.value) {
+    if (!canManageHousehold.value || undefined === household.value) {
         console.error("Tried to delete household, but couldn't!");
         return;
     }
@@ -169,11 +189,12 @@ async function openDeleteHouseholdPrompt() {
         return;
     }
     householdClient.dashboardInfo();
-    router.push({ name: 'dashboard' });
+    router.push({name: 'dashboard'});
     toast.success(_t('Successfully deleted the household!'));
 }
+
 async function openLeaveHouseholdPrompt() {
-    if (null == household.value) {
+    if (undefined === household.value) {
         console.error("Tried to leave household, but couldn't!");
         return;
     }
@@ -183,12 +204,13 @@ async function openLeaveHouseholdPrompt() {
     try {
         await householdClient.leaveHousehold(household.value.id);
         householdClient.dashboardInfo();
-        router.push({ name: 'dashboard' });
+        router.push({name: 'dashboard'});
         toast.success(_t('Successfully left the household!'));
     } catch (error) {
         toast.showThrownError(error, 'leaving the household');
     }
 }
+
 async function openMemberActionMenu(member: User) {
     if (!canPerformActionOn(member)) {
         return;
@@ -203,9 +225,11 @@ async function openMemberActionMenu(member: User) {
     });
     popover.present();
 }
+
 function canPerformActionOn(member: User) {
     return null !== user.value && privilege(member) < privilege(user.value) && canManageHousehold.value;
 }
+
 async function openTaskFormModal(): Promise<void> {
     menuController.close("menu");
     const TaskFormModal = await modalController.create({
@@ -218,6 +242,7 @@ async function openTaskFormModal(): Promise<void> {
     await TaskFormModal.onDidDismiss();
     await householdClient.dashboardInfo();
 }
+
 async function openInviteModal(): Promise<void> {
     const createHouseholdModal = await modalController.create({
         component: InviteModal,
@@ -237,14 +262,17 @@ async function openInviteModal(): Promise<void> {
     --width: unset;
     --min-width: 250px;
 }
+
 .vertical-center {
     display: flex;
 }
+
 .text-vertical-center {
     display: flex;
     justify-content: center;
     flex-direction: column;
 }
+
 .ml-1 {
     margin-left: 2px;
 }

@@ -1,22 +1,21 @@
-import { Household } from '../models/Household';
-import { User } from '../models/User';
-import { Invite } from '../models/Invite';
+import { gettersSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
+import { Household } from '@/models/Household';
+import { HouseholdPrivilege, PrivilegeLevel } from '@/models/HouseholdPrivilege';
+import { Invite } from '@/models/Invite';
 import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
-import { reactive, computed, App, ComputedRef } from 'vue';
-import { storeSymbol, stateSymbol, gettersSymbol } from '@/dependency-injection/injection-keys';
+import { User } from '@/models/User';
 import { UserSettings } from '@/models/UserSettings';
-import { HouseholdId, StarsRecord } from '@/types';
-import { UserId } from '../types/index';
-import { HouseholdPrivilege, PrivilegeLevel } from '@/models/HouseholdPrivilege';
+import { HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
+import { App, computed, ComputedRef, reactive } from 'vue';
 
 export class State {
     loggedIn = false;
     households: Household[] = [];
-    user: null | User = null;
+    user: null|User = null;
     invites: Invite[] = [];
-    pageTitle: null | string = null;
-    viewedHousehold: null | number = null;
+    pageTitle: null|string = null;
+    viewedHousehold: null|number = null;
     userSettings: UserSettings = {
         notifyInvites: true,
         notifyTaskDone: true,
@@ -29,9 +28,9 @@ export class State {
 
 export type Getters = {
     checklist: (householdId: number) => Todo[],
-    householdById: (householdId: number) => undefined | Household,
-    household: undefined | Household,
-    privileges:(household?: Household) => Record<UserId, PrivilegeLevel>,
+    householdById: (householdId: number) => undefined|Household,
+    household: undefined|Household,
+    privileges: (household?: Household) => Record<UserId, PrivilegeLevel>,
     privilege: (userId?: UserId, household?: Household) => PrivilegeLevel,
     canManageTasks: (userId?: UserId, household?: Household) => boolean,
     canManageHousehold: (userId?: UserId, household?: Household) => boolean,
@@ -53,11 +52,11 @@ const getters: GetterFunctions = {
     checklist: () => (householdId: number): Todo[] => {
         return store.state.households.find((household: Household) => household.id === householdId)?.checklist ?? [];
     },
-    householdById: () => (householdId: number): undefined | Household => {
+    householdById: () => (householdId: number): undefined|Household => {
         return store.state.households.find((household: Household) => household.id === householdId);
     },
-    household: (): undefined | Household => {
-        const { viewedHousehold } = store.state;
+    household: (): undefined|Household => {
+        const {viewedHousehold} = store.state;
         if (null === viewedHousehold) {
             return undefined;
         }
@@ -93,7 +92,7 @@ const getters: GetterFunctions = {
         return privilege === PrivilegeLevel.ADMIN;
     },
     stars: (): StarsRecord => {
-        const { viewedHousehold } = store.state;
+        const {viewedHousehold} = store.state;
         if (null === viewedHousehold) {
             return {};
         }
@@ -108,6 +107,7 @@ const getters: GetterFunctions = {
 export class Store {
     public readonly state: State;
     public readonly getters: ComputedGetters;
+
     constructor(
         state: State,
         getters: GetterFunctions,
@@ -129,18 +129,23 @@ export class Store {
     login() {
         this.state.loggedIn = true;
     }
+
     logout() {
         this.state.loggedIn = false;
     }
+
     user(user: User) {
         this.state.user = user;
     }
-    pageTitle(title: string | null) {
+
+    pageTitle(title: string|null) {
         this.state.pageTitle = title;
     }
-    viewHousehold(householdId: null | number) {
+
+    viewHousehold(householdId: null|number) {
         this.state.viewedHousehold = householdId;
     }
+
     removeTask(taskId: number) {
         const household = this.state
             .households
@@ -151,25 +156,29 @@ export class Store {
             household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
         }
     }
-    markTaskDone(taskId: number, timestamp: number) {
+
+    markTaskDone(householdId: HouseholdId, taskId: TaskId, timestamp: number) {
         const task = this.state
             .households
-            .map((household: Household) => household.tasks)
-            .flat()
+            .find((household) => household.id === householdId)
+            ?.tasks
             .find((task: Task) => task.id === taskId);
 
         if (task) {
             task.lastComplete = timestamp;
         }
     }
+
     addInvite(invite: Invite) {
         this.state.invites.push(invite);
     }
+
     dashboard(households: Household[], user: User, invites: Invite[]) {
         this.state.households = households;
         this.state.user = user;
         this.state.invites = invites;
     }
+
     addStars(householdId: number, entries: {user: UserId, stars: number}[]) {
         const householdStars: StarsRecord = {};
         entries.forEach(({user, stars}) => {
@@ -177,15 +186,31 @@ export class Store {
         });
         this.state.stars[householdId] = householdStars;
     }
+
     removeInvite(inviteToRemove: Invite) {
         this.state.invites = this.state.invites.filter(invite => invite !== inviteToRemove);
     }
+
+    assignTask(householdId: HouseholdId, taskId: TaskId, userId: UserId) {
+        const task = this.state
+            .households
+            .find((household) => household.id === householdId)
+            ?.tasks
+            .find((task: Task) => task.id === taskId);
+
+        if (task) {
+            task.assignee = userId;
+        }
+    }
+
     joinHousehold(household: Household) {
         this.state.households.push(household);
     }
+
     setSettings(settings: UserSettings) {
         this.state.userSettings = settings;
     }
+
     setDarkmode(darkmode: boolean) {
         this.state.darkmode = darkmode;
     }
