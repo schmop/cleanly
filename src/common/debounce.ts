@@ -1,15 +1,15 @@
-export default function debounce(func: any, wait: number, immediate: boolean) {
-    let timeout = undefined as number | undefined;
-    let calledInbetween = false;
+export default function debounce(func: (...args: any[]) => any, wait: number, immediate: boolean) {
+    let timeout = undefined as number|undefined;
+    let calledBetween = false;
     return function (this: any, ...rest: []) {
         const later = () => {
             timeout = undefined;
-            if (!immediate || calledInbetween)
+            if (!immediate || calledBetween)
                 func.apply(this, rest);
-            calledInbetween = false;
+            calledBetween = false;
         };
         if (immediate && timeout) {
-            calledInbetween = true;
+            calledBetween = true;
         }
         const callNow = immediate && !timeout;
         clearTimeout(timeout);

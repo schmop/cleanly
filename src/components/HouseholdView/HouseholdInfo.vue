@@ -1,48 +1,85 @@
 <template>
-    <ion-page>
-        <ion-content>
-            <ion-list>
-                <ion-list-header>{{ _t('Household settings') }}</ion-list-header>
-                <ion-item v-if="canManageTasks" button @click="openTaskFormModal">
-                    <CirclePlusIcon slot="start" />
-                    {{ _t('Add task') }}
-                </ion-item>
-                <ion-item v-if="canManageHousehold" button @click="openInviteModal">
-                    <UserPlusIcon slot="start" />
-                    {{ _t('Send invite') }}
-                </ion-item>
-                <ion-item button @click="openLeaveHouseholdPrompt">
-                    <WalkIcon slot="start" />
-                    {{ _t('Leave household') }}
-                </ion-item>
-                <ion-item v-if="canManageHousehold" button @click="openDeleteHouseholdPrompt">
-                    <TrashXIcon slot="start" />
-                    {{ _t('Delete household') }}
-                </ion-item>
-                <ion-item v-if="canManageHousehold" button @click="openSetWebhookPrompt">
-                    <WebhookIcon slot="start" />
-                    {{ _t('Set webhook') }}
-                </ion-item>
-            </ion-list>
-            <ion-list>
-                <ion-list-header>{{ _t('Members') }}</ion-list-header>
-                <ion-item
-                    v-for="(member) in members" :key="member.id" :button="canPerformActionOn(member)"
-                    @click="openMemberActionMenu(member)"
-                >
-                    <component slot="start" :is="privilegeIcons[privilege(member)]"></component>
-                    {{ member.name }}
-                    <ion-badge color="dark" slot="end" v-if="PrivilegeLevel.USER !== privilege(member)">
-                        {{ privilegeLabels[privilege(member)] }}
-                    </ion-badge>
-                    <ion-badge slot="end" color="warning" class="vertical-center">
-                        <ion-text class="text-vertical-center">{{ stars[member.id] ?? 0 }}</ion-text>
-                        <StarIcon class="ml-1" size="16" />
-                    </ion-badge>
-                </ion-item>
-            </ion-list>
-        </ion-content>
-    </ion-page>
+  <ion-page>
+    <ion-content>
+      <ion-list>
+        <ion-list-header>{{ _t('Household settings') }}</ion-list-header>
+        <ion-item
+          v-if="canManageTasks"
+          button
+          @click="openTaskFormModal"
+        >
+          <CirclePlusIcon slot="start" />
+          {{ _t('Add task') }}
+        </ion-item>
+        <ion-item
+          v-if="canManageHousehold"
+          button
+          @click="openInviteModal"
+        >
+          <UserPlusIcon slot="start" />
+          {{ _t('Send invite') }}
+        </ion-item>
+        <ion-item
+          button
+          @click="openLeaveHouseholdPrompt"
+        >
+          <WalkIcon slot="start" />
+          {{ _t('Leave household') }}
+        </ion-item>
+        <ion-item
+          v-if="canManageHousehold"
+          button
+          @click="openDeleteHouseholdPrompt"
+        >
+          <TrashXIcon slot="start" />
+          {{ _t('Delete household') }}
+        </ion-item>
+        <ion-item
+          v-if="canManageHousehold"
+          button
+          @click="openSetWebhookPrompt"
+        >
+          <WebhookIcon slot="start" />
+          {{ _t('Set webhook') }}
+        </ion-item>
+      </ion-list>
+      <ion-list>
+        <ion-list-header>{{ _t('Members') }}</ion-list-header>
+        <ion-item
+          v-for="(member) in members"
+          :key="member.id"
+          :button="canPerformActionOn(member)"
+          @click="openMemberActionMenu(member)"
+        >
+          <component
+            :is="privilegeIcons[privilege(member)]"
+            slot="start"
+          />
+          {{ member.name }}
+          <ion-badge
+            v-if="PrivilegeLevel.USER !== privilege(member)"
+            slot="end"
+            color="dark"
+          >
+            {{ privilegeLabels[privilege(member)] }}
+          </ion-badge>
+          <ion-badge
+            slot="end"
+            color="warning"
+            class="vertical-center"
+          >
+            <ion-text class="text-vertical-center">
+              {{ stars[member.id] ?? 0 }}
+            </ion-text>
+            <StarIcon
+              class="ml-1"
+              size="16"
+            />
+          </ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -53,7 +90,7 @@ import TaskForm from "@/modals/TaskForm.vue";
 import { PrivilegeLevel } from '@/models/HouseholdPrivilege';
 import { User } from "@/models/User";
 import router from "@/router";
-import toast from "@/toast";
+import toast, { showThrownError } from "@/toast";
 import { _t } from "@/translation";
 import { Clipboard } from '@capacitor/clipboard';
 import {
@@ -116,13 +153,17 @@ const stars = computed(() => getters.stars.value ?? {});
 
 watch(
     household,
-    () => {
+    async () => {
         const householdId = household.value?.id;
         if (null == householdId) {
             console.warn('No household found');
             return;
         }
-        householdClient.retrieveStars(householdId);
+        try {
+            await householdClient.retrieveStars(householdId);
+        } catch (err) {
+            await showThrownError(err);
+        }
     },
     {immediate: true}
 );
@@ -147,7 +188,7 @@ async function showSecretToast(secret: string) {
         await Clipboard.write({
             string: secret,
         });
-        toast.success('Secret was successfully copied to the clipboard!');
+        void toast.success('Secret was successfully copied to the clipboard!');
     }
 }
 
@@ -171,7 +212,7 @@ async function openSetWebhookPrompt() {
 
         await showSecretToast(response.secret);
     } catch (err) {
-        await toast.showThrownError(err, 'setting webhook');
+        await toast.showThrownError(err);
     }
 }
 
@@ -188,9 +229,11 @@ async function openDeleteHouseholdPrompt() {
 
         return;
     }
-    householdClient.dashboardInfo();
-    router.push({name: 'dashboard'});
-    toast.success(_t('Successfully deleted the household!'));
+    await Promise.all([
+        householdClient.dashboardInfo(),
+        router.push({name: 'dashboard'}),
+        toast.success(_t('Successfully deleted the household!')),
+    ]);
 }
 
 async function openLeaveHouseholdPrompt() {
@@ -203,11 +246,13 @@ async function openLeaveHouseholdPrompt() {
     }
     try {
         await householdClient.leaveHousehold(household.value.id);
-        householdClient.dashboardInfo();
-        router.push({name: 'dashboard'});
-        toast.success(_t('Successfully left the household!'));
+        await Promise.all([
+            householdClient.dashboardInfo(),
+            router.push({name: 'dashboard'}),
+            toast.success(_t('Successfully left the household!')),
+        ]);
     } catch (error) {
-        toast.showThrownError(error, 'leaving the household');
+        await toast.showThrownError(error, 'leaving the household');
     }
 }
 
@@ -223,7 +268,7 @@ async function openMemberActionMenu(member: User) {
             member,
         }
     });
-    popover.present();
+    await popover.present();
 }
 
 function canPerformActionOn(member: User) {
@@ -231,14 +276,14 @@ function canPerformActionOn(member: User) {
 }
 
 async function openTaskFormModal(): Promise<void> {
-    menuController.close("menu");
+    await menuController.close("menu");
     const TaskFormModal = await modalController.create({
         component: TaskForm,
         componentProps: {
             id: household.value?.id,
         },
     });
-    TaskFormModal.present();
+    await TaskFormModal.present();
     await TaskFormModal.onDidDismiss();
     await householdClient.dashboardInfo();
 }
@@ -250,7 +295,7 @@ async function openInviteModal(): Promise<void> {
             household: household.value,
         },
     });
-    createHouseholdModal.present();
+    await createHouseholdModal.present();
 }
 </script>
 

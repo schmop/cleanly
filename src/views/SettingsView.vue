@@ -1,72 +1,81 @@
 <template>
-    <ion-page>
-        <ion-content>
-            <ion-card>
-                <ion-card-header>
-                    <ion-card-title>
-                        {{ _t('Notification settings') }}
-                    </ion-card-title>
-                </ion-card-header>
-                <ion-card-content>
-                    <ion-item-group>
-                        <ion-item>
-                            <!--
-                                The timestamped key fixes the infinite update loop when programmatically setting the toggle value
-                                @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
-                            -->
-                            <ion-toggle
-                                @ionChange="toggleNotifyTaskDue"
-                                :key="notifyTaskDue + (new Date()).toISOString()" :checked="notifyTaskDue"
-                            ></ion-toggle>
-                            <ion-label>
-                                {{ _t('Tasks are due') }}
-                            </ion-label>
-                        </ion-item>
-                        <ion-item>
-                            <ion-toggle
-                                @ionChange="toggleNotifyTaskDone"
-                                :key="notifyTaskDone + (new Date()).toISOString()"
-                                :checked="notifyTaskDone"
-                            ></ion-toggle>
-                            <ion-label>
-                                {{ _t('Tasks are completed') }}
-                            </ion-label>
-                        </ion-item>
-                        <ion-item>
-                            <ion-toggle
-                                @ionChange="toggleNotifyInvites"
-                                :key="notifyInvites + (new Date()).toISOString()" :checked="notifyInvites"
-                            ></ion-toggle>
-                            <ion-label>
-                                {{ _t('Invited to a household') }}
-                            </ion-label>
-                        </ion-item>
-                        <ion-item>
-                            <ion-select
-                                :value="language"
-                                @ionChange="changeLanguage"
-                                :placeholder="_t('Language')"
-                                interface="popover"
-                            >
-                                <ion-select-option value="de">{{ _t('German') }}</ion-select-option>
-                                <ion-select-option value="en">{{ _t('English') }}</ion-select-option>
-                            </ion-select>
-                        </ion-item>
-                    </ion-item-group>
-                </ion-card-content>
-            </ion-card>
-        </ion-content>
-        <ion-footer class="p-2">
-            <ion-button @click="save">
-                <CheckIcon />
-                {{ _t('Save') }}
-            </ion-button>
-            <ion-button @click="cancel" color="light">
-                <CircleXIcon />
-                {{ _t('Cancel') }}
-            </ion-button>
-        </ion-footer>
-    </ion-page>
+  <ion-page>
+    <ion-content>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            {{ _t('Notification settings') }}
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item-group>
+            <ion-item>
+              <!--
+                The timestamped key fixes the infinite update loop when programmatically setting the toggle value
+                @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
+              -->
+              <ion-toggle
+                :key="notifyTaskDue + (new Date()).toISOString()"
+                :checked="notifyTaskDue"
+                @ionChange="toggleNotifyTaskDue"
+              />
+              <ion-label>
+                {{ _t('Tasks are due') }}
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-toggle
+                :key="notifyTaskDone + (new Date()).toISOString()"
+                :checked="notifyTaskDone"
+                @ionChange="toggleNotifyTaskDone"
+              />
+              <ion-label>
+                {{ _t('Tasks are completed') }}
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-toggle
+                :key="notifyInvites + (new Date()).toISOString()"
+                :checked="notifyInvites"
+                @ionChange="toggleNotifyInvites"
+              />
+              <ion-label>
+                {{ _t('Invited to a household') }}
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-select
+                :value="language"
+                :placeholder="_t('Language')"
+                interface="popover"
+                @ionChange="changeLanguage"
+              >
+                <ion-select-option value="de">
+                  {{ _t('German') }}
+                </ion-select-option>
+                <ion-select-option value="en">
+                  {{ _t('English') }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-item-group>
+        </ion-card-content>
+      </ion-card>
+    </ion-content>
+    <ion-footer class="p-2">
+      <ion-button @click="save">
+        <CheckIcon />
+        {{ _t('Save') }}
+      </ion-button>
+      <ion-button
+        color="light"
+        @click="cancel"
+      >
+        <CircleXIcon />
+        {{ _t('Cancel') }}
+      </ion-button>
+    </ion-footer>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -74,6 +83,7 @@ import { storeSymbol, userClientSymbol } from "@/dependency-injection/injection-
 import { UserSettings } from '@/models/UserSettings';
 import toast from '@/toast';
 import { _t } from '@/translation';
+import { SelectCustomEvent } from "@ionic/core/dist/types/components/select/select-interface";
 import {
     IonButton,
     IonCard,
@@ -89,7 +99,6 @@ import {
     IonSelect,
     IonSelectOption,
     IonToggle,
-    SelectChangeEventDetail,
 } from "@ionic/vue";
 import { inject, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -128,7 +137,7 @@ function toggleNotifyInvites() {
     notifyInvites.value = !notifyInvites.value;
 }
 
-function changeLanguage(event: CustomEvent<SelectChangeEventDetail>) {
+function changeLanguage(event: SelectCustomEvent<string>) {
     language.value = event.detail.value;
 }
 
@@ -142,14 +151,14 @@ async function save() {
         };
         await userClient.saveUserSettings(newSettings);
         store.setSettings(newSettings);
-        router.push({name: 'dashboard'});
+        await router.push({name: 'dashboard'});
     } catch (error) {
-        toast.error((error as Error).message);
+        await toast.error((error as Error).message);
     }
 }
 
-function cancel() {
-    router.push({name: 'dashboard'});
+async function cancel() {
+    await router.push({name: 'dashboard'});
     resetUiToStore();
 }
 

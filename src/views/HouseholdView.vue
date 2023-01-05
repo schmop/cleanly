@@ -1,39 +1,58 @@
 <template>
-    <ion-page>
-        <ion-tabs>
-            <ion-router-outlet />
-            <ion-tab-bar slot="bottom">
-                <ion-tab-button tab="tasks" :href="href('tasks')">
-                    <CheckboxIcon />
-                    <ion-label>{{ _t('Tasks') }}</ion-label>
-                    <ion-badge class="badge-with-custom-icon-fix" v-if="numOverdueTasks > 0">{{
-                            numOverdueTasks
-                        }}
-                    </ion-badge>
-                </ion-tab-button>
+  <ion-page>
+    <ion-tabs>
+      <ion-router-outlet />
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button
+          tab="tasks"
+          :href="href('tasks')"
+        >
+          <CheckboxIcon />
+          <ion-label>{{ _t('Tasks') }}</ion-label>
+          <ion-badge
+            v-if="numOverdueTasks > 0"
+            class="badge-with-custom-icon-fix"
+          >
+            {{
+              numOverdueTasks
+            }}
+          </ion-badge>
+        </ion-tab-button>
 
-                <ion-tab-button tab="checklist" :href="href('checklist')">
-                    <ChecklistIcon />
-                    <ion-label>{{ _t('Checklist') }}</ion-label>
-                </ion-tab-button>
+        <ion-tab-button
+          tab="checklist"
+          :href="href('checklist')"
+        >
+          <ChecklistIcon />
+          <ion-label>{{ _t('Checklist') }}</ion-label>
+        </ion-tab-button>
 
-                <ion-tab-button tab="activity" :href="href('activity')">
-                    <TimelineIcon />
-                    <ion-label>{{ _t('Activity') }}</ion-label>
-                </ion-tab-button>
+        <ion-tab-button
+          tab="activity"
+          :href="href('activity')"
+        >
+          <TimelineIcon />
+          <ion-label>{{ _t('Activity') }}</ion-label>
+        </ion-tab-button>
 
-                <ion-tab-button tab="statistics" :href="href('statistics')">
-                    <ChartBarIcon />
-                    <ion-label>{{ _t('Statistics') }}</ion-label>
-                </ion-tab-button>
+        <ion-tab-button
+          tab="statistics"
+          :href="href('statistics')"
+        >
+          <ChartBarIcon />
+          <ion-label>{{ _t('Statistics') }}</ion-label>
+        </ion-tab-button>
 
-                <ion-tab-button tab="household" :href="href('info')">
-                    <HomeCogIcon />
-                    <ion-label>{{ _t('Household') }}</ion-label>
-                </ion-tab-button>
-            </ion-tab-bar>
-        </ion-tabs>
-    </ion-page>
+        <ion-tab-button
+          tab="household"
+          :href="href('info')"
+        >
+          <HomeCogIcon />
+          <ion-label>{{ _t('Household') }}</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -54,7 +73,7 @@ const numOverdueTasks = computed(() => tasks.value.filter(task => taskOverDue(ta
 
 
 if (undefined === household.value) {
-    router.push({name: 'dashboard'});
+    void router.push({name: 'dashboard'});
 }
 onBeforeUnmount(() => {
     store.viewHousehold(null);

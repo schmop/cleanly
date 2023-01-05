@@ -6,7 +6,13 @@ const state = container.getStore().state;
 
 function formatString(string: string, ...args: (string|number)[]) {
     return string.replace(/{([0-9]+)}/g, (match, index) => {
-        return `${args[index]}` ?? match;
+        if (typeof index === "string") {
+            index = parseInt(index, 10);
+        }
+        if (typeof index !== "number") {
+            throw new Error('Formatting string failed!');
+        }
+        return `${args[index] ?? match}`;
     });
 }
 

@@ -1,12 +1,21 @@
 <template>
   <ion-card
-    class="focus-no-highlight" :class="{ 'danger': overdue }" @click="toggleActions" tabindex="-1"
+    class="focus-no-highlight"
+    :class="{ 'danger': overdue }"
+    tabindex="-1"
+    @click="toggleActions"
     @blur.capture="closeActions"
   >
-    <ion-card-header v-if="task" class="pb-0">
+    <ion-card-header
+      v-if="task"
+      class="pb-0"
+    >
       <ion-card-title>
         <div>
-          <component class="vertical-center" :is="icons[icon]" />
+          <component
+            :is="icons[icon]"
+            class="vertical-center"
+          />
           <span class="vertical-center">{{ task.name }}</span>
         </div>
       </ion-card-title>
@@ -16,7 +25,10 @@
         <span class="small row">
           {{ durationText }}
         </span>
-        <span class="small row" v-if="assignee">
+        <span
+          v-if="assignee"
+          class="small row"
+        >
           <UserIcon />
           {{ assignee.name }}
         </span>
@@ -27,22 +39,40 @@
           </ion-text>
           <template v-if="canManageTasks && showActions">
             <ion-buttons>
-              <ion-button :id="contextMenuId" @click.stop="() => {/** Noop */ }">
+              <ion-button
+                :id="contextMenuId"
+                @click.stop="() => {/** Noop */ }"
+              >
                 <DotsVerticalIcon slot="icon-only" />
               </ion-button>
             </ion-buttons>
-            <ion-popover :trigger="contextMenuId" dismiss-on-select>
+            <ion-popover
+              :trigger="contextMenuId"
+              dismiss-on-select
+            >
               <ion-content>
                 <ion-list>
-                  <ion-item button @click="editTask" lines="none">
+                  <ion-item
+                    button
+                    lines="none"
+                    @click="editTask"
+                  >
                     <PencilIcon slot="start" />
                     <ion-label> {{ _t('Edit task') }}</ion-label>
                   </ion-item>
-                  <ion-item button @click="assignTo" lines="none">
+                  <ion-item
+                    button
+                    lines="none"
+                    @click="assignTo"
+                  >
                     <UserCheckIcon slot="start" />
                     <ion-label> {{ _t('Assign to') }}</ion-label>
                   </ion-item>
-                  <ion-item button @click="deleteTask" lines="none">
+                  <ion-item
+                    button
+                    lines="none"
+                    @click="deleteTask"
+                  >
                     <TrashXIcon slot="start" />
                     <ion-label> {{ _t('Delete task') }}</ion-label>
                   </ion-item>
@@ -54,14 +84,24 @@
       </div>
       <div class="w-100">
         <div class="progress-background soft">
-          <div class="progress" :style="taskColor">
+          <div
+            class="progress"
+            :style="taskColor"
+          >
             {{ dueInText }}
           </div>
         </div>
       </div>
       <transition name="actions">
-        <div class="w-100" v-show="actionsVisible">
-          <ion-button expand="block" color="tertiary" @click.stop="markDone">
+        <div
+          v-show="actionsVisible"
+          class="w-100"
+        >
+          <ion-button
+            expand="block"
+            color="tertiary"
+            @click.stop="markDone"
+          >
             {{ _t('Mark done') }}
           </ion-button>
         </div>
@@ -151,9 +191,9 @@ async function deleteTask() {
     try {
         await taskClient.deleteTask(props.task.id);
         store.removeTask(props.task.id);
-        toast.success(_t('Task deleted successfully'));
+        await toast.success(_t('Task deleted successfully'));
     } catch (e) {
-        toast.error(_t('Could not delete task'));
+        await toast.error(_t('Could not delete task'));
     }
 }
 
@@ -193,7 +233,7 @@ async function assignTo() {
     if (dismiss.role === 'cancel') {
         return;
     }
-    let userId = dismiss.data?.assignee.value;
+    let userId: unknown = dismiss.data?.assignee.value;
     if (typeof userId !== 'number' || dismiss.role === 'unassign') {
         userId = null;
     }
@@ -215,7 +255,7 @@ async function editTask() {
             task: props.task,
         },
     });
-    taskFormModal.present();
+    await taskFormModal.present();
     await taskFormModal.onDidDismiss();
     await householdClient.dashboardInfo();
 }
@@ -226,15 +266,13 @@ async function markDone() {
             actionsVisible.value = false;
             const newTimestamp = await taskClient.markTaskComplete(props.task.id);
             store.markTaskDone(props.household.id, props.task.id, newTimestamp);
-            toast.success(_t('Task done'));
+            void toast.success(_t('Task done'));
             const householdId = props.household.id;
             if (null != householdId) {
-                householdClient.retrieveStars(householdId);
+                await householdClient.retrieveStars(householdId);
             }
         } catch (err) {
-            if (err instanceof Error) {
-                toast.error(err.message);
-            }
+            await showThrownError(err);
         }
     }
 }
@@ -256,7 +294,7 @@ function closeActions(event: FocusEvent) {
     if (!(card instanceof HTMLElement)) {
         return;
     }
-    if (target instanceof HTMLElement && card.contains(target as HTMLElement)) {
+    if (target instanceof HTMLElement && card.contains(target)) {
         return;
     }
 

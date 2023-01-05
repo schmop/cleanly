@@ -1,40 +1,62 @@
 <template>
-    <ion-page>
-        <ion-content>
-            <ion-loading backdropDismiss v-if="statistics === null || household === undefined" />
-            <ion-card v-else-if="(sortedTasks ?? []).length === 0">
-                <ion-card-header>
-                    <ion-card-title> {{ _t('There are no tasks yet to analyze') }}</ion-card-title>
-                </ion-card-header>
-            </ion-card>
-            <template v-else>
-                <ion-select
-                    :value="analysis"
-                    interface="action-sheet"
-                    :placeholder="_t('Select analysis')"
-                    @ionChange="selectAnalysis"
-                >
-                    <ion-select-option value="participations">{{ _t('Participations') }}</ion-select-option>
-                    <ion-select-option value="punctuality">{{ _t('Punctuality') }}</ion-select-option>
-                </ion-select>
-                <ion-select
-                    :value="selectedTaskId"
-                    interface="action-sheet"
-                    :placeholder="_t('Select task')"
-                    @ionChange="selectTask"
-                >
-                    <ion-select-option v-for="task in sortedTasks" :key="task.id" :value="task.id">
-                        {{ task.name }}
-                    </ion-select-option>
-                </ion-select>
-                <Doughnut v-if="analysis === 'participations'" :data="participationData" :options="options" />
-                <Bar v-else-if="analysis === 'punctuality'" :data="punctualityData" :options="options" />
-                <ion-refresher slot="fixed" @ionRefresh="reloadStatistics">
-                    <ion-refresher-content />
-                </ion-refresher>
-            </template>
-        </ion-content>
-    </ion-page>
+  <ion-page>
+    <ion-content>
+      <ion-loading
+        v-if="statistics === null || household === undefined"
+        backdrop-dismiss
+      />
+      <ion-card v-else-if="(sortedTasks ?? []).length === 0">
+        <ion-card-header>
+          <ion-card-title> {{ _t('There are no tasks yet to analyze') }}</ion-card-title>
+        </ion-card-header>
+      </ion-card>
+      <template v-else>
+        <ion-select
+          :value="analysis"
+          interface="action-sheet"
+          :placeholder="_t('Select analysis')"
+          @ionChange="selectAnalysis"
+        >
+          <ion-select-option value="participations">
+            {{ _t('Participations') }}
+          </ion-select-option>
+          <ion-select-option value="punctuality">
+            {{ _t('Punctuality') }}
+          </ion-select-option>
+        </ion-select>
+        <ion-select
+          :value="selectedTaskId"
+          interface="action-sheet"
+          :placeholder="_t('Select task')"
+          @ionChange="selectTask"
+        >
+          <ion-select-option
+            v-for="task in sortedTasks"
+            :key="task.id"
+            :value="task.id"
+          >
+            {{ task.name }}
+          </ion-select-option>
+        </ion-select>
+        <Doughnut
+          v-if="analysis === 'participations'"
+          :data="participationData"
+          :options="options"
+        />
+        <Bar
+          v-else-if="analysis === 'punctuality'"
+          :data="punctualityData"
+          :options="options"
+        />
+        <ion-refresher
+          slot="fixed"
+          @ionRefresh="reloadStatistics"
+        >
+          <ion-refresher-content />
+        </ion-refresher>
+      </template>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -167,14 +189,14 @@ async function reloadStatistics(event: RefresherCustomEvent) {
 async function fetchStatistics() {
     const id = state.viewedHousehold;
     if (null === id) {
-        error('Could not fetch logs, no household was selected!');
+        await error('Could not fetch logs, no household was selected!');
         return;
     }
     try {
         statistics.value = await taskClient.fetchStatsForHousehold(id);
     } catch (err) {
         if (err instanceof Error) {
-            error(err.message);
+            await error(err.message);
         }
         console.error(err);
         statistics.value = null;
@@ -185,8 +207,8 @@ function selectFirstTask() {
     selectedTaskId.value = sortedTasks.value?.[0]?.id ?? null;
 }
 
-onIonViewWillEnter(() => {
-    fetchStatistics();
+onIonViewWillEnter(async () => {
+    await fetchStatistics();
     selectFirstTask();
 });
 

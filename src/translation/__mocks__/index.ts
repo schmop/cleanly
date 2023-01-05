@@ -1,6 +1,9 @@
 function formatString(string: string, ...args: (string|number)[]) {
     return string.replace(/{([0-9]+)}/g, (match, index) => {
-        return `${args[index]}` ?? match;
+        if (typeof index !== 'number') {
+            throw new Error('Could not format string, match was not numerical!');
+        }
+        return `${args[index] ?? match}`;
     });
 }
 

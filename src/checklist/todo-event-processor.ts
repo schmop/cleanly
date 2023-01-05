@@ -1,20 +1,24 @@
-import { HouseholdClient } from '@/client/household-client';
+import { isChecklistPayload } from "@/client/sse/ChecklistPayload.guard";
 import { Todo } from '@/models/Todo';
 import { TodoEvent } from '@/models/TodoEvent';
 import { Store } from '@/store';
-import toast from '@/toast';
+import toast, { warning } from '@/toast';
 
 export class TodoEventProcessor {
-    constructor(private store: Store, private householdClient: HouseholdClient) {
+    constructor(private store: Store) {
     }
 
-    processBatch(events: TodoEvent[], householdId: number): void {
-        const todos = this.store.getters.checklist.value(householdId);
+    processBatch(payload: unknown): void {
+        if (!isChecklistPayload(payload)) {
+            void warning('Live updates received wrong checklist data!');
+            return;
+        }
+        const todos = this.store.getters.checklist.value(payload.household_id);
         if (null == todos) {
             this.error('processing multiple checklist updates');
             return;
         }
-        events.forEach((event: TodoEvent) => {
+        payload.events.forEach((event: TodoEvent) => {
             this.process(event, todos);
         });
     }
@@ -88,7 +92,6 @@ export class TodoEventProcessor {
 
     private error(action: string): void {
         console.warn(`Synchronization error while ${action}, reloading...`);
-        toast.warning(`Synchronization error while ${action}, reloading...`);
-        this.householdClient.dashboardInfo();
+        void toast.warning(`Synchronization error while ${action}, reloading...`);
     }
 }

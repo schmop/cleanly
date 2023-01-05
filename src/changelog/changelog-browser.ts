@@ -5,6 +5,6 @@ export async function openChangelogBrowser() {
     await Browser.open({url: `${getWebHost()}/changelog`, windowName: 'Changelog - Cleanly'});
 
     return new Promise((resolve: (value?: unknown) => void) => {
-        Browser.addListener('browserFinished', () => resolve());
+        void Browser.addListener('browserFinished', () => resolve());
     });
 }

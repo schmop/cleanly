@@ -5,16 +5,23 @@
         <div class="scroll-inner-container">
           <ion-chip
             v-for="(category) in categories"
-            :color="selectedCategory === category ? 'success' : undefined" :key="category"
+            :key="category"
+            :color="selectedCategory === category ? 'success' : undefined"
             @click="toggleFilter(category)"
           >
             <component :is="icons[category]" />
-            <XIcon v-if="selectedCategory === category" size="16" />
+            <XIcon
+              v-if="selectedCategory === category"
+              size="16"
+            />
           </ion-chip>
         </div>
       </div>
       <TaskView
-        v-for="(task) in filteredTasks" :task="task" :household="household" :key="task.id"
+        v-for="(task) in filteredTasks"
+        :key="task.id"
+        :task="task"
+        :household="household"
         :show-actions="true"
       />
 
@@ -23,20 +30,31 @@
           <ion-card-title> {{ _t('There are no tasks yet') }}</ion-card-title>
         </ion-card-header>
         <ion-card-content v-if="canManageTasks">
-          <ion-button color="primary" @click="openTaskFormModal">
+          <ion-button
+            color="primary"
+            @click="openTaskFormModal"
+          >
             <CirclePlusIcon slot="start" />
             {{ _t('Create task') }}
           </ion-button>
         </ion-card-content>
       </ion-card>
 
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed" v-if="canManageTasks">
+      <ion-fab
+        v-if="canManageTasks"
+        slot="fixed"
+        vertical="bottom"
+        horizontal="end"
+      >
         <ion-fab-button @click="openTaskFormModal">
           <PlusIcon />
         </ion-fab-button>
       </ion-fab>
 
-      <ion-refresher slot="fixed" @ionRefresh="forceReload">
+      <ion-refresher
+        slot="fixed"
+        @ionRefresh="forceReload"
+      >
         <ion-refresher-content />
       </ion-refresher>
     </ion-content>
@@ -102,14 +120,14 @@ function toggleFilter(icon: IconName) {
 }
 
 async function openTaskFormModal(): Promise<void> {
-    menuController.close("menu");
+    void menuController.close("menu");
     const TaskFormModal = await modalController.create({
         component: TaskForm,
         componentProps: {
             id: household.value?.id,
         },
     });
-    TaskFormModal.present();
+    await TaskFormModal.present();
     await TaskFormModal.onDidDismiss();
     await householdClient.dashboardInfo();
 }

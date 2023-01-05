@@ -1,23 +1,37 @@
 <template>
-    <ion-list>
-        <ion-list-header>{{ __t('Actions for {0}', member?.name ?? '<unknown>') }}</ion-list-header>
-        <ion-item button @click="openPromoteToAdmin">
-            <ChefHatIcon slot="start" />
-            <ion-label>{{ _t('Promote to admin') }}</ion-label>
-        </ion-item>
-        <ion-item button @click="openPromoteToModerator" v-if="memberPrivilege === PrivilegeLevel.USER">
-            <WandIcon slot="start" />
-            <ion-label>{{ _t('Promote to moderator') }}</ion-label>
-        </ion-item>
-        <ion-item button @click="openDemoteToUser" v-if="memberPrivilege === PrivilegeLevel.MODERATOR">
-            <ArrowDownCircleIcon slot="start" />
-            <ion-label>{{ _t('Demote to user') }}</ion-label>
-        </ion-item>
-        <ion-item button @click="openKickMemberPrompt">
-            <UserMinusIcon slot="start" />
-            <ion-label>{{ _t('Kick member') }}</ion-label>
-        </ion-item>
-    </ion-list>
+  <ion-list>
+    <ion-list-header>{{ __t('Actions for {0}', member?.name ?? '<unknown>') }}</ion-list-header>
+    <ion-item
+      button
+      @click="openPromoteToAdmin"
+    >
+      <ChefHatIcon slot="start" />
+      <ion-label>{{ _t('Promote to admin') }}</ion-label>
+    </ion-item>
+    <ion-item
+      v-if="memberPrivilege === PrivilegeLevel.USER"
+      button
+      @click="openPromoteToModerator"
+    >
+      <WandIcon slot="start" />
+      <ion-label>{{ _t('Promote to moderator') }}</ion-label>
+    </ion-item>
+    <ion-item
+      v-if="memberPrivilege === PrivilegeLevel.MODERATOR"
+      button
+      @click="openDemoteToUser"
+    >
+      <ArrowDownCircleIcon slot="start" />
+      <ion-label>{{ _t('Demote to user') }}</ion-label>
+    </ion-item>
+    <ion-item
+      button
+      @click="openKickMemberPrompt"
+    >
+      <UserMinusIcon slot="start" />
+      <ion-label>{{ _t('Kick member') }}</ion-label>
+    </ion-item>
+  </ion-list>
 </template>
 
 <script setup lang="ts">
@@ -25,7 +39,7 @@ import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/inj
 import { Household } from "@/models/Household";
 import { PrivilegeLevel } from "@/models/HouseholdPrivilege";
 import { User } from "@/models/User";
-import toast from "@/toast";
+import toast, { showThrownError } from "@/toast";
 import { __t, _t } from "@/translation";
 import {
     IonItem, IonLabel, IonList, IonListHeader,
@@ -68,16 +82,16 @@ async function openChangePrivileges(nameLevel: string, level: PrivilegeLevel) {
             _t('Cancel'),
         ]
     });
-    dismiss();
+    void dismiss();
     await alert.present();
     if ((await alert.onDidDismiss()).role === 'confirm') {
-        if (await householdClient.changePrivilege(props.member.id, props.household.id, level)) {
-            toast.success(__t('Successfully changed privileges of {0}!', props.member.name));
-            householdClient.dashboardInfo();
-
-            return;
+        try {
+            await householdClient.changePrivilege(props.member.id, props.household.id, level);
+            await toast.success(__t('Successfully changed privileges of {0}!', props.member.name));
+            await householdClient.dashboardInfo();
+        } catch (err) {
+            await showThrownError(err);
         }
-        await toast.error(_t('There was an error changing the privileges of a member!'));
     }
 }
 async function openKickMemberPrompt() {
@@ -91,12 +105,12 @@ async function openKickMemberPrompt() {
             _t('Cancel'),
         ]
     });
-    dismiss();
+    void dismiss();
     await alert.present();
     if ((await alert.onDidDismiss()).role === 'confirm') {
         if (await householdClient.kickFromHousehold(props.member.id, props.household.id)) {
-            toast.success(__t('Successfully kicked {0} from the household!', props.member?.name ?? _t('someone')));
-            householdClient.dashboardInfo();
+            void toast.success(__t('Successfully kicked {0} from the household!', props.member?.name ?? _t('someone')));
+            await householdClient.dashboardInfo();
 
             return;
         }

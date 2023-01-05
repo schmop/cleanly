@@ -1,45 +1,69 @@
 <template>
-    <ion-menu content-id="main" menu-id="menu" side="end">
-        <ion-header>
-            <ion-toolbar color="primary">
-                <ion-title>
-                    {{ _t('Menu') }}
-                    <CircleXIcon @click="close" style="float: right" />
-                </ion-title>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content>
-            <ion-list>
-                <ion-item router-link="/" router-direction="back" button @click="close">
-                    <HomeIcon slot="start" />
-                    {{ _t('Dashboard') }}
-                </ion-item>
-                <ion-item button @click="openCreateHouseholdModal">
-                    <CirclePlusIcon slot="start" />
-                    {{ _t('Create household') }}
-                </ion-item>
-                <ion-item button @click="gotoSettings">
-                    <SettingsIcon slot="start" />
-                    {{ _t('Settings') }}
-                </ion-item>
-                <ion-item button @click="openChangelog">
-                    <NewsIcon slot="start" />
-                    {{ _t('Changes') }}
-                </ion-item>
-                <ion-item button @click="logout">
-                    <LogoutIcon slot="start" />
-                    {{ _t('Logout') }}
-                </ion-item>
-            </ion-list>
-        </ion-content>
-        <ion-footer>
-            <ion-item>
-                <ion-label slot="end">
-                    <p>{{ `Version: ${appVersion}` }}</p>
-                </ion-label>
-            </ion-item>
-        </ion-footer>
-    </ion-menu>
+  <ion-menu
+    content-id="main"
+    menu-id="menu"
+    side="end"
+  >
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>
+          {{ _t('Menu') }}
+          <CircleXIcon
+            style="float: right"
+            @click="close"
+          />
+        </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list>
+        <ion-item
+          router-link="/"
+          router-direction="back"
+          button
+          @click="close"
+        >
+          <HomeIcon slot="start" />
+          {{ _t('Dashboard') }}
+        </ion-item>
+        <ion-item
+          button
+          @click="openCreateHouseholdModal"
+        >
+          <CirclePlusIcon slot="start" />
+          {{ _t('Create household') }}
+        </ion-item>
+        <ion-item
+          button
+          @click="gotoSettings"
+        >
+          <SettingsIcon slot="start" />
+          {{ _t('Settings') }}
+        </ion-item>
+        <ion-item
+          button
+          @click="openChangelog"
+        >
+          <NewsIcon slot="start" />
+          {{ _t('Changes') }}
+        </ion-item>
+        <ion-item
+          button
+          @click="logout"
+        >
+          <LogoutIcon slot="start" />
+          {{ _t('Logout') }}
+        </ion-item>
+      </ion-list>
+    </ion-content>
+    <ion-footer>
+      <ion-item>
+        <ion-label slot="end">
+          <p>{{ `Version: ${appVersion}` }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-footer>
+  </ion-menu>
 </template>
 
 <script setup lang="ts">
@@ -77,20 +101,20 @@ async function close() {
 
 async function openChangelog() {
     await openChangelogBrowser();
-    close();
+    await close();
 }
 
-function gotoSettings() {
-    close();
-    router.push({name: 'settings'});
+async function gotoSettings() {
+    await close();
+    await router.push({name: 'settings'});
 }
 
 async function openCreateHouseholdModal() {
-    close()
+    await close();
     const createHouseholdModal = await modalController.create({
         component: CreateHousehold,
     });
-    createHouseholdModal.present();
+    await createHouseholdModal.present();
     await createHouseholdModal.onDidDismiss();
     await householdClient.dashboardInfo();
 }
@@ -98,7 +122,7 @@ async function openCreateHouseholdModal() {
 async function logout() {
     await close();
     authClient.logout();
-    router.replace({name: 'login'});
+    await router.replace({name: 'login'});
 }
 
 onBeforeMount(async () => {

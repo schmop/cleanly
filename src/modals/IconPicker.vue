@@ -1,20 +1,28 @@
 <template>
-    <ion-header>
-        <ion-toolbar color="medium">
-            <ion-title>
-                {{ _t('Icon') }}
-                <CircleXIcon @click="dismiss()" style="float: right" />
-            </ion-title>
-        </ion-toolbar>
-    </ion-header>
-    <ion-content color="light">
-        <ion-item-group>
-            <ion-item button v-for="(icon, name) in icons" :key="name" @click="select(`${name}`)">
-                <ion-label>{{ _t(`${name}`) }}</ion-label>
-                <component :is="icon" />
-            </ion-item>
-        </ion-item-group>
-    </ion-content>
+  <ion-header>
+    <ion-toolbar color="medium">
+      <ion-title>
+        {{ _t('Icon') }}
+        <CircleXIcon
+          style="float: right"
+          @click="dismiss()"
+        />
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content color="light">
+    <ion-item-group>
+      <ion-item
+        v-for="(icon, name) in icons"
+        :key="name"
+        button
+        @click="select(`${name}`)"
+      >
+        <ion-label>{{ _t(`${name}`) }}</ion-label>
+        <component :is="icon" />
+      </ion-item>
+    </ion-item-group>
+  </ion-content>
 </template>
 
 <script setup lang="ts">
@@ -38,14 +46,14 @@ const props = defineProps<{
 
 const emit = defineEmits(['select']);
 
-function dismiss() {
-    modalController.dismiss();
+async function dismiss() {
+    await modalController.dismiss();
 }
 
 async function select(icon: string) {
     props.iconReceiver.dispatchEvent(new CustomEvent('icon', {detail: icon}));
     emit('select', icon);
-    dismiss();
+    await dismiss();
 }
 </script>
 

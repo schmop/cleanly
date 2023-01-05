@@ -1,45 +1,65 @@
 <template>
-    <ion-header>
-        <ion-toolbar color="medium">
-            <ion-title>
-                {{ _t('Color') }}
-                <CircleXIcon @click="dismiss()" style="float: right" />
-            </ion-title>
-        </ion-toolbar>
-    </ion-header>
-    <ion-content color="light">
-        <div class="content">
-            <color-picker
-                class="color-picker" @input="onColorChange" @select="select()" :hue="color.hue"
-                :saturation="color.saturation" :luminosity="color.luminosity"
-            >
-            </color-picker>
-            <div class="preview-container dark-preview">
-                <div class="preview" :style="`background-color: ${darkColor.toHex()}`">{{
-                        __t('{0} left', '0 ' + _t('hours'))
-                    }}
-                </div>
-            </div>
-            <div class="preview-container light-preview">
-                <div class="preview" :style="`background-color: ${lightColor.toHex()}`">{{
-                        __t('{0} left', '0 ' + _t('hours'))
-                    }}
-                </div>
-            </div>
+  <ion-header>
+    <ion-toolbar color="medium">
+      <ion-title>
+        {{ _t('Color') }}
+        <CircleXIcon
+          style="float: right"
+          @click="dismiss()"
+        />
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content color="light">
+    <div class="content">
+      <color-picker
+        class="color-picker"
+        :hue="color.hue"
+        :saturation="color.saturation"
+        :luminosity="color.luminosity"
+        @input="onColorChange"
+        @select="select()"
+      />
+      <div class="preview-container dark-preview">
+        <div
+          class="preview"
+          :style="`background-color: ${darkColor.toHex()}`"
+        >
+          {{
+            __t('{0} left', '0 ' + _t('hours'))
+          }}
         </div>
-    </ion-content>
-    <ion-footer>
-        <ion-toolbar>
-            <ion-button color="primary" @click="select()">
-                <PaletteIcon slot="start" />
-                {{ _t('Select') }}
-            </ion-button>
-            <ion-button color="light" @click="dismiss()">
-                <CircleXIcon slot="start" />
-                {{ _t('Cancel') }}
-            </ion-button>
-        </ion-toolbar>
-    </ion-footer>
+      </div>
+      <div class="preview-container light-preview">
+        <div
+          class="preview"
+          :style="`background-color: ${lightColor.toHex()}`"
+        >
+          {{
+            __t('{0} left', '0 ' + _t('hours'))
+          }}
+        </div>
+      </div>
+    </div>
+  </ion-content>
+  <ion-footer>
+    <ion-toolbar>
+      <ion-button
+        color="primary"
+        @click="select()"
+      >
+        <PaletteIcon slot="start" />
+        {{ _t('Select') }}
+      </ion-button>
+      <ion-button
+        color="light"
+        @click="dismiss()"
+      >
+        <CircleXIcon slot="start" />
+        {{ _t('Cancel') }}
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
 </template>
 
 <script setup lang="ts">
@@ -64,8 +84,8 @@ const darkColor = computed(() => taskColorFromHue(hue.value, true));
 const lightColor = computed(() => taskColorFromHue(hue.value, false));
 const color = computed(() => state.darkmode ? darkColor.value : lightColor.value);
 
-function dismiss() {
-    modalController.dismiss();
+async function dismiss() {
+    await modalController.dismiss();
 }
 
 function onColorChange(newHue: number) {
@@ -75,7 +95,7 @@ function onColorChange(newHue: number) {
 async function select() {
     props.colorReceiver.dispatchEvent(new CustomEvent('color', {detail: hue.value}));
     emit('select', hue.value);
-    dismiss();
+    await dismiss();
 }
 </script>
 

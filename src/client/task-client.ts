@@ -1,3 +1,5 @@
+import { handleErrorResponse } from "@/client/response/handle-error-response";
+import { isTaskCompleteResponse } from "@/client/response/TaskCompleteResponse.guard";
 import { Household } from '@/models/Household';
 import { HouseholdStats } from '@/models/HouseholdStats';
 import { isHouseholdStats } from '@/models/HouseholdStats.guard';
@@ -29,7 +31,7 @@ export class TaskClient {
         );
 
         if (response.status !== 200) {
-            throw new Error('Could not create task, ' + response.statusText);
+            await handleErrorResponse(response, 'creating task');
         }
     }
 
@@ -47,7 +49,7 @@ export class TaskClient {
         );
 
         if (response.status !== 200) {
-            throw new Error('Could not edit task, ' + response.statusText);
+            await handleErrorResponse(response, 'editing task');
         }
     }
 
@@ -61,7 +63,7 @@ export class TaskClient {
         );
 
         if (response.status !== 200) {
-            throw new Error('Could not assign user to task, ' + response.statusText);
+            await handleErrorResponse(response, 'assigning task');
         }
     }
 
@@ -71,7 +73,7 @@ export class TaskClient {
         });
 
         if (response.status !== 200) {
-            throw new Error('Could not delete task, ' + response.statusText);
+            await handleErrorResponse(response, 'deleting task');
         }
     }
 
@@ -82,11 +84,10 @@ export class TaskClient {
         }
         const response = await this.client.request(`api/task/log/${householdId}/${fetchFrom ?? ''}`);
         if (response.status !== 200) {
-            console.error('Could not fetch task logs', response.statusText);
-            throw new Error('Could not fetch task logs, ' + response.statusText);
+            await handleErrorResponse(response, 'fetching tasklog');
         }
 
-        const data = await response.json();
+        const data: unknown = await response.json();
         if (!isRawTaskLogResponse(data)) {
             throw new Error('Invalid data received fetching task logs!');
         }
@@ -120,11 +121,10 @@ export class TaskClient {
         }
         const response = await this.client.request(`api/task/stats/${householdId}`);
         if (response.status !== 200) {
-            console.error('Could not fetch task stats', response.statusText);
-            throw new Error('Could not fetch task stats, ' + response.statusText);
+            await handleErrorResponse(response, 'fetching household stats');
         }
 
-        const data = await response.json();
+        const data: unknown = await response.json();
         if (!isHouseholdStats(data)) {
             throw new Error('Invalid data received fetching task stats!');
         }
@@ -133,7 +133,7 @@ export class TaskClient {
     }
 
     /**
-     * @returns false on error, or the new timestamp of the now completed task
+     * @returns new timestamp of the now completed task
      */
     async markTaskComplete(taskId: number): Promise<number> {
         const response = await this.client.request(`api/task/mark-done/${taskId}`, {
@@ -141,10 +141,13 @@ export class TaskClient {
         });
 
         if (response.status !== 200) {
-            console.error('Could not mark task as done', response.statusText);
-            throw new Error('Could not mark task as done, ' + response.statusText);
+            await handleErrorResponse(response, 'marking task as done');
+        }
+        const data: unknown = await response.json();
+        if (!isTaskCompleteResponse(data)) {
+            throw new Error('Invalid task complete response given!');
         }
 
-        return (await response.json()).timestamp as number;
+        return data.timestamp;
     }
 }

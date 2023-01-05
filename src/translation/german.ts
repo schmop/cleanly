@@ -27,7 +27,7 @@ export const german = {
     'Menu': 'Menü',
     'Mark done': 'Erledigen',
     'Overdue for {0}': 'Fällig seit {0}',
-    '{0} left': '{0} verbleibend',
+    '{0} left': 'Noch {0}',
     'Add Task': 'Neue Aufgabe',
     'Repeats every {0} {1}': 'Wiederholt sich alle {0} {1}',
     'Add': 'Hinzufügen',
@@ -227,9 +227,6 @@ export const german = {
     'Assign to': 'Zuweisen',
     'Task assigned successfully!': 'Aufgabe erfolgreich zugewiesen!',
     'Unassign': 'Zuweisung aufheben',
+    'Successfully invited users to household!': 'Einladungen erfolgreich versandt!',
     '': '',
 };
-
-export function hasTranslation(text: string): text is keyof typeof german {
-    return text in german;
-}

@@ -9,10 +9,11 @@ export class ForegroundListener {
     ) {
     }
 
-    register(): void {
-        App.addListener('resume', () => {
+    async register() {
+        await App.addListener('resume', () => {
             if (this.store.state.loggedIn) {
-                this.householdClient.dashboardInfo();
+                /** @TODO: catch errors and tell user? */
+                void this.householdClient.dashboardInfo();
             }
         });
     }

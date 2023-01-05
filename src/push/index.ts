@@ -1,5 +1,5 @@
-import { PushNotifications, PushNotificationSchema, Token } from '@capacitor/push-notifications';
 import { Device } from '@capacitor/device';
+import { PushNotifications, PushNotificationSchema, Token } from '@capacitor/push-notifications';
 
 
 export class PushService {
@@ -7,12 +7,12 @@ export class PushService {
     private pushIdPromise: null|Promise<void> = null;
 
     constructor() {
-        this.init();
+        this.init().catch((err) => console.warn(err));
     }
 
     async init() {
         await this.requestPermissions();
-        this.registerListeners();
+        await this.registerListeners();
     }
 
     async getPushId(): Promise<null|string> {
@@ -41,12 +41,12 @@ export class PushService {
 
     async registerListeners() {
         this.pushIdPromise = new Promise((resolve, reject) => {
-            PushNotifications.addListener('registration', (token: Token) => {
+            void PushNotifications.addListener('registration', (token: Token) => {
                 console.info('Device registered', token);
                 this.pushId = token.value;
                 resolve();
             });
-            PushNotifications.addListener('registrationError', err => {
+            void PushNotifications.addListener('registrationError', err => {
                 console.error('Registration error: ', err.error);
                 reject(err);
             });

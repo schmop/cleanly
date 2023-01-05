@@ -14,3 +14,6 @@ export type StarsRecord = Record<UserId, number>;
 export function keyOf<K extends keyof any, _T>(key: keyof any, dictionary: Record<K, _T>): key is K {
     return key in dictionary;
 }
+
+export type ArrayElement<ArrayType extends readonly unknown[]> =
+    ArrayType extends readonly (infer ElementType)[] ? ElementType : never;

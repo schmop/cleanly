@@ -1,41 +1,61 @@
 <template>
-    <ion-page>
-        <ion-content id="dashboard">
-            <HouseholdPreview v-for="(household, index) in households" @click="openHousehold(household)"
-                :household="household" :key="index" />
-            <ion-card v-if="households.length === 0">
-                <ion-card-header>
-                    <ion-card-title> {{ _t('No households yet...') }} </ion-card-title>
-                </ion-card-header>
-                <ion-card-content>
-                    {{ _t('To start, join a household or create one:') }}
-                    <ion-button color="primary" @click="openCreateHouseholdModal">
-                        <CirclePlusIcon slot="start" />
-                        {{ _t('Create household') }}
-                    </ion-button>
-                </ion-card-content>
-            </ion-card>
+  <ion-page>
+    <ion-content id="dashboard">
+      <HouseholdPreview
+        v-for="(household, index) in households"
+        :key="index"
+        :household="household"
+        @click="openHousehold(household)"
+      />
+      <ion-card v-if="households.length === 0">
+        <ion-card-header>
+          <ion-card-title> {{ _t('No households yet...') }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          {{ _t('To start, join a household or create one:') }}
+          <ion-button
+            color="primary"
+            @click="openCreateHouseholdModal"
+          >
+            <CirclePlusIcon slot="start" />
+            {{ _t('Create household') }}
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
 
-            <ion-refresher slot="fixed" @ionRefresh="forceReload">
-                <ion-refresher-content />
-            </ion-refresher>
-        </ion-content>
-    </ion-page>
+      <ion-refresher
+        slot="fixed"
+        @ionRefresh="forceReload"
+      >
+        <ion-refresher-content />
+      </ion-refresher>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
+import { forceReload } from '@/app-state/pull-to-refresh';
+import HouseholdPreview from "@/components/HouseholdPreview.vue";
 import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import CreateHousehold from "@/modals/CreateHousehold.vue";
 import { Household } from "@/models/Household";
+import router from "@/router";
+import { _t } from "@/translation";
 import {
-    IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonPage, menuController, modalController
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonContent,
+    IonPage,
+    IonRefresher,
+    IonRefresherContent,
+    menuController,
+    modalController
 } from "@ionic/vue";
 import { computed, inject } from "vue";
 import { CirclePlusIcon } from 'vue-tabler-icons';
-import HouseholdPreview from "@/components/HouseholdPreview.vue";
-import CreateHousehold from "@/modals/CreateHousehold.vue";
-import router from "@/router";
-import { _t } from "@/translation";
-import { forceReload } from '@/app-state/pull-to-refresh';
 
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
@@ -44,17 +64,18 @@ const householdClient = inject(householdClientSymbol)!;
 const households = computed(() => state.households);
 
 async function openCreateHouseholdModal() {
-    menuController.close("menu");
+    await menuController.close("menu");
     const createHouseholdModal = await modalController.create({
         component: CreateHousehold,
     });
-    createHouseholdModal.present();
+    await createHouseholdModal.present();
     await createHouseholdModal.onDidDismiss();
     await householdClient.dashboardInfo();
 }
-function openHousehold(household: Household) {
+
+async function openHousehold(household: Household) {
     store.viewHousehold(household.id);
-    router.push({ name: 'household-view' });
+    await router.push({name: 'household-view'});
 }
 </script>
 

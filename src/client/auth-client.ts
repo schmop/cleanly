@@ -1,8 +1,15 @@
 import { getWebHost } from '@/client/host';
-import { container } from '@/dependency-injection/container';
+import { handleErrorResponse } from "@/client/response/handle-error-response";
+import { isLoginRefreshResponse } from "@/client/response/LoginRefreshResponse.guard";
+import { isLoginResponse } from "@/client/response/LoginResponse.guard";
+import { isLookupUserResponse } from "@/client/response/LookupUserResponse.guard";
+import { SseClient } from "@/client/sse-client";
+import { AuthStorage } from "@/client/storage/AuthStorage";
+import { isAuthStorage } from "@/client/storage/AuthStorage.guard";
 import { PushService } from '@/push';
+import router from '@/router';
 import { Store } from '@/store';
-import router from '../router';
+import { error, warning } from "@/toast";
 
 export class AuthClient {
     private _token: null|string = null;
@@ -13,7 +20,7 @@ export class AuthClient {
         return 'Cleanly.State';
     }
 
-    constructor(private store: Store, private push: PushService) {
+    constructor(private store: Store, private push: PushService, private sseClient: SseClient) {
     }
 
     get HOST() {
@@ -22,33 +29,48 @@ export class AuthClient {
 
     async restoreState(): Promise<void> {
         const stateString = localStorage.getItem(this.LOCALSTORAGE_STATE_KEY);
-        if (null != stateString) {
-            const state = JSON.parse(stateString);
-            this.setLoginData(state);
-            console.info("Found login data in local storage!");
-            if (!await this.authCheck() && !await this.refreshLogin()) {
-                console.info("Login data was stale, logging out!");
-                this.logout();
-            }
+        if (null === stateString) {
+            console.warn('No cached credentials found.');
+
+            return;
+        }
+        const state: unknown = JSON.parse(stateString);
+        if (!isAuthStorage(state)) {
+            await warning('Invalid format in credential cache found.');
+            localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
+
+            return;
+        }
+        this.setLoginData(state);
+        console.info("Found login data in local storage!");
+        if (!await this.authCheck() && !await this.refreshLogin()) {
+            console.info("Login data was stale, logging out!");
+            this.logout();
         }
     }
 
-    setLoginData({token, refresh_token, mail}: {token?: null|string, refresh_token?: null|string, mail?: null|string}) {
+    setLoginData({token, refresh_token, mail}: Partial<AuthStorage>) {
         this._token = token ?? this._token;
         this._refreshToken = refresh_token ?? this._refreshToken;
         this._mail = mail ?? this._mail;
+        const storage = {
+            'mail': this._mail,
+            'token': this._token,
+            'refresh_token': this._refreshToken
+        };
+        if (!isAuthStorage(storage)) {
+            void error('Could not cache auth credentials');
+            return;
+        }
         localStorage.setItem(
             this.LOCALSTORAGE_STATE_KEY,
-            JSON.stringify({
-                'mail': this._mail,
-                'token': this._token,
-                'refresh_token': this._refreshToken
-            })
+            JSON.stringify(storage)
         );
         this.store.login();
         // Todo: resolve circular dependency
-        container.getSseClient().register();
-        this.registerPush();
+        this.sseClient.setTokenCallback(() => this._token);
+        this.sseClient.register();
+        void this.registerPush();
     }
 
     async authCheck(): Promise<boolean> {
@@ -70,8 +92,12 @@ export class AuthClient {
         if (response.status !== 200) {
             return false;
         }
-        const token = (await response.json()).token;
-        this.setLoginData({token, refresh_token: this._refreshToken});
+        const data: unknown = await response.json();
+        if (!isLoginRefreshResponse(data)) {
+            await error('Invalid refresh login response given!');
+            return false;
+        }
+        this.setLoginData({token: data.token, refresh_token: this._refreshToken});
 
         return true;
     }
@@ -83,18 +109,9 @@ export class AuthClient {
             {method: 'POST'},
             false
         );
-        if (response.status === 200) {
-            return;
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'signing up');
         }
-        let errors = "";
-
-        try {
-            errors = (await response.json())['errors'];
-        } catch (e) {
-            // noop
-        }
-
-        throw new Error("Could not sign up\n" + errors);
     }
 
     async signIn(mail: string, password: string): Promise<void> {
@@ -109,15 +126,15 @@ export class AuthClient {
             },
             false
         );
-        if (response.status === 200) {
-            const data = await response.json();
-            if ('token' in data) {
-                this.setLoginData({...data, mail});
-
-                return;
-            }
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'signing in');
         }
-        throw new Error('Could not authenticate, code: ' + response.status);
+        const data: unknown = await response.json();
+        if (isLoginResponse(data)) {
+            this.setLoginData({...data, mail});
+
+            return;
+        }
     }
 
     logout(): void {
@@ -144,18 +161,16 @@ export class AuthClient {
         const pushId = await this.push.getPushId()
         const deviceId = await this.push.getDeviceId();
         if (null === pushId) {
-            console.error('No push id given, cannot register push service!');
+            console.warn('No push id given, cannot register push service!');
             return;
         }
         const formData = new FormData();
         formData.append('push_id', pushId);
         formData.append('device_id', deviceId);
-        const response = await this.request('api/push', {
+        await this.request('api/push', {
             body: formData,
             method: 'POST',
         });
-
-        return await response.json();
     }
 
     async lookupUsers(search: string) {
@@ -165,8 +180,16 @@ export class AuthClient {
             body: formData,
             method: 'POST',
         });
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'searching users');
+        }
 
-        return await response.json();
+        const data: unknown = await response.json();
+        if (!isLookupUserResponse(data)) {
+            throw new Error('Invalid user lookup response given!');
+        }
+
+        return data;
     }
 
     async sendJson(endpoint: string, data: object, init: RequestInit, allowRetry = true): Promise<Response> {
@@ -193,7 +216,7 @@ export class AuthClient {
             if (this._token != null) {
                 return await this.request(endpoint, init, false);
             }
-            router.replace('/');
+            await router.replace('/');
         }
 
         return response;

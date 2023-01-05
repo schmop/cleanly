@@ -7,7 +7,10 @@
     </ion-card-header>
     <ion-card-content>
       <TaskView
-        v-for="(task, index) in tasks" :task="task" :household="props.household" :key="index"
+        v-for="(task, index) in tasks"
+        :key="index"
+        :task="task"
+        :household="props.household"
         :show-actions="false"
       />
     </ion-card-content>

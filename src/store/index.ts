@@ -7,7 +7,7 @@ import { Todo } from '@/models/Todo';
 import { User } from '@/models/User';
 import { UserSettings } from '@/models/UserSettings';
 import { HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
-import { App, computed, ComputedRef, reactive } from 'vue';
+import { App, computed, ComputedGetter, ComputedRef, reactive } from 'vue';
 
 export class State {
     loggedIn = false;
@@ -37,13 +37,13 @@ export type Getters = {
     stars: StarsRecord,
     tasks: Task[],
 };
-export type GetterFunctions = { [key in keyof Getters]: () => Getters[key] };
+export type GetterFunctions = { [key in keyof Getters]: ComputedGetter<Getters[key]> };
 export type ComputedGetters = { [key in keyof Getters]: ComputedRef<Getters[key]> };
 
 function makeGettersReactive(getters: GetterFunctions): ComputedGetters {
     return Object.fromEntries(
         Object.entries(getters).map(
-            ([key, getter]) => [key, computed(getter as any)]
+            ([key, getter]) => [key, computed(getter as ComputedGetter<any>)]
         )
     ) as ComputedGetters;
 }
@@ -226,9 +226,16 @@ export const store = new Store(
     state,
     getters,
 );
+
+declare global {
+    interface Window {
+        store: Store;
+    }
+}
+
 if (process.env.NODE_ENV !== 'production') {
     /**
      * This replaces the Vuex-Dev-Tools (in a poorly fashioned way)
      */
-    (window as any).store = store;
+    window.store = store;
 }

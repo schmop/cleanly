@@ -50,7 +50,7 @@ class Container {
     }
 
     getAuthClient(): AuthClient {
-        return this.authClient = this.authClient ?? new AuthClient(store, this.getPush());
+        return this.authClient = this.authClient ?? new AuthClient(store, this.getPush(), this.getSseClient());
     }
 
     getHouseholdClient(): HouseholdClient {
@@ -66,11 +66,11 @@ class Container {
     }
 
     getSseClient(): SseClient {
-        return this.sseClient = this.sseClient ?? new SseClient(this.getAuthClient(), this.getTodoEventProcessor(), this.getInviteEventProcessor());
+        return this.sseClient = this.sseClient ?? new SseClient(this.getTodoEventProcessor(), this.getInviteEventProcessor());
     }
 
     getTodoEventProcessor(): TodoEventProcessor {
-        return this.todoEventProcessor = this.todoEventProcessor ?? new TodoEventProcessor(store, this.getHouseholdClient());
+        return this.todoEventProcessor = this.todoEventProcessor ?? new TodoEventProcessor(store);
     }
 
     getInviteEventProcessor(): InviteEventProcessor {

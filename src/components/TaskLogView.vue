@@ -1,25 +1,25 @@
 <template>
-    <ion-card>
-        <ion-card-header>
-            <ion-card-title>
-                <component :is="icon" />
-                <ion-text color="secondary">
-                    <i>{{ userName }}</i>
-                </ion-text>
-                {{ _t('did') }}
-                <ion-text color="secondary">
-                    <i>{{ task.name }}</i>
-                </ion-text>
-                {{ relativeInterval }}
-                {{ _t('for') }}
-                <ion-text color="warning">
-                    <i>{{ log.stars }}
-                        <StarIcon size="18" />
-                    </i>
-                </ion-text>
-            </ion-card-title>
-        </ion-card-header>
-    </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <component :is="icon" />
+        <ion-text color="secondary">
+          <i>{{ userName }}</i>
+        </ion-text>
+        {{ _t('did') }}
+        <ion-text color="secondary">
+          <i>{{ task.name }}</i>
+        </ion-text>
+        {{ relativeInterval }}
+        {{ _t('for') }}
+        <ion-text color="warning">
+          <i>{{ log.stars }}
+            <StarIcon size="18" />
+          </i>
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+  </ion-card>
 </template>
 
 <script setup lang="ts">

@@ -1,36 +1,58 @@
 <template>
-    <ion-app>
-        <LoadingScreen v-if="!triedSessionRestore" @success="sessionRestoreSuccess" @fail="sessionRestoreFail" />
-        <ion-page v-else>
-            <template v-if="loggedIn && !isLoginPage">
-                <MenuView />
-                <ion-header>
-                    <ion-toolbar>
-                        <ion-buttons slot="start" v-if="!isDashboard">
-                            <ion-button router-link="/" size="large" router-direction="back">
-                                <HomeIcon />
-                            </ion-button>
-                        </ion-buttons>
-                        <ion-buttons slot="primary">
-                            <ion-menu-button :auto-hide="false"></ion-menu-button>
-                        </ion-buttons>
-                        <ion-buttons slot="secondary" v-if="invites.length > 0">
-                            <ion-button size="large" @click="showInvites">
-                                <MailIcon />
-                                <ion-badge color="danger" class="button-badge">
-                                    {{ invites.length }}
-                                </ion-badge>
-                            </ion-button>
-                        </ion-buttons>
-                        <ion-title size="small"> {{ pageTitle ?? _t('Cleanly') }}</ion-title>
-                    </ion-toolbar>
-                </ion-header>
-            </template>
-            <ion-content id="main">
-                <ion-router-outlet ref="outlet" />
-            </ion-content>
-        </ion-page>
-    </ion-app>
+  <ion-app>
+    <LoadingScreen
+      v-if="!triedSessionRestore"
+      @success="sessionRestoreSuccess"
+      @fail="sessionRestoreFail"
+    />
+    <ion-page v-else>
+      <template v-if="loggedIn && !isLoginPage">
+        <MenuView />
+        <ion-header>
+          <ion-toolbar>
+            <ion-buttons
+              v-if="!isDashboard"
+              slot="start"
+            >
+              <ion-button
+                router-link="/"
+                size="large"
+                router-direction="back"
+              >
+                <HomeIcon />
+              </ion-button>
+            </ion-buttons>
+            <ion-buttons slot="primary">
+              <ion-menu-button :auto-hide="false" />
+            </ion-buttons>
+            <ion-buttons
+              v-if="invites.length > 0"
+              slot="secondary"
+            >
+              <ion-button
+                size="large"
+                @click="showInvites"
+              >
+                <MailIcon />
+                <ion-badge
+                  color="danger"
+                  class="button-badge"
+                >
+                  {{ invites.length }}
+                </ion-badge>
+              </ion-button>
+            </ion-buttons>
+            <ion-title size="small">
+              {{ pageTitle ?? _t('Cleanly') }}
+            </ion-title>
+          </ion-toolbar>
+        </ion-header>
+      </template>
+      <ion-content id="main">
+        <ion-router-outlet ref="outlet" />
+      </ion-content>
+    </ion-page>
+  </ion-app>
 </template>
 
 <script setup lang="ts">
@@ -89,9 +111,9 @@ watch(
     {immediate: true}
 );
 
-function openHousehold(household: Household) {
+async function openHousehold(household: Household) {
     store.viewHousehold(household.id);
-    router.push({name: 'household-view'});
+    await router.push({name: 'household-view'});
 }
 
 async function sessionRestoreSuccess() {
@@ -99,7 +121,7 @@ async function sessionRestoreSuccess() {
         await householdClient.dashboardInfo();
         const households = store.state.households;
         if (households.length === 1) {
-            openHousehold(households[0]!);
+            await openHousehold(households[0]!);
         } else {
             await router.replace({name: 'dashboard'});
         }
@@ -110,17 +132,17 @@ async function sessionRestoreSuccess() {
     }
 }
 
-function sessionRestoreFail() {
+async function sessionRestoreFail() {
     triedSessionRestore.value = true;
-    router.replace({name: 'login'});
+    await router.replace({name: 'login'});
 }
 
-function showInvites() {
-    router.push({name: 'invite-view'});
+async function showInvites() {
+    await router.push({name: 'invite-view'});
 }
 
-checkAppVersion();
-foregroundListener.register();
+checkAppVersion().catch((err) => console.warn(err));
+void foregroundListener.register();
 colorschemeListener.register();
 
 </script>

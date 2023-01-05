@@ -1,41 +1,57 @@
 <template>
-    <ion-page>
-        <ion-content>
-            <ion-reorder-group :disabled="false" @ionItemReorder="reorder">
-                <TransitionGroup name="checklist">
-                    <ion-item v-for="(todo, index) in todos" :key="todo.uuid">
-                        <ion-button fill="clear" color="dark" shape="round" @click.stop="markAsCompleted(index)">
-                            <SquareIcon slot="icon-only" />
-                        </ion-button>
-                        <ion-input
-                            @ionInput="updateTodo(index, $event)"
-                            v-model="todo.content"
-                            :id="todo.uuid"
-                        />
-                        <ion-reorder slot="end">
-                        </ion-reorder>
-                    </ion-item>
-                </TransitionGroup>
+  <ion-page>
+    <ion-content>
+      <ion-reorder-group
+        :disabled="false"
+        @ionItemReorder="reorder"
+      >
+        <TransitionGroup name="checklist">
+          <ion-item
+            v-for="(todo, index) in todos"
+            :key="todo.uuid"
+          >
+            <ion-button
+              fill="clear"
+              color="dark"
+              shape="round"
+              @click.stop="markAsCompleted(index)"
+            >
+              <SquareIcon slot="icon-only" />
+            </ion-button>
+            <ion-input
+              :id="todo.uuid"
+              v-model="todo.content"
+              @ionInput="updateTodo(index, $event)"
+            />
+            <ion-reorder slot="end" />
+          </ion-item>
+        </TransitionGroup>
 
-                <Transition name="nothing-yet">
-                    <ion-card v-if="todos.length === 0">
-                        <ion-card-header>
-                            <ion-card-title> {{ _t('There are no checklist entries yet') }}</ion-card-title>
-                        </ion-card-header>
-                    </ion-card>
-                </Transition>
-
-            </ion-reorder-group>
-            <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-                <ion-fab-button @click="addTodo">
-                    <PlusIcon />
-                </ion-fab-button>
-            </ion-fab>
-            <ion-refresher slot="fixed" @ionRefresh="forceReload">
-                <ion-refresher-content />
-            </ion-refresher>
-        </ion-content>
-    </ion-page>
+        <Transition name="nothing-yet">
+          <ion-card v-if="todos.length === 0">
+            <ion-card-header>
+              <ion-card-title> {{ _t('There are no checklist entries yet') }}</ion-card-title>
+            </ion-card-header>
+          </ion-card>
+        </Transition>
+      </ion-reorder-group>
+      <ion-fab
+        slot="fixed"
+        vertical="bottom"
+        horizontal="end"
+      >
+        <ion-fab-button @click="addTodo">
+          <PlusIcon />
+        </ion-fab-button>
+      </ion-fab>
+      <ion-refresher
+        slot="fixed"
+        @ionRefresh="forceReload"
+      >
+        <ion-refresher-content />
+      </ion-refresher>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script setup lang="ts">
@@ -45,9 +61,10 @@ import { uuid4 } from '@/common/uuid';
 import { gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
 import { Todo } from '@/models/Todo';
 import { TodoEvent } from "@/models/TodoEvent";
-import toast from "@/toast";
+import { showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import {
+    InputCustomEvent,
     IonButton,
     IonCard,
     IonCardHeader,
@@ -81,8 +98,10 @@ const requestFlushQueue = debounce(async () => {
     }
     const sentEventQueue = eventQueue.value;
     eventQueue.value = [];
-    if (!await householdClient.updateChecklist(household.value.id, sentEventQueue)) {
-        await toast.error('Could not send updated checklist to server!');
+    try {
+        await householdClient.updateChecklist(household.value.id, sentEventQueue);
+    } catch (err) {
+        await showThrownError(err);
     }
 }, 1000, false);
 
@@ -105,7 +124,7 @@ function addToQueue(event: TodoEvent) {
     requestFlushQueue();
 }
 
-function updateTodo(index: number, event: any) {
+function updateTodo(index: number, event: InputCustomEvent) {
     const todo = todos.value[index];
     if (undefined === todo) {
         throw new Error('Could not update nonexistent todo.');
@@ -117,7 +136,7 @@ function updateTodo(index: number, event: any) {
     addToQueue({
         type: 'update',
         uuid: todo.uuid,
-        data: event.target.value,
+        data: `${event.target.value ?? ''}`,
     });
 }
 
@@ -144,23 +163,35 @@ function markAsCompleted(index: number) {
 function reorder(event: ItemReorderCustomEvent) {
     const {from, to} = event.detail;
     const todo = todos.value[from];
+    if (undefined === todo) {
+        throw new Error('Could not move nonexistent todo.');
+    }
     const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? undefined;
     addToQueue({
         type: 'sort',
         uuid: todo.uuid,
         data: insertBeforeUuid,
     });
-    todos.value = event.detail.complete(todos.value);
+    // Source: Trust me, bro
+    todos.value = event.detail.complete(todos.value) as Todo[];
 }
 
-async function addTodo() {
+function addTodo() {
     const todo: Todo = {uuid: uuid4(), content: ''};
     todos.value.push(todo);
     addToQueue({
         type: 'create',
         uuid: todo.uuid,
     });
-    setTimeout(() => (document.querySelector(`[id="${todo.uuid}"]`) as any|undefined)?.setFocus(), 100);
+    setTimeout(
+        () => {
+            const todoElement: (Element&{setFocus?: () => void})|null = document.querySelector(`[id="${todo.uuid}"]`);
+            if (null !== todoElement && typeof todoElement.setFocus === 'function') {
+                todoElement?.setFocus();
+            }
+        },
+        100,
+    );
 }
 </script>
 

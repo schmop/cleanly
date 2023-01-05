@@ -1,7 +1,10 @@
 <template>
   <ion-page>
     <ion-content>
-      <ion-loading :cssClass="'no-background'" spinner="circular" />
+      <ion-loading
+        :css-class="'no-background'"
+        spinner="circular"
+      />
     </ion-content>
   </ion-page>
 </template>

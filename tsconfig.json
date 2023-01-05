@@ -19,7 +19,7 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
+      ]
     },
     "lib": [
       "esnext",
@@ -28,13 +28,17 @@
       "scripthost"
     ]
   },
-  "files": ["global.d.ts"],
+  "files": [
+    "global.d.ts"
+  ],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
+    "**/*.js",
+    "**/.*.js"
   ],
   "exclude": [
     "node_modules"

@@ -3,26 +3,46 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ _t('Create household') }}
-        <CircleXIcon @click="dismiss()" style="float: right" />
+        <CircleXIcon
+          style="float: right"
+          @click="dismiss()"
+        />
       </ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content color="light" @keypress.enter="createHousehold()">
+  <ion-content
+    color="light"
+    @keypress.enter="createHousehold()"
+  >
     <ion-item-group>
       <ion-item>
-        <ion-label position="stacked">{{ _t('Name') }}</ion-label>
-        <ion-input type="text" v-model="householdName" />
-        <PencilIcon slot="end" class="align-center" />
+        <ion-label position="stacked">
+          {{ _t('Name') }}
+        </ion-label>
+        <ion-input
+          v-model="householdName"
+          type="text"
+        />
+        <PencilIcon
+          slot="end"
+          class="align-center"
+        />
       </ion-item>
     </ion-item-group>
   </ion-content>
   <ion-footer>
     <ion-toolbar>
-      <ion-button color="primary" @click="createHousehold()">
+      <ion-button
+        color="primary"
+        @click="createHousehold()"
+      >
         <CirclePlusIcon slot="start" />
         {{ _t('Create') }}
       </ion-button>
-      <ion-button color="light" @click="dismiss()">
+      <ion-button
+        color="light"
+        @click="dismiss()"
+      >
         <CircleXIcon slot="start" />
         {{ _t('Cancel') }}
       </ion-button>
@@ -31,34 +51,41 @@
 </template>
 
 <script setup lang="ts">
+import { householdClientSymbol } from '@/dependency-injection/injection-keys';
+import { showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import {
-IonButton,
-IonContent,
-IonFooter,
-IonHeader,
-IonInput,
-IonItem,
-IonItemGroup,
-IonLabel,
-IonTitle,
-IonToolbar,
-modalController,
+    IonButton,
+    IonContent,
+    IonFooter,
+    IonHeader,
+    IonInput,
+    IonItem,
+    IonItemGroup,
+    IonLabel,
+    IonTitle,
+    IonToolbar,
+    modalController,
 } from "@ionic/vue";
 import { inject, ref } from 'vue';
 import { CirclePlusIcon, CircleXIcon, PencilIcon } from 'vue-tabler-icons';
-import { householdClientSymbol } from '@/dependency-injection/injection-keys';
 
 const householdClient = inject(householdClientSymbol)!;
 
 const householdName = ref('');
 
-function dismiss() {
-  modalController.dismiss();
+async function dismiss() {
+    await modalController.dismiss();
 }
+
 async function createHousehold() {
-  await householdClient.createHousehold(householdName.value);
-  dismiss();
+    try {
+
+        await householdClient.createHousehold(householdName.value);
+    } catch (err) {
+        await showThrownError(err);
+    }
+    await dismiss();
 }
 </script>
 
