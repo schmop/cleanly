@@ -225,12 +225,13 @@ async function assignTo() {
             },
             {
                 text: _t("Confirm"),
+                role: "confirm",
             },
         ],
     });
     await picker.present();
     const dismiss = await picker.onDidDismiss<{assignee: PickerColumnOption}>();
-    if (dismiss.role === 'cancel') {
+    if (undefined === dismiss.role || !['confirm', 'unassign'].includes(dismiss.role)) {
         return;
     }
     let userId: unknown = dismiss.data?.assignee.value;
