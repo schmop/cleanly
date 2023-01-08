@@ -2,6 +2,7 @@
  * Generated type guards for "TaskCompleteResponse.ts".
  * WARNING: Do not manually change this file.
  */
+import { isUser } from "../../models/User.guard";
 import { TaskCompleteResponse } from "./TaskCompleteResponse";
 
 function evaluate(
@@ -25,6 +26,8 @@ export function isTaskCompleteResponse(obj: unknown, argumentName: string = "tas
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(typeof typedObj["timestamp"] === "number", `${argumentName}["timestamp"]`, "number", typedObj["timestamp"])
+        evaluate(typeof typedObj["timestamp"] === "number", `${argumentName}["timestamp"]`, "number", typedObj["timestamp"]) &&
+        evaluate((typedObj["assignee"] === null ||
+            isUser(typedObj["assignee"]) as boolean), `${argumentName}["assignee"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | null", typedObj["assignee"])
     )
 }

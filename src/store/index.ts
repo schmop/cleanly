@@ -191,7 +191,7 @@ export class Store {
         this.state.invites = this.state.invites.filter(invite => invite !== inviteToRemove);
     }
 
-    assignTask(householdId: HouseholdId, taskId: TaskId, userId: UserId) {
+    assignTask(householdId: HouseholdId, taskId: TaskId, userId: UserId|null) {
         const task = this.state
             .households
             .find((household) => household.id === householdId)

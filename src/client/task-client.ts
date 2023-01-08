@@ -1,4 +1,5 @@
 import { handleErrorResponse } from "@/client/response/handle-error-response";
+import { TaskCompleteResponse } from "@/client/response/TaskCompleteResponse";
 import { isTaskCompleteResponse } from "@/client/response/TaskCompleteResponse.guard";
 import { Household } from '@/models/Household';
 import { HouseholdStats } from '@/models/HouseholdStats';
@@ -135,7 +136,7 @@ export class TaskClient {
     /**
      * @returns new timestamp of the now completed task
      */
-    async markTaskComplete(taskId: number): Promise<number> {
+    async markTaskComplete(taskId: number): Promise<TaskCompleteResponse> {
         const response = await this.client.request(`api/task/mark-done/${taskId}`, {
             method: 'POST',
         });
@@ -148,6 +149,6 @@ export class TaskClient {
             throw new Error('Invalid task complete response given!');
         }
 
-        return data.timestamp;
+        return data;
     }
 }

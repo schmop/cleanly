@@ -264,8 +264,9 @@ async function markDone() {
     if (props.task.id != null) {
         try {
             actionsVisible.value = false;
-            const newTimestamp = await taskClient.markTaskComplete(props.task.id);
-            store.markTaskDone(props.household.id, props.task.id, newTimestamp);
+            const response = await taskClient.markTaskComplete(props.task.id);
+            store.markTaskDone(props.household.id, props.task.id, response.timestamp);
+            store.assignTask(props.household.id, props.task.id, response.assignee?.id ?? null)
             void toast.success(_t('Task done'));
             const householdId = props.household.id;
             if (null != householdId) {
