@@ -1,7 +1,7 @@
-import { User } from "@/models/User";
 import { Task } from "@/models/Task";
-import { Todo } from "./Todo";
+import { User } from "@/models/User";
 import { HouseholdPrivilege } from './HouseholdPrivilege';
+import { Todo } from "./Todo";
 
 /** @see {isHousehold} ts-auto-guard:type-guard */
 export interface Household {
@@ -12,4 +12,5 @@ export interface Household {
     webhookUrl: string|null,
     privileges: HouseholdPrivilege[],
     checklist: Todo[],
+    reassignmentStrategy: string,
 }

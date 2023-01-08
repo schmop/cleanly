@@ -149,6 +149,18 @@ export class HouseholdClient {
         }
     }
 
+    async setReassignmentStrategy(householdId: number, reassignmentStrategy: string) {
+        const response = await this.client.sendJson(
+            `api/household/reassignment-strategy/${householdId}`,
+            {reassignmentStrategy},
+            {method: 'POST'},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "changing the reassignment strategy");
+        }
+    }
+
     async setWebhook(householdId: number, url: string): Promise<WebhookResponse> {
         const response = await this.client.sendJson(
             `api/household/webhook/${householdId}`,

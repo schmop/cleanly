@@ -3,10 +3,6 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ isEditing ? __t('Edit task') : _t('Add task') }}
-        <CircleXIcon
-          style="float: right"
-          @click="dismiss()"
-        />
       </ion-title>
     </ion-toolbar>
   </ion-header>

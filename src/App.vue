@@ -10,24 +10,12 @@
         <MenuView />
         <ion-header>
           <ion-toolbar>
-            <ion-buttons
-              v-if="!isDashboard"
-              slot="start"
-            >
-              <ion-button
-                router-link="/"
-                size="large"
-                router-direction="back"
-              >
-                <HomeIcon />
-              </ion-button>
-            </ion-buttons>
-            <ion-buttons slot="primary">
+            <ion-buttons slot="start">
               <ion-menu-button :auto-hide="false" />
             </ion-buttons>
             <ion-buttons
               v-if="invites.length > 0"
-              slot="secondary"
+              slot="end"
             >
               <ion-button
                 size="large"
@@ -83,7 +71,7 @@ import {
 } from '@ionic/vue';
 import { computed, inject, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { HomeIcon, MailIcon } from 'vue-tabler-icons';
+import { MailIcon } from 'vue-tabler-icons';
 
 
 let triedSessionRestore = ref(false);
@@ -95,7 +83,6 @@ const householdClient = inject(householdClientSymbol)!;
 const foregroundListener = inject(foregroundListenerSymbol)!;
 const colorschemeListener = inject(colorschemeListenerSymbol)!;
 
-const isDashboard = computed(() => route.name === 'dashboard');
 const isLoginPage = computed(() => route.name === 'login');
 
 const loggedIn = computed(() => state.loggedIn);

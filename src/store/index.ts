@@ -211,13 +211,13 @@ export class Store {
         this.state.userSettings = settings;
     }
 
+    setReassignmentStrategy(household: Household, reassignmentStrategy: string) {
+        household.reassignmentStrategy = reassignmentStrategy;
+    }
+
     setDarkmode(darkmode: boolean) {
         this.state.darkmode = darkmode;
     }
-
-    /**
-     * Actions
-     */
 }
 
 const state = reactive(new State());

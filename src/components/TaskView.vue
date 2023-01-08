@@ -362,6 +362,7 @@ function closeActions(event: FocusEvent) {
     align-items: center;
     flex-direction: row;
     justify-content: space-between;
+    margin-left: 2px;
 }
 
 .pb-0 {

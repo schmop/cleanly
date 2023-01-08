@@ -3,10 +3,6 @@
     <ion-toolbar color="medium">
       <ion-title>
         {{ _t('Invite') }}
-        <CircleXIcon
-          style="float: right"
-          @click="dismiss()"
-        />
       </ion-title>
     </ion-toolbar>
   </ion-header>

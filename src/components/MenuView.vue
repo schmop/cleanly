@@ -2,16 +2,12 @@
   <ion-menu
     content-id="main"
     menu-id="menu"
-    side="end"
+    side="start"
   >
     <ion-header>
       <ion-toolbar color="primary">
         <ion-title>
           {{ _t('Menu') }}
-          <CircleXIcon
-            style="float: right"
-            @click="close"
-          />
         </ion-title>
       </ion-toolbar>
     </ion-header>
@@ -86,7 +82,7 @@ import {
 } from "@ionic/vue";
 import { inject, onBeforeMount, ref } from "vue";
 import { routerKey } from "vue-router";
-import { CirclePlusIcon, CircleXIcon, HomeIcon, LogoutIcon, NewsIcon, SettingsIcon } from "vue-tabler-icons";
+import { CirclePlusIcon, HomeIcon, LogoutIcon, NewsIcon, SettingsIcon } from "vue-tabler-icons";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 
 const householdClient = inject(householdClientSymbol)!;

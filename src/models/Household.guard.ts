@@ -48,6 +48,7 @@ export function isHousehold(obj: unknown, argumentName: string = "household"): o
         evaluate(Array.isArray(typedObj["checklist"]) &&
             typedObj["checklist"].every((e: any) =>
                 isTodo(e) as boolean
-            ), `${argumentName}["checklist"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Todo\").Todo[]", typedObj["checklist"])
+            ), `${argumentName}["checklist"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Todo\").Todo[]", typedObj["checklist"]) &&
+        evaluate(typeof typedObj["reassignmentStrategy"] === "string", `${argumentName}["reassignmentStrategy"]`, "string", typedObj["reassignmentStrategy"])
     )
 }

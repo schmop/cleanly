@@ -13,6 +13,28 @@
         </ion-item>
         <ion-item
           v-if="canManageHousehold"
+          lines="inset"
+        >
+          <RotateIcon slot="start" />
+          <ion-select
+            :value="household.reassignmentStrategy"
+            interface="action-sheet"
+            :placeholder="_t('Select reassignment strategy')"
+            @ionChange="selectReassignmentStrategy"
+          >
+            <ion-select-option value="none">
+              {{ _t('Do nothing') }}
+            </ion-select-option>
+            <ion-select-option value="unassign">
+              {{ _t('Unassign') }}
+            </ion-select-option>
+            <ion-select-option value="rotate">
+              {{ _t('Rotate') }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item
+          v-if="canManageHousehold"
           button
           @click="openInviteModal"
         >
@@ -84,13 +106,13 @@
 
 <script setup lang="ts">
 import { confirmablePrompt, stringPrompt } from "@/alert/prompt";
-import { gettersSymbol, householdClientSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
+import { gettersSymbol, householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import InviteModal from "@/modals/InviteModal.vue";
 import TaskForm from "@/modals/TaskForm.vue";
 import { PrivilegeLevel } from '@/models/HouseholdPrivilege';
 import { User } from "@/models/User";
 import router from "@/router";
-import toast, { showThrownError } from "@/toast";
+import toast, { showThrownError, success } from "@/toast";
 import { _t } from "@/translation";
 import { Clipboard } from '@capacitor/clipboard';
 import {
@@ -100,16 +122,20 @@ import {
     IonList,
     IonListHeader,
     IonPage,
+    IonSelect,
+    IonSelectOption,
     IonText,
     menuController,
     modalController,
     popoverController,
+    SelectCustomEvent,
     toastController
 } from "@ionic/vue";
 import { computed, inject, watch } from 'vue';
 import {
     ChefHatIcon,
     CirclePlusIcon,
+    RotateIcon,
     StarIcon,
     TrashXIcon,
     UserIcon,
@@ -120,6 +146,7 @@ import {
 } from "vue-tabler-icons";
 import HouseholdMemberActions from "./HouseholdMemberActions.vue";
 
+const store = inject(storeSymbol)!;
 const getters = inject(gettersSymbol)!;
 const state = inject(stateSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -167,6 +194,19 @@ watch(
     },
     {immediate: true}
 );
+
+async function selectReassignmentStrategy(event: SelectCustomEvent<string>) {
+    if (undefined === household.value?.id) {
+        return;
+    }
+    try {
+        await householdClient.setReassignmentStrategy(household.value.id, event.detail.value);
+        store.setReassignmentStrategy(household.value, event.detail.value);
+        await success('Reassignment strategy changed successfully!');
+    } catch (err) {
+        await showThrownError(err);
+    }
+}
 
 async function showSecretToast(secret: string) {
     const secretToast = await toastController.create({
