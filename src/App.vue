@@ -68,12 +68,10 @@ import {
     IonTitle,
     IonToolbar
 } from '@ionic/vue';
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { MailIcon } from 'vue-tabler-icons';
 
-
-let triedSessionRestore = ref(false);
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
 const route = useRoute();
