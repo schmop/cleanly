@@ -6,25 +6,29 @@ import { Task } from '@/models/Task';
 import { Todo } from '@/models/Todo';
 import { User } from '@/models/User';
 import { UserSettings } from '@/models/UserSettings';
+import { Localstore } from "@/store/localstore";
 import { HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
 import { App, computed, ComputedGetter, ComputedRef, reactive } from 'vue';
 
 export class State {
-    loggedIn = false;
-    households: Household[] = [];
-    user: null|User = null;
-    invites: Invite[] = [];
-    pageTitle: null|string = null;
-    viewedHousehold: null|number = null;
-    userSettings: UserSettings = {
+    public loggedIn = false;
+    public households: Household[] = [];
+    public user: null|User = null;
+    public invites: Invite[] = [];
+    public pageTitle: null|string = null;
+    public viewedHousehold: null|number = null;
+    public userSettings: UserSettings = {
         notifyInvites: true,
         notifyTaskDone: true,
         notifyTaskDue: true,
         language: 'de',
     };
-    stars: Record<HouseholdId, StarsRecord> = {};
-    darkmode = false;
+    public stars: Record<HouseholdId, StarsRecord> = {};
+    public darkmode = false;
 }
+
+/** @see {isState} ts-auto-guard:type-guard */
+export type StateInterface = Pick<State, keyof State>;
 
 export type Getters = {
     checklist: (householdId: number) => Todo[],
@@ -105,14 +109,22 @@ const getters: GetterFunctions = {
 };
 
 export class Store {
-    public readonly state: State;
+    private _state: State;
+    public get state() {
+        return this._state;
+    }
+
+    private set state(state: State) {
+        this._state = state;
+    }
+
     public readonly getters: ComputedGetters;
 
     constructor(
         state: State,
         getters: GetterFunctions,
     ) {
-        this.state = state;
+        this._state = state;
         this.getters = makeGettersReactive(getters);
     }
 
@@ -123,9 +135,10 @@ export class Store {
         app.provide(gettersSymbol, this.getters);
     }
 
-    /**
-     * Mutations
-     */
+    overrideState(state: State) {
+        this.state = state;
+    }
+
     login() {
         this.state.loggedIn = true;
     }
@@ -226,6 +239,9 @@ export const store = new Store(
     state,
     getters,
 );
+
+export const localstore = new Localstore(store);
+localstore.init();
 
 declare global {
     interface Window {

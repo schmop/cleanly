@@ -1,4 +1,5 @@
 import { ColorschemeListener } from "@/app-state/colorscheme-listener";
+import { DashboardRefresher } from "@/app-state/dashboard-refresher";
 import { ForegroundListener } from "@/app-state/foreground-listener";
 import { AuthClient } from "@/client/auth-client";
 import { HouseholdClient } from "@/client/household-client";
@@ -6,7 +7,7 @@ import { SseClient } from "@/client/sse-client";
 import { TaskClient } from "@/client/task-client";
 import { UserClient } from "@/client/user-client";
 import { PushService } from "@/push";
-import { Store, State, ComputedGetters } from "@/store";
+import { ComputedGetters, State, Store } from "@/store";
 import { InjectionKey } from "vue";
 
 export const storeSymbol = Symbol() as InjectionKey<Store>;
@@ -20,3 +21,4 @@ export const userClientSymbol = Symbol() as InjectionKey<UserClient>;
 export const pushSymbol = Symbol() as InjectionKey<PushService>;
 export const foregroundListenerSymbol = Symbol() as InjectionKey<ForegroundListener>;
 export const colorschemeListenerSymbol = Symbol() as InjectionKey<ColorschemeListener>;
+export const dashboardRefresherSymbol = Symbol() as InjectionKey<DashboardRefresher>;

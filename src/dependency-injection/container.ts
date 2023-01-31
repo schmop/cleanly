@@ -1,4 +1,5 @@
 import { ColorschemeListener } from '@/app-state/colorscheme-listener';
+import { DashboardRefresher } from "@/app-state/dashboard-refresher";
 import { ForegroundListener } from '@/app-state/foreground-listener';
 import { TodoEventProcessor } from '@/checklist/todo-event-processor';
 import { AuthClient } from '@/client/auth-client';
@@ -13,6 +14,7 @@ import { App } from 'vue';
 import {
     authClientSymbol,
     colorschemeListenerSymbol,
+    dashboardRefresherSymbol,
     foregroundListenerSymbol,
     householdClientSymbol,
     pushSymbol,
@@ -32,6 +34,7 @@ class Container {
     push?: PushService;
     foregroundListener?: ForegroundListener;
     colorschemeListener?: ColorschemeListener;
+    dashboardRefresher?: DashboardRefresher;
 
     /** Installation as Vue plugin */
     install(app: App) {
@@ -43,6 +46,7 @@ class Container {
         app.provide(pushSymbol, this.getPush());
         app.provide(foregroundListenerSymbol, this.getForegroundListener());
         app.provide(colorschemeListenerSymbol, this.getColorschemeListener());
+        app.provide(dashboardRefresherSymbol, this.getDashboardRefresher());
     }
 
     getStore(): Store {
@@ -50,43 +54,47 @@ class Container {
     }
 
     getAuthClient(): AuthClient {
-        return this.authClient = this.authClient ?? new AuthClient(store, this.getPush(), this.getSseClient());
+        return this.authClient ??= new AuthClient(store, this.getPush(), this.getSseClient());
     }
 
     getHouseholdClient(): HouseholdClient {
-        return this.householdClient = this.householdClient ?? new HouseholdClient(this.getAuthClient(), store);
+        return this.householdClient ??= new HouseholdClient(this.getAuthClient(), store);
     }
 
     getUserClient(): UserClient {
-        return this.userClient = this.userClient ?? new UserClient(this.getAuthClient());
+        return this.userClient ??= new UserClient(this.getAuthClient());
     }
 
     getPush(): PushService {
-        return this.push = this.push ?? new PushService();
+        return this.push ??= new PushService();
     }
 
     getSseClient(): SseClient {
-        return this.sseClient = this.sseClient ?? new SseClient(this.getTodoEventProcessor(), this.getInviteEventProcessor());
+        return this.sseClient ??= new SseClient(this.getTodoEventProcessor(), this.getInviteEventProcessor());
     }
 
     getTodoEventProcessor(): TodoEventProcessor {
-        return this.todoEventProcessor = this.todoEventProcessor ?? new TodoEventProcessor(store);
+        return this.todoEventProcessor ??= new TodoEventProcessor(store);
     }
 
     getInviteEventProcessor(): InviteEventProcessor {
-        return this.inviteEventProcessor = this.inviteEventProcessor ?? new InviteEventProcessor(store);
+        return this.inviteEventProcessor ??= new InviteEventProcessor(store);
     }
 
     getTaskClient(): TaskClient {
-        return this.taskClient = this.taskClient ?? new TaskClient(this.getAuthClient(), store);
+        return this.taskClient ??= new TaskClient(this.getAuthClient(), store);
     }
 
     getForegroundListener(): ForegroundListener {
-        return this.foregroundListener = this.foregroundListener ?? new ForegroundListener(this.getHouseholdClient(), store);
+        return this.foregroundListener ??= new ForegroundListener(this.getHouseholdClient(), this.getSseClient(), store);
     }
 
     getColorschemeListener(): ColorschemeListener {
-        return this.colorschemeListener = this.colorschemeListener ?? new ColorschemeListener(store);
+        return this.colorschemeListener ??= new ColorschemeListener(store);
+    }
+
+    getDashboardRefresher(): DashboardRefresher {
+        return this.dashboardRefresher ??= new DashboardRefresher(this.getHouseholdClient());
     }
 }
 

@@ -8,7 +8,7 @@ import { AuthStorage } from "@/client/storage/AuthStorage";
 import { isAuthStorage } from "@/client/storage/AuthStorage.guard";
 import { PushService } from '@/push';
 import router from '@/router';
-import { Store } from '@/store';
+import { localstore, Store } from '@/store';
 import { error, warning } from "@/toast";
 
 export class AuthClient {
@@ -27,7 +27,7 @@ export class AuthClient {
         return getWebHost();
     }
 
-    async restoreState(): Promise<void> {
+    restoreState() {
         const stateString = localStorage.getItem(this.LOCALSTORAGE_STATE_KEY);
         if (null === stateString) {
             console.warn('No cached credentials found.');
@@ -36,17 +36,13 @@ export class AuthClient {
         }
         const state: unknown = JSON.parse(stateString);
         if (!isAuthStorage(state)) {
-            await warning('Invalid format in credential cache found.');
+            void warning('Invalid format in credential cache found.');
             localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
 
             return;
         }
         this.setLoginData(state);
         console.info("Found login data in local storage!");
-        if (!await this.authCheck() && !await this.refreshLogin()) {
-            console.info("Login data was stale, logging out!");
-            this.logout();
-        }
     }
 
     setLoginData({token, refresh_token, mail}: Partial<AuthStorage>) {
@@ -67,7 +63,6 @@ export class AuthClient {
             JSON.stringify(storage)
         );
         this.store.login();
-        // Todo: resolve circular dependency
         this.sseClient.setTokenCallback(() => this._token);
         this.sseClient.register();
         void this.registerPush();
@@ -139,6 +134,7 @@ export class AuthClient {
 
     logout(): void {
         localStorage.removeItem(this.LOCALSTORAGE_STATE_KEY);
+        localstore.clear();
         this.store.logout();
         this._mail = null;
         this._token = null;
@@ -212,10 +208,11 @@ export class AuthClient {
 
         const response = await fetch(`${this.HOST}/${endpoint}`, init);
         if (response.status === 401 && allowRetry) {
-            await this.restoreState();
-            if (this._token != null) {
+            if (await this.authCheck() || await this.refreshLogin()) {
                 return await this.request(endpoint, init, false);
             }
+            console.info("Login data was stale, logging out!");
+            this.logout();
             await router.replace('/');
         }
 

@@ -46,7 +46,7 @@
       </ion-fab>
       <ion-refresher
         slot="fixed"
-        @ionRefresh="forceReload"
+        @ionRefresh="dashboardRefresher.forceReload($event)"
       >
         <ion-refresher-content />
       </ion-refresher>
@@ -55,10 +55,9 @@
 </template>
 
 <script setup lang="ts">
-import { forceReload } from '@/app-state/pull-to-refresh';
 import debounce from '@/common/debounce';
 import { uuid4 } from '@/common/uuid';
-import { gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
+import { dashboardRefresherSymbol, gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
 import { Todo } from '@/models/Todo';
 import { TodoEvent } from "@/models/TodoEvent";
 import { showThrownError } from "@/toast";
@@ -86,6 +85,7 @@ import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
+const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const household = computed(() => getters.household.value);
 const originTodos = computed(() => household.value?.checklist);

@@ -17,3 +17,5 @@ export function keyOf<K extends keyof any, _T>(key: keyof any, dictionary: Recor
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
     ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
+
+export type Callback = (...args: any[]) => any;

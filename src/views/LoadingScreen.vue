@@ -10,26 +10,11 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onBeforeMount } from 'vue';
-import { IonPage, IonContent, IonLoading } from "@ionic/vue";
-import { authClientSymbol } from "@/dependency-injection/injection-keys";
-
-const emit = defineEmits(['success', 'fail']);
-const authClient = inject(authClientSymbol)!;
-
-onBeforeMount(async () => {
-  await authClient.restoreState();
-  if (authClient.isAuthenticated()) {
-    emit('success');
-  } else {
-    emit('fail');
-  }
-});
-</script>
+import { IonContent, IonLoading, IonPage } from "@ionic/vue";</script>
 
 <style>
-.no-background>.loading-wrapper {
-  background: none;
-  box-shadow: none;
+.no-background > .loading-wrapper {
+    background: none;
+    box-shadow: none;
 }
 </style>

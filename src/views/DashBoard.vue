@@ -25,7 +25,7 @@
 
       <ion-refresher
         slot="fixed"
-        @ionRefresh="forceReload"
+        @ionRefresh="dashboardRefresher.forceReload($event)"
       >
         <ion-refresher-content />
       </ion-refresher>
@@ -34,9 +34,13 @@
 </template>
 
 <script setup lang="ts">
-import { forceReload } from '@/app-state/pull-to-refresh';
 import HouseholdPreview from "@/components/HouseholdPreview.vue";
-import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import {
+    dashboardRefresherSymbol,
+    householdClientSymbol,
+    stateSymbol,
+    storeSymbol
+} from "@/dependency-injection/injection-keys";
 import CreateHousehold from "@/modals/CreateHousehold.vue";
 import { Household } from "@/models/Household";
 import router from "@/router";
@@ -60,6 +64,7 @@ import { CirclePlusIcon } from 'vue-tabler-icons';
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
+const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const households = computed(() => state.households);
 
