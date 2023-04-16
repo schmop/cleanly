@@ -14,7 +14,6 @@ export interface SerializableRequest {
 }
 
 /** @see {isPersistableRequest} ts-auto-guard:type-guard */
-
 export interface PersistableRequest {
     method: HttpMethod;
     url: string;
