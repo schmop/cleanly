@@ -18,7 +18,8 @@ export class TaskClient {
     }
 
     async addNewTask(householdId: number, name: string, icon: string, hue: number|null, duration: number|null, stars: number) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             'api/task/create',
             {
                 household_id: householdId,
@@ -28,7 +29,6 @@ export class TaskClient {
                 duration,
                 stars,
             },
-            {method: 'POST'}
         );
 
         if (response.status !== 200) {
@@ -37,7 +37,8 @@ export class TaskClient {
     }
 
     async editTask(task: Task, name: string, icon: string, hue: number|null, duration: number|null, stars: number) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             `api/task/edit/${task.id}`,
             {
                 name,
@@ -46,7 +47,6 @@ export class TaskClient {
                 duration,
                 stars,
             },
-            {method: 'POST'}
         );
 
         if (response.status !== 200) {
@@ -55,12 +55,12 @@ export class TaskClient {
     }
 
     async assignTo(task: Task, assignee: UserId|null) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             `api/task/assign/${task.id}`,
             {
                 assignee
             },
-            {method: 'POST'}
         );
 
         if (response.status !== 200) {
@@ -69,9 +69,10 @@ export class TaskClient {
     }
 
     async deleteTask(taskId: number) {
-        const response = await this.client.request(`api/task/${taskId}`, {
-            method: 'DELETE',
-        });
+        const response = await this.client.requestEventually(
+            'DELETE',
+            `api/task/${taskId}`,
+        );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, 'deleting task');
@@ -83,7 +84,10 @@ export class TaskClient {
         if (null == household) {
             throw new Error('Cannot fetch tasklogs of an unknown household!');
         }
-        const response = await this.client.request(`api/task/log/${householdId}/${fetchFrom ?? ''}`);
+        const response = await this.client.requestImmediately(
+            'GET',
+            `api/task/log/${householdId}/${fetchFrom ?? ''}`
+        );
         if (response.status !== 200) {
             await handleErrorResponse(response, 'fetching tasklog');
         }
@@ -120,7 +124,10 @@ export class TaskClient {
         if (null == household) {
             throw new Error('Cannot fetch task stats of an unknown household!');
         }
-        const response = await this.client.request(`api/task/stats/${householdId}`);
+        const response = await this.client.requestImmediately(
+            'GET',
+            `api/task/stats/${householdId}`,
+        );
         if (response.status !== 200) {
             await handleErrorResponse(response, 'fetching household stats');
         }
@@ -137,9 +144,10 @@ export class TaskClient {
      * @returns new timestamp of the now completed task
      */
     async markTaskComplete(taskId: number): Promise<TaskCompleteResponse> {
-        const response = await this.client.request(`api/task/mark-done/${taskId}`, {
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/task/mark-done/${taskId}`
+        );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, 'marking task as done');

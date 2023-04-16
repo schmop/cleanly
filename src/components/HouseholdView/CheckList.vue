@@ -23,7 +23,9 @@
               v-model="todo.content"
               @ionInput="updateTodo(index, $event)"
             />
-            <ion-reorder slot="end" />
+            <ion-reorder
+              slot="end"
+            />
           </ion-item>
         </TransitionGroup>
 
@@ -46,7 +48,7 @@
       </ion-fab>
       <ion-refresher
         slot="fixed"
-        @ionRefresh="forceReload"
+        @ionRefresh="dashboardRefresher.forceReload($event)"
       >
         <ion-refresher-content />
       </ion-refresher>
@@ -55,10 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { forceReload } from '@/app-state/pull-to-refresh';
 import debounce from '@/common/debounce';
 import { uuid4 } from '@/common/uuid';
-import { gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
+import { dashboardRefresherSymbol, gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
 import { Todo } from '@/models/Todo';
 import { TodoEvent } from "@/models/TodoEvent";
 import { showThrownError } from "@/toast";
@@ -86,6 +87,7 @@ import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
+const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const household = computed(() => getters.household.value);
 const originTodos = computed(() => household.value?.checklist);
@@ -156,6 +158,7 @@ function markAsCompleted(index: number) {
         addToQueue({
             type: 'delete',
             uuid: todo.uuid,
+            data: null,
         });
     }
 }
@@ -166,7 +169,7 @@ function reorder(event: ItemReorderCustomEvent) {
     if (undefined === todo) {
         throw new Error('Could not move nonexistent todo.');
     }
-    const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? undefined;
+    const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? null;
     addToQueue({
         type: 'sort',
         uuid: todo.uuid,
@@ -182,6 +185,7 @@ function addTodo() {
     addToQueue({
         type: 'create',
         uuid: todo.uuid,
+        data: null,
     });
     setTimeout(
         () => {

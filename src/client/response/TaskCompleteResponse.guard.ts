@@ -28,6 +28,6 @@ export function isTaskCompleteResponse(obj: unknown, argumentName: string = "tas
             typeof typedObj === "function") &&
         evaluate(typeof typedObj["timestamp"] === "number", `${argumentName}["timestamp"]`, "number", typedObj["timestamp"]) &&
         evaluate((typedObj["assignee"] === null ||
-            isUser(typedObj["assignee"]) as boolean), `${argumentName}["assignee"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | null", typedObj["assignee"])
+            isUser(typedObj["assignee"]) as boolean), `${argumentName}["assignee"]`, "import(\"./src/models/User\").User | null", typedObj["assignee"])
     )
 }

@@ -53,7 +53,7 @@
 
       <ion-refresher
         slot="fixed"
-        @ionRefresh="forceReload"
+        @ionRefresh="dashboardRefresher.forceReload($event)"
       >
         <ion-refresher-content />
       </ion-refresher>
@@ -62,10 +62,9 @@
 </template>
 
 <script setup lang="ts">
-import { forceReload } from '@/app-state/pull-to-refresh';
 import { taskSortByPriority } from "@/common/task-priority";
 import { IconName, icons, isValidIcon } from "@/components/icons";
-import { gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
+import { dashboardRefresherSymbol, gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
 import TaskForm from '@/modals/TaskForm.vue';
 import { _t } from '@/translation';
 import {
@@ -90,6 +89,7 @@ import TaskView from '../TaskView.vue';
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
+const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const selectedCategory = ref<IconName|null>(null);
 

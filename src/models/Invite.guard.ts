@@ -29,6 +29,6 @@ export function isInvite(obj: unknown, argumentName: string = "invite"): obj is 
         evaluate(typeof typedObj["householdId"] === "number", `${argumentName}["householdId"]`, "number", typedObj["householdId"]) &&
         evaluate(typeof typedObj["householdName"] === "string", `${argumentName}["householdName"]`, "string", typedObj["householdName"]) &&
         evaluate((typedObj["inviter"] === null ||
-            isUser(typedObj["inviter"]) as boolean), `${argumentName}["inviter"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | null", typedObj["inviter"])
+            isUser(typedObj["inviter"]) as boolean), `${argumentName}["inviter"]`, "import(\"./src/models/User\").User | null", typedObj["inviter"])
     )
 }

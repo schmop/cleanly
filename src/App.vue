@@ -1,9 +1,7 @@
 <template>
   <ion-app>
     <LoadingScreen
-      v-if="!triedSessionRestore"
-      @success="sessionRestoreSuccess"
-      @fail="sessionRestoreFail"
+      v-if="!loggedIn && !isLoginPage"
     />
     <ion-page v-else>
       <template v-if="loggedIn && !isLoginPage">
@@ -46,6 +44,7 @@
 <script setup lang="ts">
 import MenuView from '@/components/MenuView.vue';
 import {
+    authClientSymbol,
     colorschemeListenerSymbol,
     foregroundListenerSymbol,
     householdClientSymbol,
@@ -69,22 +68,20 @@ import {
     IonTitle,
     IonToolbar
 } from '@ionic/vue';
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { MailIcon } from 'vue-tabler-icons';
 
-
-let triedSessionRestore = ref(false);
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
 const route = useRoute();
 const router = useRouter();
+const authClient = inject(authClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 const foregroundListener = inject(foregroundListenerSymbol)!;
 const colorschemeListener = inject(colorschemeListenerSymbol)!;
 
 const isLoginPage = computed(() => route.name === 'login');
-
 const loggedIn = computed(() => state.loggedIn);
 const invites = computed(() => state.invites);
 const pageTitle = computed(() => state.pageTitle);
@@ -103,25 +100,26 @@ async function openHousehold(household: Household) {
     await router.push({name: 'household-view'});
 }
 
-async function sessionRestoreSuccess() {
-    try {
-        await householdClient.dashboardInfo();
-        const households = store.state.households;
-        if (households.length === 1) {
-            await openHousehold(households[0]!);
-        } else {
-            await router.replace({name: 'dashboard'});
-        }
-    } catch (error) {
+async function restoreSession() {
+    authClient.restoreState();
+    if (!authClient.isAuthenticated()) {
         await router.replace({name: 'login'});
-    } finally {
-        triedSessionRestore.value = true;
+        return;
     }
-}
-
-async function sessionRestoreFail() {
-    triedSessionRestore.value = true;
-    await router.replace({name: 'login'});
+    const dashboardInfoPromise = householdClient.dashboardInfo();
+    if (!loggedIn.value) {
+        try {
+            await dashboardInfoPromise;
+        } catch (error) {
+            await router.replace({name: 'login'});
+        }
+    }
+    const households = store.state.households;
+    if (households.length === 1) {
+        await openHousehold(households[0]!);
+    } else {
+        await router.replace({name: 'dashboard'});
+    }
 }
 
 async function showInvites() {
@@ -131,6 +129,7 @@ async function showInvites() {
 checkAppVersion().catch((err) => console.warn(err));
 void foregroundListener.register();
 colorschemeListener.register();
+void restoreSession();
 
 </script>
 <style scoped>

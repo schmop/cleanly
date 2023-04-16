@@ -8,7 +8,8 @@
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
     "build:android": "capacitor update android && vue-cli-service build --mode=development && rmdir /s /Q \"android/app/src/main/assets/public\" && Xcopy /E /I \"dist\" \"android/app/src/main/assets/public\"",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@capacitor/android": "^4.6.1",
@@ -19,7 +20,7 @@
     "@capacitor/device": "^4.1.0",
     "@capacitor/haptics": "^4.1.0",
     "@capacitor/keyboard": "^4.1.0",
-    "@capacitor/push-notifications": "file:../3rdparty/capacitor-plugins/push-notifications",
+    "@capacitor/push-notifications": "^4.1.0",
     "@capacitor/status-bar": "^4.1.1",
     "@capawesome/capacitor-app-update": "^2.0.1",
     "@ionic/core": "^6.4.0",
@@ -30,6 +31,7 @@
     "core-js": "^3.6.5",
     "module-alias": "^2.2.2",
     "moment": "^2.29.3",
+    "patch-package": "^6.5.1",
     "uuid": "^8.3.2",
     "vue": "^3.2.21",
     "vue-chartjs": "^5.0.1",
@@ -60,7 +62,7 @@
     "jest-extended": "^3.2.0",
     "jetifier": "^2.0.0",
     "raw-loader": "^4.0.2",
-    "ts-auto-guard": "^4.1.2",
+    "ts-auto-guard": "github:schmop/ts-auto-guard#229-replace-path-on-windows",
     "ts-jest": "^27.1.5",
     "typescript": "^4.9.4"
   },

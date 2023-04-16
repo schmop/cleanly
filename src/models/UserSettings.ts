@@ -1,5 +1,5 @@
 /** @see {isUserSettings} ts-auto-guard:type-guard */
-export interface UserSettings {
+export type UserSettings = {
     notifyTaskDone: boolean,
     notifyTaskDue: boolean,
     notifyInvites: boolean,

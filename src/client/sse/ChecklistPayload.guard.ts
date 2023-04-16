@@ -29,7 +29,7 @@ export function isChecklistPayload(obj: unknown, argumentName: string = "checkli
         evaluate(Array.isArray(typedObj["events"]) &&
             typedObj["events"].every((e: any) =>
                 isTodoEvent(e) as boolean
-            ), `${argumentName}["events"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/TodoEvent\").TodoEvent[]", typedObj["events"]) &&
+            ), `${argumentName}["events"]`, "import(\"./src/models/TodoEvent\").TodoEvent[]", typedObj["events"]) &&
         evaluate(typeof typedObj["household_id"] === "number", `${argumentName}["household_id"]`, "number", typedObj["household_id"])
     )
 }

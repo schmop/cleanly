@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        {{ isEditing ? __t('Edit task') : _t('Add task') }}
+        {{ isEditing ? _t('Edit task') : _t('Add task') }}
       </ion-title>
     </ion-toolbar>
   </ion-header>
@@ -86,7 +86,7 @@
         @click="submit()"
       >
         <CirclePlusIcon slot="start" />
-        {{ _t('Add') }}
+        {{ isEditing ? _t('Save') : _t('Add') }}
       </ion-button>
       <ion-button
         color="light"

@@ -31,22 +31,22 @@
 <script setup lang="ts">
 import { stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 import { TaskLog } from '@/models/TaskLog';
-import { error } from "@/toast";
+import { error, showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core';
 import {
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonContent,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent,
-    IonPage,
-    IonRefresher,
-    IonRefresherContent,
-    IonSpinner,
-    onIonViewWillEnter,
-    RefresherCustomEvent
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  IonPage,
+  IonRefresher,
+  IonRefresherContent,
+  IonSpinner,
+  onIonViewWillEnter,
+  RefresherCustomEvent
 } from "@ionic/vue";
 import { computed, inject, ref } from "vue";
 import TaskLogView from '../TaskLogView.vue';
@@ -60,64 +60,61 @@ let stopScrolling = false;
 let isLoading = ref(true);
 
 const sortedTaskLogs = computed(() => {
-    const logs = taskLogs.value.concat();
-    return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
+  const logs = taskLogs.value.concat();
+  return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
 });
 
 async function reload(event: RefresherCustomEvent) {
-    await reset();
-    event.detail.complete();
+  await reset();
+  event.detail.complete();
 }
 
 async function fetchLogs() {
-    const id = state.viewedHousehold;
-    if (null === id) {
-        void error('Could not fetch logs, no household was selected!');
-        isLoading.value = false;
-        return;
-    }
-    try {
-        const response = await taskClient.fetchTaskLog(id, upToFetchId);
-        upToFetchId = response.upToId;
-        taskLogs.value.push(...response.logs);
-    } catch (err) {
-        if (err instanceof Error) {
-            void error(err.message);
-        }
-        console.error(err);
-        stopScrolling = true;
-    }
-    if (null === upToFetchId) {
-        stopScrolling = true;
-    }
+  const id = state.viewedHousehold;
+  if (null === id) {
+    void error('Could not fetch logs, no household was selected!');
     isLoading.value = false;
+    return;
+  }
+  try {
+    const response = await taskClient.fetchTaskLog(id, upToFetchId);
+    upToFetchId = response.upToId;
+    taskLogs.value.push(...response.logs);
+  } catch (err) {
+    void showThrownError(err);
+    stopScrolling = true;
+  }
+  if (null === upToFetchId) {
+    stopScrolling = true;
+  }
+  isLoading.value = false;
 }
 
 async function ionInfinite(event: IonInfiniteScrollCustomEvent<void>) {
-    if (!stopScrolling) {
-        await fetchLogs();
-    }
-    await event.target.complete();
+  if (!stopScrolling) {
+    await fetchLogs();
+  }
+  await event.target.complete();
 }
 
 async function reset() {
-    upToFetchId = null;
-    taskLogs.value = [];
-    stopScrolling = false;
-    isLoading.value = true;
-    await fetchLogs();
+  upToFetchId = null;
+  taskLogs.value = [];
+  stopScrolling = false;
+  isLoading.value = true;
+  await fetchLogs();
 }
 
 onIonViewWillEnter(async () => {
-    await reset();
+  await reset();
 });
 
 </script>
 
 <style scoped>
 .center {
-    position: fixed;
-    top: 50%;
-    left: 50%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
 }
 </style>

@@ -29,8 +29,8 @@ export function isTodoEvent(obj: unknown, argumentName: string = "todoEvent"): o
         evaluate((typedObj["type"] === "sort" ||
             typedObj["type"] === "delete" ||
             typedObj["type"] === "update" ||
-            typedObj["type"] === "create"), `${argumentName}["type"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/TodoEvent\").TodoEventType", typedObj["type"]) &&
-        evaluate((typeof typedObj["data"] === "undefined" ||
-            typeof typedObj["data"] === "string"), `${argumentName}["data"]`, "string | undefined", typedObj["data"])
+            typedObj["type"] === "create"), `${argumentName}["type"]`, "import(\"./src/models/TodoEvent\").TodoEventType", typedObj["type"]) &&
+        evaluate((typedObj["data"] === null ||
+            typeof typedObj["data"] === "string"), `${argumentName}["data"]`, "string | null", typedObj["data"])
     )
 }

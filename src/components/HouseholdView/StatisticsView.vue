@@ -60,47 +60,44 @@
 </template>
 
 <script setup lang="ts">
-import { secondsToDays } from '@/common/time';
+import { getParticipationData } from "@/components/HouseholdView/statistics/participations";
+import { getPunctualityData } from "@/components/HouseholdView/statistics/punctuality";
+import { Analysis, BarChartData, DoughnutChartData } from "@/components/HouseholdView/statistics/types";
 import { gettersSymbol, stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
-import { HouseholdStats, TaskStats } from '@/models/HouseholdStats';
-import { error } from "@/toast";
-import { __t, _t } from '@/translation';
+import { HouseholdStats } from '@/models/HouseholdStats';
+import { error, showThrownError } from "@/toast";
+import { _t } from '@/translation';
 import { TaskId } from '@/types';
 import {
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonContent,
-    IonLoading,
-    IonPage,
-    IonRefresher,
-    IonRefresherContent,
-    IonSelect,
-    IonSelectOption,
-    onIonViewWillEnter,
-    RefresherCustomEvent,
-    SelectCustomEvent
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonContent,
+  IonLoading,
+  IonPage,
+  IonRefresher,
+  IonRefresherContent,
+  IonSelect,
+  IonSelectOption,
+  onIonViewWillEnter,
+  RefresherCustomEvent,
+  SelectCustomEvent
 } from "@ionic/vue";
 import {
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    ChartData,
-    Colors,
-    Legend,
-    LinearScale,
-    Title,
-    Tooltip
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Colors,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip
 } from 'chart.js';
 import { computed, inject, ref } from "vue";
 import { Bar, Doughnut } from 'vue-chartjs';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Colors);
-
-type DoughnutChartData = ChartData<"doughnut", number[], unknown>;
-type BarChartData = ChartData<"bar", number[], unknown>;
-type Analysis = "participations"|"punctuality";
 
 const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
@@ -113,107 +110,63 @@ const options = {responsive: true};
 
 const household = computed(() => getters.household.value);
 const sortedTasks = computed(() => household.value?.tasks.concat().sort((a, b) => {
-    return a.name.localeCompare(b.name);
+  return a.name.localeCompare(b.name);
 }));
 const selectedTask = computed(() => household.value?.tasks.find((task) => task.id === selectedTaskId.value));
-const participationData = computed<DoughnutChartData>(() => {
-    const task = selectedTask.value;
-    if (analysis.value !== 'participations' || null === statistics.value || undefined === task) {
-        console.warn('Could not show pie chart!', statistics.value, selectedTaskId.value)
-        return {labels: [], datasets: []};
-    }
-    const participations = statistics.value.userParticipations[task.id];
-    const userIds = household.value?.users.map((user) => user.id) ?? [];
-    const participationCounts = userIds.map((userId) => participations?.[userId] ?? 0);
-
-    return {
-        labels: userIdsToUserNames(userIds),
-        datasets: [{
-            label: __t('Participations at {0}', task.name),
-            data: participationCounts,
-        }],
-    }
-});
-const punctualityData = computed<BarChartData>(() => {
-    const task = selectedTask.value;
-    const durations: TaskStats = statistics.value?.durations[task?.id ?? -1]
-        ?? {num: 0, average: null, min: null, max: null};
-    if ('punctuality' !== analysis.value
-        || undefined === task
-        || durations.num === 0
-    ) {
-        console.warn('Could not show bar chart!', statistics.value, selectedTaskId.value)
-        return {labels: [], datasets: []};
-    }
-
-    return {
-        labels: [
-            _t("configured"),
-            _t("average"),
-            _t("minimum"),
-            _t("maximum"),
-        ],
-        datasets: [{
-            label: __t('Days to do {0}', task.name),
-            data: [
-                task.duration ?? 0,
-                secondsToDays(durations.average ?? 0),
-                secondsToDays(durations.min ?? 0),
-                secondsToDays(durations.max ?? 0),
-            ],
-        }],
-    }
-});
-
-function userIdsToUserNames(ids: number[]): string[] {
-    return ids.map((id) => {
-        const user = household.value?.users.find((user) => user.id === id);
-
-        return user?.name ?? `user-${id}`
-    });
-}
+const participationData = computed<DoughnutChartData>(() => getParticipationData(
+  selectedTask.value,
+  household.value,
+  analysis.value,
+  statistics.value,
+));
+const punctualityData = computed<BarChartData>(() => getPunctualityData(
+  selectedTask.value,
+  analysis.value,
+  statistics.value,
+));
 
 function selectTask(event: SelectCustomEvent<TaskId>) {
-    selectedTaskId.value = event.detail.value;
+  selectedTaskId.value = event.detail.value;
 }
 
 function selectAnalysis(event: SelectCustomEvent<Analysis>) {
-    analysis.value = event.detail.value;
+  analysis.value = event.detail.value;
 }
 
 async function reloadStatistics(event: RefresherCustomEvent) {
-    await fetchStatistics();
-    event.detail.complete();
+  await fetchStatistics();
+  event.detail.complete();
 }
 
 async function fetchStatistics() {
-    const id = state.viewedHousehold;
-    if (null === id) {
-        await error('Could not fetch logs, no household was selected!');
-        return;
-    }
-    try {
-        statistics.value = await taskClient.fetchStatsForHousehold(id);
-    } catch (err) {
-        if (err instanceof Error) {
-            await error(err.message);
-        }
-        console.error(err);
-        statistics.value = null;
-    }
+  const id = state.viewedHousehold;
+  if (null === id) {
+    await error('Could not fetch logs, no household was selected!');
+    return;
+  }
+  try {
+    statistics.value = await taskClient.fetchStatsForHousehold(id);
+  } catch (err) {
+    await showThrownError(err);
+    statistics.value = null;
+  }
 }
 
 function selectFirstTask() {
-    selectedTaskId.value = sortedTasks.value?.[0]?.id ?? null;
+  selectedTaskId.value = sortedTasks.value?.[0]?.id ?? null;
 }
 
 onIonViewWillEnter(async () => {
-    await fetchStatistics();
-    selectFirstTask();
+  await fetchStatistics();
+  selectFirstTask();
 });
 
 </script>
 
 <style scoped>
-
+@media (prefers-color-scheme: dark) {
+  canvas {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
 </style>
