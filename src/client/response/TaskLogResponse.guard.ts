@@ -45,7 +45,7 @@ export function isRawTaskLogResponse(obj: unknown, argumentName: string = "rawTa
         evaluate(Array.isArray(typedObj["logs"]) &&
             typedObj["logs"].every((e: any) =>
                 isRawTaskLog(e) as boolean
-            ), `${argumentName}["logs"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/client/response/TaskLogResponse\").RawTaskLog[]", typedObj["logs"]) &&
+            ), `${argumentName}["logs"]`, "import(\"./src/client/response/TaskLogResponse\").RawTaskLog[]", typedObj["logs"]) &&
         evaluate((typedObj["upToId"] === null ||
             typeof typedObj["upToId"] === "string"), `${argumentName}["upToId"]`, "string | null", typedObj["upToId"])
     )
@@ -60,7 +60,7 @@ export function isTaskLogResponse(obj: unknown, argumentName: string = "taskLogR
         evaluate(Array.isArray(typedObj["logs"]) &&
             typedObj["logs"].every((e: any) =>
                 isTaskLog(e) as boolean
-            ), `${argumentName}["logs"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/TaskLog\").TaskLog[]", typedObj["logs"]) &&
+            ), `${argumentName}["logs"]`, "import(\"./src/models/TaskLog\").TaskLog[]", typedObj["logs"]) &&
         evaluate((typedObj["upToId"] === null ||
             typeof typedObj["upToId"] === "string"), `${argumentName}["upToId"]`, "string | null", typedObj["upToId"])
     )

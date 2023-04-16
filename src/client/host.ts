@@ -1,5 +1,5 @@
 function getDevHostIp() {
-    return "http://192.168.178.88";
+    return "http://192.168.215.132";
 }
 
 export function getWebHost() {

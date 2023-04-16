@@ -23,7 +23,9 @@
               v-model="todo.content"
               @ionInput="updateTodo(index, $event)"
             />
-            <ion-reorder slot="end" />
+            <ion-reorder
+              slot="end"
+            />
           </ion-item>
         </TransitionGroup>
 
@@ -156,6 +158,7 @@ function markAsCompleted(index: number) {
         addToQueue({
             type: 'delete',
             uuid: todo.uuid,
+            data: null,
         });
     }
 }
@@ -166,7 +169,7 @@ function reorder(event: ItemReorderCustomEvent) {
     if (undefined === todo) {
         throw new Error('Could not move nonexistent todo.');
     }
-    const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? undefined;
+    const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? null;
     addToQueue({
         type: 'sort',
         uuid: todo.uuid,
@@ -182,6 +185,7 @@ function addTodo() {
     addToQueue({
         type: 'create',
         uuid: todo.uuid,
+        data: null,
     });
     setTimeout(
         () => {

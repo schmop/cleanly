@@ -26,6 +26,6 @@ export function isInviteResponse(obj: unknown, argumentName: string = "inviteRes
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(isHousehold(typedObj["household"]) as boolean, `${argumentName}["household"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Household\").Household", typedObj["household"])
+        evaluate(isHousehold(typedObj["household"]) as boolean, `${argumentName}["household"]`, "import(\"./src/models/Household\").Household", typedObj["household"])
     )
 }

@@ -33,18 +33,18 @@ export function isState(obj: unknown, argumentName: string = "stateInterface"): 
         evaluate(Array.isArray(typedObj["households"]) &&
             typedObj["households"].every((e: any) =>
                 isHousehold(e) as boolean
-            ), `${argumentName}["households"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Household\").Household[]", typedObj["households"]) &&
+            ), `${argumentName}["households"]`, "import(\"./src/models/Household\").Household[]", typedObj["households"]) &&
         evaluate((typedObj["user"] === null ||
-            isUser(typedObj["user"]) as boolean), `${argumentName}["user"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | null", typedObj["user"]) &&
+            isUser(typedObj["user"]) as boolean), `${argumentName}["user"]`, "import(\"./src/models/User\").User | null", typedObj["user"]) &&
         evaluate(Array.isArray(typedObj["invites"]) &&
             typedObj["invites"].every((e: any) =>
                 isInvite(e) as boolean
-            ), `${argumentName}["invites"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Invite\").Invite[]", typedObj["invites"]) &&
+            ), `${argumentName}["invites"]`, "import(\"./src/models/Invite\").Invite[]", typedObj["invites"]) &&
         evaluate((typedObj["pageTitle"] === null ||
             typeof typedObj["pageTitle"] === "string"), `${argumentName}["pageTitle"]`, "string | null", typedObj["pageTitle"]) &&
         evaluate((typedObj["viewedHousehold"] === null ||
             typeof typedObj["viewedHousehold"] === "number"), `${argumentName}["viewedHousehold"]`, "number | null", typedObj["viewedHousehold"]) &&
-        evaluate(isUserSettings(typedObj["userSettings"]) as boolean, `${argumentName}["userSettings"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/UserSettings\").UserSettings", typedObj["userSettings"]) &&
+        evaluate(isUserSettings(typedObj["userSettings"]) as boolean, `${argumentName}["userSettings"]`, "import(\"./src/models/UserSettings\").UserSettings", typedObj["userSettings"]) &&
         evaluate((typedObj["stars"] !== null &&
             typeof typedObj["stars"] === "object" ||
             typeof typedObj["stars"] === "function") &&
@@ -54,8 +54,8 @@ export function isState(obj: unknown, argumentName: string = "stateInterface"): 
                     typeof value === "function") &&
                     Object.entries<any>(value)
                         .every(([key, value]) => (evaluate(typeof value === "number", `${argumentName}["stars"] value["${key.toString().replace(/"/g, '\\"')}"]`, "number", value) &&
-                            evaluate(typeof key === "number", `${argumentName}["stars"] value (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/types/index\").StarsRecord", value) &&
-                    evaluate(typeof key === "number", `${argumentName}["stars"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]`, "Record<number, import(\"C:/Users/schmop/Desktop/cleanly/src/types/index\").StarsRecord>", typedObj["stars"]) &&
+                            evaluate(typeof key === "number", `${argumentName}["stars"] value (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"/home/schmop/cleanly/src/types/index\").StarsRecord", value) &&
+                    evaluate(typeof key === "number", `${argumentName}["stars"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]`, "Record<number, import(\"./src/types/index\").StarsRecord>", typedObj["stars"]) &&
         evaluate(typeof typedObj["darkmode"] === "boolean", `${argumentName}["darkmode"]`, "boolean", typedObj["darkmode"])
     )
 }

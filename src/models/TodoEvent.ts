@@ -2,7 +2,7 @@
 export interface TodoEvent {
     uuid: string,
     type: TodoEventType,
-    data?: string,
+    data: string|null,
 }
 
 export type TodoEventType = 'sort' | 'delete' | 'update' | 'create';

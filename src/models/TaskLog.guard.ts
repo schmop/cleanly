@@ -29,8 +29,8 @@ export function isTaskLog(obj: unknown, argumentName: string = "taskLog"): obj i
             typeof typedObj === "function") &&
         evaluate(typeof typedObj["uuid"] === "string", `${argumentName}["uuid"]`, "string", typedObj["uuid"]) &&
         evaluate((typeof typedObj["user"] === "undefined" ||
-            isUser(typedObj["user"]) as boolean), `${argumentName}["user"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User | undefined", typedObj["user"]) &&
-        evaluate(isTask(typedObj["task"]) as boolean, `${argumentName}["task"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Task\").Task", typedObj["task"]) &&
+            isUser(typedObj["user"]) as boolean), `${argumentName}["user"]`, "import(\"./src/models/User\").User | undefined", typedObj["user"]) &&
+        evaluate(isTask(typedObj["task"]) as boolean, `${argumentName}["task"]`, "import(\"./src/models/Task\").Task", typedObj["task"]) &&
         evaluate(typeof typedObj["timestamp"] === "number", `${argumentName}["timestamp"]`, "number", typedObj["timestamp"]) &&
         evaluate(typeof typedObj["stars"] === "number", `${argumentName}["stars"]`, "number", typedObj["stars"])
     )

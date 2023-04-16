@@ -34,21 +34,21 @@ export function isHousehold(obj: unknown, argumentName: string = "household"): o
         evaluate(Array.isArray(typedObj["users"]) &&
             typedObj["users"].every((e: any) =>
                 isUser(e) as boolean
-            ), `${argumentName}["users"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User[]", typedObj["users"]) &&
+            ), `${argumentName}["users"]`, "import(\"./src/models/User\").User[]", typedObj["users"]) &&
         evaluate(Array.isArray(typedObj["tasks"]) &&
             typedObj["tasks"].every((e: any) =>
                 isTask(e) as boolean
-            ), `${argumentName}["tasks"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Task\").Task[]", typedObj["tasks"]) &&
+            ), `${argumentName}["tasks"]`, "import(\"./src/models/Task\").Task[]", typedObj["tasks"]) &&
         evaluate((typedObj["webhookUrl"] === null ||
             typeof typedObj["webhookUrl"] === "string"), `${argumentName}["webhookUrl"]`, "string | null", typedObj["webhookUrl"]) &&
         evaluate(Array.isArray(typedObj["privileges"]) &&
             typedObj["privileges"].every((e: any) =>
                 isHouseholdPrivilege(e) as boolean
-            ), `${argumentName}["privileges"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/HouseholdPrivilege\").HouseholdPrivilege[]", typedObj["privileges"]) &&
+            ), `${argumentName}["privileges"]`, "import(\"./src/models/HouseholdPrivilege\").HouseholdPrivilege[]", typedObj["privileges"]) &&
         evaluate(Array.isArray(typedObj["checklist"]) &&
             typedObj["checklist"].every((e: any) =>
                 isTodo(e) as boolean
-            ), `${argumentName}["checklist"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Todo\").Todo[]", typedObj["checklist"]) &&
+            ), `${argumentName}["checklist"]`, "import(\"./src/models/Todo\").Todo[]", typedObj["checklist"]) &&
         evaluate(typeof typedObj["reassignmentStrategy"] === "string", `${argumentName}["reassignmentStrategy"]`, "string", typedObj["reassignmentStrategy"])
     )
 }

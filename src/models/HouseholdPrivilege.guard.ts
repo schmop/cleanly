@@ -29,6 +29,6 @@ export function isHouseholdPrivilege(obj: unknown, argumentName: string = "house
         evaluate(typeof typedObj["household"] === "number", `${argumentName}["household"]`, "number", typedObj["household"]) &&
         evaluate((typedObj["privilege"] === PrivilegeLevel.USER ||
             typedObj["privilege"] === PrivilegeLevel.MODERATOR ||
-            typedObj["privilege"] === PrivilegeLevel.ADMIN), `${argumentName}["privilege"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/HouseholdPrivilege\").PrivilegeLevel", typedObj["privilege"])
+            typedObj["privilege"] === PrivilegeLevel.ADMIN), `${argumentName}["privilege"]`, "import(\"./src/models/HouseholdPrivilege\").PrivilegeLevel", typedObj["privilege"])
     )
 }

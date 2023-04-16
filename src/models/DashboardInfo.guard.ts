@@ -29,15 +29,15 @@ export function isDashboardInfo(obj: unknown, argumentName: string = "dashboardI
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(isUser(typedObj["user"]) as boolean, `${argumentName}["user"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/User\").User", typedObj["user"]) &&
+        evaluate(isUser(typedObj["user"]) as boolean, `${argumentName}["user"]`, "import(\"./src/models/User\").User", typedObj["user"]) &&
         evaluate(Array.isArray(typedObj["households"]) &&
             typedObj["households"].every((e: any) =>
                 isHousehold(e) as boolean
-            ), `${argumentName}["households"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Household\").Household[]", typedObj["households"]) &&
+            ), `${argumentName}["households"]`, "import(\"./src/models/Household\").Household[]", typedObj["households"]) &&
         evaluate(Array.isArray(typedObj["invites"]) &&
             typedObj["invites"].every((e: any) =>
                 isInvite(e) as boolean
-            ), `${argumentName}["invites"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Invite\").Invite[]", typedObj["invites"]) &&
-        evaluate(isUserSettings(typedObj["settings"]) as boolean, `${argumentName}["settings"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/UserSettings\").UserSettings", typedObj["settings"])
+            ), `${argumentName}["invites"]`, "import(\"./src/models/Invite\").Invite[]", typedObj["invites"]) &&
+        evaluate(isUserSettings(typedObj["settings"]) as boolean, `${argumentName}["settings"]`, "import(\"./src/models/UserSettings\").UserSettings", typedObj["settings"])
     )
 }

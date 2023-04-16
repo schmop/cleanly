@@ -26,6 +26,6 @@ export function isInviteEvent(obj: unknown, argumentName: string = "inviteEvent"
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(isInvite(typedObj["invite"]) as boolean, `${argumentName}["invite"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/Invite\").Invite", typedObj["invite"])
+        evaluate(isInvite(typedObj["invite"]) as boolean, `${argumentName}["invite"]`, "import(\"./src/models/Invite\").Invite", typedObj["invite"])
     )
 }
