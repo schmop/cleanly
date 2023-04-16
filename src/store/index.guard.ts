@@ -54,7 +54,7 @@ export function isState(obj: unknown, argumentName: string = "stateInterface"): 
                     typeof value === "function") &&
                     Object.entries<any>(value)
                         .every(([key, value]) => (evaluate(typeof value === "number", `${argumentName}["stars"] value["${key.toString().replace(/"/g, '\\"')}"]`, "number", value) &&
-                            evaluate(typeof key === "number", `${argumentName}["stars"] value (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"/home/schmop/cleanly/src/types/index\").StarsRecord", value) &&
+                            evaluate(typeof key === "number", `${argumentName}["stars"] value (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/types/index\").StarsRecord", value) &&
                     evaluate(typeof key === "number", `${argumentName}["stars"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "number", key))), `${argumentName}["stars"]`, "Record<number, import(\"./src/types/index\").StarsRecord>", typedObj["stars"]) &&
         evaluate(typeof typedObj["darkmode"] === "boolean", `${argumentName}["darkmode"]`, "boolean", typedObj["darkmode"])
     )

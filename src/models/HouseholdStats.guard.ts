@@ -29,8 +29,8 @@ export function isHouseholdStats(obj: unknown, argumentName: string = "household
             typeof typedObj["durations"] === "object" ||
             typeof typedObj["durations"] === "function") &&
             Object.entries<any>(typedObj["durations"])
-                .every(([key, value]) => (evaluate(isTaskStats(value) as boolean, `${argumentName}["durations"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"/home/schmop/cleanly/src/models/HouseholdStats\").TaskStats", value) &&
-                    evaluate(typeof key === "string", `${argumentName}["durations"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "string", key))), `${argumentName}["durations"]`, "import(\"./src/types/index\").JsonRecord<number, import(\"/home/schmop/cleanly/src/models/HouseholdStats\").TaskStats>", typedObj["durations"]) &&
+                .every(([key, value]) => (evaluate(isTaskStats(value) as boolean, `${argumentName}["durations"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/HouseholdStats\").TaskStats", value) &&
+                    evaluate(typeof key === "string", `${argumentName}["durations"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "string", key))), `${argumentName}["durations"]`, "import(\"./src/types/index\").JsonRecord<number, import(\"C:/Users/schmop/Desktop/cleanly/src/models/HouseholdStats\").TaskStats>", typedObj["durations"]) &&
         evaluate((typedObj["userParticipations"] !== null &&
             typeof typedObj["userParticipations"] === "object" ||
             typeof typedObj["userParticipations"] === "function") &&
@@ -40,8 +40,8 @@ export function isHouseholdStats(obj: unknown, argumentName: string = "household
                     typeof value === "function") &&
                     Object.entries<any>(value)
                         .every(([key, value]) => (evaluate(typeof value === "number", `${argumentName}["userParticipations"] value["${key.toString().replace(/"/g, '\\"')}"]`, "number", value) &&
-                            evaluate(typeof key === "string", `${argumentName}["userParticipations"] value (key: "${key.toString().replace(/"/g, '\\"')}")`, "string", key))), `${argumentName}["userParticipations"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"/home/schmop/cleanly/src/models/HouseholdStats\").UserParticipations", value) &&
-                    evaluate(typeof key === "string", `${argumentName}["userParticipations"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "string", key))), `${argumentName}["userParticipations"]`, "import(\"./src/types/index\").JsonRecord<number, import(\"/home/schmop/cleanly/src/models/HouseholdStats\").UserParticipations>", typedObj["userParticipations"])
+                            evaluate(typeof key === "string", `${argumentName}["userParticipations"] value (key: "${key.toString().replace(/"/g, '\\"')}")`, "string", key))), `${argumentName}["userParticipations"]["${key.toString().replace(/"/g, '\\"')}"]`, "import(\"C:/Users/schmop/Desktop/cleanly/src/models/HouseholdStats\").UserParticipations", value) &&
+                    evaluate(typeof key === "string", `${argumentName}["userParticipations"] (key: "${key.toString().replace(/"/g, '\\"')}")`, "string", key))), `${argumentName}["userParticipations"]`, "import(\"./src/types/index\").JsonRecord<number, import(\"C:/Users/schmop/Desktop/cleanly/src/models/HouseholdStats\").UserParticipations>", typedObj["userParticipations"])
     )
 }
 
