@@ -6,10 +6,10 @@ export class UserClient {
     }
 
     async saveUserSettings(settings: UserSettings) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             'api/user/settings',
             settings,
-            {method: 'POST'},
         );
 
         if (response.status !== 200) {

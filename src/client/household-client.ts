@@ -18,10 +18,11 @@ export class HouseholdClient {
     async createHousehold(newHouseholdName: string) {
         const formData = new FormData();
         formData.append('name', newHouseholdName);
-        const response = await this.client.request('api/household/create', {
-            body: formData,
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            'api/household/create',
+            formData,
+        );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, 'creating household');
@@ -29,7 +30,10 @@ export class HouseholdClient {
     }
 
     async dashboardInfo(): Promise<void> {
-        const response = await this.client.request('api/dashboard');
+        const response = await this.client.requestImmediately(
+            'GET',
+            'api/dashboard',
+        );
         if (response.status !== 200) {
             void error("Could not authenticate!");
             throw new Error(`Could not authenticate, code: ${response.status}`);
@@ -45,9 +49,10 @@ export class HouseholdClient {
     }
 
     async acceptInvite(invite: Invite) {
-        const response = await this.client.request(`api/household/accept-invite/${invite.householdId}`, {
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/accept-invite/${invite.householdId}`,
+        );
         if (response.status !== 200) {
             await handleErrorResponse(response, "accepting invite");
         }
@@ -59,18 +64,20 @@ export class HouseholdClient {
     }
 
     async declineInvite(invite: Invite) {
-        const response = await this.client.request(`api/household/decline-invite/${invite.householdId}`, {
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/decline-invite/${invite.householdId}`,
+        );
         if (response.status !== 200) {
             await handleErrorResponse(response, "declining invite");
         }
     }
 
     async removeHousehold(householdId: number) {
-        const response = await this.client.request(`api/household/${householdId}`, {
-            method: 'DELETE',
-        });
+        const response = await this.client.requestEventually(
+            'DELETE',
+            `api/household/${householdId}`,
+        );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, "removing household");
@@ -80,9 +87,10 @@ export class HouseholdClient {
     }
 
     async kickFromHousehold(memberId: number, householdId: number) {
-        const response = await this.client.request(`api/household/kick/${householdId}/${memberId}`, {
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/kick/${householdId}/${memberId}`,
+        );
 
         if (response.status !== 200) {
             console.error('Could not kick member from household', response.statusText);
@@ -94,9 +102,10 @@ export class HouseholdClient {
     }
 
     async changePrivilege(memberId: number, householdId: number, level: PrivilegeLevel) {
-        const response = await this.client.request(`api/household/privilege/${householdId}/${memberId}/${level}`, {
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/privilege/${householdId}/${memberId}/${level}`,
+        );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, "changing privileges");
@@ -104,9 +113,10 @@ export class HouseholdClient {
     }
 
     async leaveHousehold(householdId: number) {
-        const response = await this.client.request(`api/household/leave/${householdId}`, {
-            method: 'POST',
-        });
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/leave/${householdId}`,
+        );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, "leaving household");
@@ -114,7 +124,10 @@ export class HouseholdClient {
     }
 
     async retrieveStars(householdId: number) {
-        const response = await this.client.request(`api/household/${householdId}/stars`);
+        const response = await this.client.requestImmediately(
+            'GET',
+            `api/household/${householdId}/stars`,
+        );
         if (response.status !== 200) {
             await handleErrorResponse(response, "fetching stars");
         }
@@ -127,10 +140,10 @@ export class HouseholdClient {
     }
 
     async invite(householdId: number, ...ids: number[]) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             `api/household/invite/${householdId}`,
             {ids},
-            {method: 'POST'}
         );
         if (response.status !== 200) {
             await handleErrorResponse(response, "inviting members");
@@ -138,10 +151,10 @@ export class HouseholdClient {
     }
 
     async updateChecklist(householdId: number, events: TodoEvent[]) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             `api/household/update-checklist/${householdId}`,
             {events},
-            {method: 'POST'},
         );
 
         if (response.status !== 200) {
@@ -150,10 +163,10 @@ export class HouseholdClient {
     }
 
     async setReassignmentStrategy(householdId: number, reassignmentStrategy: string) {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             `api/household/reassignment-strategy/${householdId}`,
             {reassignmentStrategy},
-            {method: 'POST'},
         );
 
         if (response.status !== 200) {
@@ -162,10 +175,10 @@ export class HouseholdClient {
     }
 
     async setWebhook(householdId: number, url: string): Promise<WebhookResponse> {
-        const response = await this.client.sendJson(
+        const response = await this.client.sendJsonEventually(
+            'POST',
             `api/household/webhook/${householdId}`,
             {webhook_url: url},
-            {method: 'POST'},
         );
 
         if (response.status !== 200) {

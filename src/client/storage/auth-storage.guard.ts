@@ -1,8 +1,8 @@
 /*
- * Generated type guards for "AuthStorage.ts".
+ * Generated type guards for "auth-storage.ts".
  * WARNING: Do not manually change this file.
  */
-import { AuthStorage } from "./AuthStorage";
+import { AuthStorage } from "./auth-storage";
 
 function evaluate(
     isCorrect: boolean,

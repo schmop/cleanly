@@ -8,7 +8,7 @@ import { warning } from "@/toast";
 export class SseClient {
     private source: EventSource|null;
     private retries = 0;
-    private tokenGetter: (() => string|null)|null = null;
+    private tokenGetter: (() => string|undefined)|null = null;
     private listenerBag: ListenerBag;
 
     get HOST() {
@@ -27,7 +27,7 @@ export class SseClient {
         this.listenerBag = new ListenerBag();
     }
 
-    setTokenCallback(tokenCallback: () => string|null) {
+    setTokenCallback(tokenCallback: () => string|undefined) {
         this.tokenGetter = tokenCallback;
         this.restart();
     }

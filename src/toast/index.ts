@@ -63,6 +63,7 @@ export async function error(message: string, duration = 5000): Promise<void> {
 }
 
 export async function showThrownError(exception: unknown, context?: string): Promise<void> {
+    console.info(exception);
     let message = undefined === context ? '' : `Error occurred while ${context}: `;
 
     if (exception instanceof Error) {
