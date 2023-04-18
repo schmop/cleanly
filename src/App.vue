@@ -44,29 +44,29 @@
 <script setup lang="ts">
 import MenuView from '@/components/MenuView.vue';
 import {
-    authClientSymbol,
-    colorschemeListenerSymbol,
-    foregroundListenerSymbol,
-    householdClientSymbol,
-    stateSymbol,
-    storeSymbol
+  authClientSymbol,
+  colorschemeListenerSymbol,
+  foregroundListenerSymbol,
+  householdClientSymbol,
+  stateSymbol,
+  storeSymbol
 } from '@/dependency-injection/injection-keys';
 import { Household } from '@/models/Household';
 import { _t } from '@/translation';
 import { checkAppVersion } from '@/update/update';
 import LoadingScreen from '@/views/LoadingScreen.vue';
 import {
-    IonApp,
-    IonBadge,
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonHeader,
-    IonMenuButton,
-    IonPage,
-    IonRouterOutlet,
-    IonTitle,
-    IonToolbar
+  IonApp,
+  IonBadge,
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonMenuButton,
+  IonPage,
+  IonRouterOutlet,
+  IonTitle,
+  IonToolbar
 } from '@ionic/vue';
 import { computed, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -87,43 +87,42 @@ const invites = computed(() => state.invites);
 const pageTitle = computed(() => state.pageTitle);
 
 watch(
-    () => state.viewedHousehold,
-    () => {
-        const household = state.households.find((household: Household) => household.id === state.viewedHousehold);
-        store.pageTitle(household?.name ?? null);
-    },
-    {immediate: true}
+  () => state.viewedHousehold,
+  () => {
+    const household = state.households.find((household: Household) => household.id === state.viewedHousehold);
+    store.pageTitle(household?.name ?? null);
+  },
+  {immediate: true}
 );
 
 async function openHousehold(household: Household) {
-    store.viewHousehold(household.id);
-    await router.push({name: 'household-view'});
+  store.viewHousehold(household.id);
+  await router.push({name: 'household-view'});
 }
 
 async function restoreSession() {
-    authClient.restoreState();
-    if (!authClient.isAuthenticated()) {
-        await router.replace({name: 'login'});
-        return;
-    }
-    const dashboardInfoPromise = householdClient.dashboardInfo();
-    if (!loggedIn.value) {
-        try {
-            await dashboardInfoPromise;
-        } catch (error) {
-            await router.replace({name: 'login'});
-        }
-    }
-    const households = store.state.households;
-    if (households.length === 1) {
-        await openHousehold(households[0]!);
-    } else {
-        await router.replace({name: 'dashboard'});
-    }
+  authClient.restoreState();
+  if (!authClient.isAuthenticated()) {
+    await router.replace({name: 'login'});
+    return;
+  }
+  const dashboardInfoPromise = householdClient.dashboardInfo();
+  dashboardInfoPromise.catch(async () => {
+    await router.replace({name: 'login'});
+  });
+  if (!loggedIn.value) {
+    await dashboardInfoPromise;
+  }
+  const households = store.state.households;
+  if (households.length === 1) {
+    await openHousehold(households[0]!);
+  } else {
+    await router.replace({name: 'dashboard'});
+  }
 }
 
 async function showInvites() {
-    await router.push({name: 'invite-view'});
+  await router.push({name: 'invite-view'});
 }
 
 checkAppVersion().catch((err) => console.warn(err));
@@ -134,11 +133,11 @@ void restoreSession();
 </script>
 <style scoped>
 .button-badge {
-    position: absolute;
-    right: -8px;
-    top: 0;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+  position: absolute;
+  right: -8px;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
 }
 </style>

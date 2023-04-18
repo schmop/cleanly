@@ -38,6 +38,11 @@ export class SseClient {
         this.register(true);
     }
 
+    close() {
+        this.source?.close();
+        this.listenerBag.clear();
+    }
+
     register(force: boolean = false) {
         const token = this.tokenGetter?.() ?? null;
         if (null !== this.source && !force || null === token) {

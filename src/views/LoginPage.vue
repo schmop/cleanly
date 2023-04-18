@@ -107,15 +107,15 @@ import router from "@/router";
 import toast, { showThrownError } from "@/toast";
 import { _t } from "@/translation";
 import {
-    IonButton,
-    IonContent,
-    IonFooter,
-    IonInput,
-    IonItem,
-    IonItemGroup,
-    IonLabel,
-    IonPage,
-    IonToggle,
+  IonButton,
+  IonContent,
+  IonFooter,
+  IonInput,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
+  IonPage,
+  IonToggle,
 } from "@ionic/vue";
 import { computed, inject, ref } from "vue";
 import { ExternalLinkIcon, LoginIcon, UserPlusIcon } from 'vue-tabler-icons';
@@ -131,60 +131,60 @@ const retype = ref("");
 
 const formValid = computed(() => !isRegistering.value || password.value === retype.value);
 const actionText = computed(() => {
-    if (!formValid.value) {
-        return _t("Your passwords need to match!");
-    }
+  if (!formValid.value) {
+    return _t("Your passwords need to match!");
+  }
 
-    return isRegistering.value ? _t("Register") : _t("Login");
+  return isRegistering.value ? _t("Register") : _t("Login");
 });
 
 function onToggle() {
-    isRegistering.value = !isRegistering.value;
+  isRegistering.value = !isRegistering.value;
 }
 
 async function sendForm() {
-    if (!formValid.value) {
-        return;
-    }
-    if (isRegistering.value) {
-        await register();
-    } else {
-        await login();
-    }
+  if (!formValid.value) {
+    return;
+  }
+  if (isRegistering.value) {
+    await register();
+  } else {
+    await login();
+  }
 }
 
 async function register() {
-    try {
-        await authClient.signUp(name.value, mail.value, password.value);
-        name.value = "";
-        password.value = "";
-        retype.value = "";
-        mail.value = "";
-        isRegistering.value = false;
-        await toast.info(_t("Verification mail was sent, please verify your mail address before you can log in!"));
-    } catch (error) {
-        await showThrownError(error);
-    }
+  try {
+    await authClient.signUp(name.value, mail.value, password.value);
+    name.value = "";
+    password.value = "";
+    retype.value = "";
+    mail.value = "";
+    isRegistering.value = false;
+    await toast.info(_t("Verification mail was sent, please verify your mail address before you can log in!"));
+  } catch (error) {
+    await showThrownError(error);
+  }
 }
 
 async function login() {
-    try {
-        await authClient.signIn(mail.value, password.value);
-        await householdClient.dashboardInfo();
-        await toast.info(_t("Login successful!"));
-        await router.replace({name: 'dashboard'});
-    } catch (error) {
-        await showThrownError(error);
-    }
+  try {
+    await authClient.signIn(mail.value, password.value);
+    await householdClient.dashboardInfo();
+    await toast.info(_t("Login successful!"));
+    await router.replace({name: 'dashboard'});
+  } catch (error) {
+    await showThrownError(error);
+  }
 }
 </script>
 
 <style scoped>
 .mr-1 {
-    margin-right: 4px;
+  margin-right: 4px;
 }
 
 .align-center {
-    align-self: center;
+  align-self: center;
 }
 </style>

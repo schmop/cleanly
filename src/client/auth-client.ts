@@ -1,3 +1,4 @@
+import { fetchImmediately, fetchJsonImmediately } from "@/client/client";
 import { getWebHost } from '@/client/host';
 import { HeadersData, HTTP_OK, HTTP_UNAUTHORIZED, HttpMethod, JsonData, RequestBody } from "@/client/request";
 import { handleErrorResponse } from "@/client/response/handle-error-response";
@@ -64,22 +65,23 @@ export class AuthClient {
         storage.refresh_token = refresh_token ?? this.authStorage?.refresh_token;
         storage.mail = mail ?? this.authStorage?.mail;
         if (!isAuthStorage(storage)) {
-            void error('Could not cache auth credentials');
+            void error('Invalid login data given!');
             return;
         }
         this.authStorage = storage;
         this.store.login();
         this.sseClient.setTokenCallback(() => this.authStorage?.token);
-        this.sseClient.register();
         saveAuthToStorage(storage);
         void this.registerPush();
     }
 
     async isSessionValid(): Promise<boolean> {
-        const response = await fetch(`${this.HOST}/api/auth_check`, {
-            method: 'GET',
-            headers: this.headersWithAuth({}),
-        });
+        const response = await fetchImmediately(
+            'GET',
+            'api/auth_check',
+            undefined,
+            this.headersWithAuth(),
+        );
 
         return HTTP_OK === response.status;
     }
@@ -90,7 +92,7 @@ export class AuthClient {
         }
         const formData = new FormData();
         formData.append('refresh_token', this.authStorage?.refresh_token);
-        const response = await this.requestImmediately(
+        const response = await fetchImmediately(
             'POST',
             'api/login_refresh',
             formData,
@@ -109,7 +111,7 @@ export class AuthClient {
     }
 
     async signUp(name: string, mail: string, password: string): Promise<void> {
-        const response = await this.sendJsonImmediately(
+        const response = await fetchJsonImmediately(
             'POST',
             'signup',
             {name, mail, password},
@@ -120,7 +122,7 @@ export class AuthClient {
     }
 
     async signIn(mail: string, password: string): Promise<void> {
-        const response = await this.sendJsonImmediately(
+        const response = await fetchJsonImmediately(
             'POST',
             'api/login_check',
             {
@@ -143,6 +145,7 @@ export class AuthClient {
         clearAuthFromStorage();
         localstore.clear();
         this.store.logout();
+        this.sseClient.close();
         this.authStorage = null;
     }
 
@@ -187,6 +190,14 @@ export class AuthClient {
         return data;
     }
 
+    private headersWithAuth(headers: HeadersData = {}): HeadersData {
+        if (null != this.authStorage?.token) {
+            headers['Authorization'] = `Bearer ${this.authStorage?.token}`;
+        }
+
+        return headers;
+    }
+
     async sendJsonImmediately(
         method: HttpMethod,
         url: string,
@@ -221,36 +232,30 @@ export class AuthClient {
         );
     }
 
-    private headersWithAuth(headers: HeadersData = {}): HeadersData {
-        if (null != this.authStorage?.token) {
-            headers['Authorization'] = `Bearer ${this.authStorage?.token}`;
-        }
-
-        return headers;
-    }
-
     async requestImmediately(
         method: HttpMethod,
         url: string,
         body?: RequestBody,
         headers?: HeadersData,
     ): Promise<Response> {
-        let response = await fetch(`${this.HOST}/${url}`, {
+        let response = await fetchImmediately(
             method,
-            headers: this.headersWithAuth(headers),
+            url,
             body,
-        });
+            this.headersWithAuth(headers),
+        );
         if (response.status === HTTP_UNAUTHORIZED) {
             if (!await this.isSessionValid() && !await this.refreshLogin()) {
                 await this.handleSessionExpired();
-                throw new AuthClientError();
+                throw new AuthClientError('Session invalid, could be expired!');
             }
             // If authentication refresh was successful, retry the request
-            response = await fetch(`${this.HOST}/${url}`, {
+            response = await fetchImmediately(
                 method,
-                headers: this.headersWithAuth(headers),
+                url,
                 body,
-            });
+                this.headersWithAuth(headers),
+            );
         }
 
         return response;
