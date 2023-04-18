@@ -24,6 +24,9 @@ import router from '@/router';
 import { localstore, Store } from '@/store';
 import { error } from "@/toast";
 
+class AuthClientError extends Error {
+}
+
 export enum RetryStrategy {
     RETRY,
     RETRY_AND_PERSIST,
@@ -232,11 +235,25 @@ export class AuthClient {
         body?: RequestBody,
         headers?: HeadersData,
     ): Promise<Response> {
-        return await fetch(`${this.HOST}/${url}`, {
+        let response = await fetch(`${this.HOST}/${url}`, {
             method,
             headers: this.headersWithAuth(headers),
             body,
         });
+        if (response.status === HTTP_UNAUTHORIZED) {
+            if (!await this.isSessionValid() && !await this.refreshLogin()) {
+                await this.handleSessionExpired();
+                throw new AuthClientError();
+            }
+            // If authentication refresh was successful, retry the request
+            response = await fetch(`${this.HOST}/${url}`, {
+                method,
+                headers: this.headersWithAuth(headers),
+                body,
+            });
+        }
+
+        return response;
     }
 
     async requestEventually(
@@ -282,23 +299,14 @@ export class AuthClient {
                 request.headers,
             );
         } catch (err) {
+            if (err instanceof AuthClientError) {
+                return;
+            }
             this.requestQueue.unshift(request);
 
             return this.retryLater();
         }
-        if (response.status === HTTP_UNAUTHORIZED) {
-            if (!await this.isSessionValid() && !await this.refreshLogin()) {
-                await this.handleSessionExpired();
-                return;
-            }
-            // If authentication refresh was successful, retry the request
-            response = await this.requestImmediately(
-                request.method,
-                request.url,
-                request.body,
-                request.headers,
-            );
-        }
+
         request.callback?.(response);
         if (request.shouldPersist) {
             saveRequestQueueToStorage(this.requestQueue);
