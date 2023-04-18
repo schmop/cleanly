@@ -76,10 +76,10 @@ export class AuthClient {
     }
 
     async isSessionValid(): Promise<boolean> {
-        const response = await this.requestImmediately(
-            'GET',
-            'api/auth_check',
-        );
+        const response = await fetch(`${this.HOST}/api/auth_check`, {
+            method: 'GET',
+            headers: this.headersWithAuth({}),
+        });
 
         return HTTP_OK === response.status;
     }
