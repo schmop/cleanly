@@ -22,10 +22,3 @@ export function _n(singular: string, plural: string, num: number) {
 export function __n(singular: string, plural: string, num: number, ...args: (string|number)[]) {
     return num === 1 ? __t(singular, ...args) : __t(plural, ...args);
 }
-
-export const translations = {
-    _t,
-    __t,
-    _n,
-    __n,
-};

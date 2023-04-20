@@ -44,10 +44,3 @@ export function __t(text: string, ...args: (string|number)[]) {
 export function __n(singular: string, plural: string, num: number, ...args: (string|number)[]) {
     return num === 1 ? __t(singular, ...args) : __t(plural, ...args);
 }
-
-export const translations = {
-    _t,
-    _n,
-    __t,
-    __n,
-};

@@ -1,8 +1,8 @@
-import {User} from "@/models/User";
+import { User } from "@/models/User";
 import { Task } from "./Task";
 
 /** @see {isTaskLog} ts-auto-guard:type-guard */
-export interface TaskLog {
+export type TaskLog = {
     uuid: string,
     user: User|undefined,
     task: Task,

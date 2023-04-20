@@ -1,7 +1,7 @@
 import { UserId } from "@/types";
 
 /** @see {isTask} ts-auto-guard:type-guard */
-export interface Task {
+export type Task = {
     name: string,
     id: number,
     icon: string,

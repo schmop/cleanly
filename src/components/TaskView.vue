@@ -33,7 +33,10 @@
           {{ assignee.name }}
         </span>
         <div class="flex-end row">
-          <ion-text color="warning">
+          <ion-text
+            v-if="task.stars > 0"
+            color="warning"
+          >
             <span class="vertical-center">{{ task.stars }}</span>
             <StarIcon class="vertical-center" />
           </ion-text>
@@ -111,16 +114,17 @@
 </template>
 
 <script setup lang="ts">
+import { confirmablePrompt } from "@/alert/prompt";
 import { getDefaultTaskHue, taskColorFromHue } from "@/common/task-colors";
 import { taskOverDue } from "@/common/task-priority";
 import { DAY_IN_HOURS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
 import { icons, isValidIcon } from "@/components/icons";
 import {
-    gettersSymbol,
-    householdClientSymbol,
-    stateSymbol,
-    storeSymbol,
-    taskClientSymbol
+  gettersSymbol,
+  householdClientSymbol,
+  stateSymbol,
+  storeSymbol,
+  taskClientSymbol
 } from '@/dependency-injection/injection-keys';
 import TaskForm from "@/modals/TaskForm.vue";
 import { Household } from "@/models/Household";
@@ -128,30 +132,30 @@ import { Task } from "@/models/Task";
 import toast, { showThrownError, success } from "@/toast";
 import { __t, _t } from "@/translation";
 import {
-    IonButton,
-    IonButtons,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonContent,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonPopover,
-    IonText,
-    modalController,
-    PickerColumn,
-    PickerColumnOption,
-    pickerController,
+  IonButton,
+  IonButtons,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonContent,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPopover,
+  IonText,
+  modalController,
+  PickerColumn,
+  PickerColumnOption,
+  pickerController,
 } from "@ionic/vue";
 import { computed, inject, ref } from 'vue';
 import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
-    task: Task,
-    showActions: boolean,
-    household: Household,
+  task: Task,
+  showActions: boolean,
+  household: Household,
 }>();
 const store = inject(storeSymbol)!;
 const state = inject(stateSymbol)!;
@@ -169,223 +173,230 @@ const overdue = computed(() => taskOverDue(props.task));
 const taskColor = computed(() => `background-color: ${taskColorFromHue(props.task.hue ?? getDefaultTaskHue(), state.darkmode).toHex()}`);
 const durationText = computed(() => roundedRecurringInterval(props.task.duration));
 const dueInText = computed(() => {
-    const {lastComplete} = props.task;
+  const {lastComplete} = props.task;
 
-    if (null == lastComplete) {
-        return _t('Never done before');
-    }
-    const lastCompleteHours = secondsSince(lastComplete) / HOUR_IN_SECONDS;
-    if (null === props.task.duration) {
-        return __t('Last done {0}', formatHours(lastCompleteHours));
-    }
-    const durationHours = props.task.duration * DAY_IN_HOURS;
-    const hoursLeft = durationHours - lastCompleteHours;
-    if (hoursLeft < 0) {
-        return __t('Overdue for {0}', formatHours(-hoursLeft));
-    }
+  if (null == lastComplete) {
+    return _t('Never done before');
+  }
+  const lastCompleteHours = secondsSince(lastComplete) / HOUR_IN_SECONDS;
+  if (null === props.task.duration) {
+    return __t('Last done {0}', formatHours(lastCompleteHours));
+  }
+  const durationHours = props.task.duration * DAY_IN_HOURS;
+  const hoursLeft = durationHours - lastCompleteHours;
+  if (hoursLeft < 0) {
+    return __t('Overdue for {0}', formatHours(-hoursLeft));
+  }
 
-    return __t('{0} left', formatHours(hoursLeft));
+  return __t('{0} left', formatHours(hoursLeft));
 });
 
 async function deleteTask() {
-    try {
-        await taskClient.deleteTask(props.task.id);
-        store.removeTask(props.task.id);
-        await toast.success(_t('Task deleted successfully'));
-    } catch (e) {
-        await toast.error(_t('Could not delete task'));
-    }
+  if (!await confirmablePrompt(
+    _t('Delete task'),
+    _t('Delete'),
+    _t('Are you sure you want to delete this task? All activity entries and corresponding stars will be lost.'
+    ))) {
+    return;
+  }
+  try {
+    await taskClient.deleteTask(props.task.id);
+    store.removeTask(props.task.id);
+    await toast.success(_t('Task deleted successfully'));
+  } catch (e) {
+    await toast.error(_t('Could not delete task'));
+  }
 }
 
 async function assignTo() {
-    const assigneeColumn: PickerColumn = {
-        name: 'assignee',
-        options: props.household.users.map(
-            (user) => ({
-                value: user.id,
-                text: user.name,
-            }),
-        ),
-    };
-    if (props.task.assignee !== null) {
-        assigneeColumn.selectedIndex = assigneeColumn.options.findIndex(
-            (option) => option.value === props.task.assignee
-        );
-    }
-    const picker = await pickerController.create({
-        columns: [assigneeColumn],
-        buttons: [
-            {
-                text: _t("Cancel"),
-                role: "cancel",
-            },
-            {
-                text: _t("Unassign"),
-                role: "unassign",
-            },
-            {
-                text: _t("Confirm"),
-                role: "confirm",
-            },
-        ],
-    });
-    await picker.present();
-    const dismiss = await picker.onDidDismiss<{assignee: PickerColumnOption}>();
-    if (undefined === dismiss.role || !['confirm', 'unassign'].includes(dismiss.role)) {
-        return;
-    }
-    let userId: unknown = dismiss.data?.assignee.value;
-    if (typeof userId !== 'number' || dismiss.role === 'unassign') {
-        userId = null;
-    }
+  const assigneeColumn: PickerColumn = {
+    name: 'assignee',
+    options: props.household.users.map(
+      (user) => ({
+        value: user.id,
+        text: user.name,
+      }),
+    ),
+  };
+  if (props.task.assignee !== null) {
+    assigneeColumn.selectedIndex = assigneeColumn.options.findIndex(
+      (option) => option.value === props.task.assignee
+    );
+  }
+  const picker = await pickerController.create({
+    columns: [assigneeColumn],
+    buttons: [
+      {
+        text: _t("Cancel"),
+        role: "cancel",
+      },
+      {
+        text: _t("Unassign"),
+        role: "unassign",
+      },
+      {
+        text: _t("Confirm"),
+        role: "confirm",
+      },
+    ],
+  });
+  await picker.present();
+  const dismiss = await picker.onDidDismiss<{assignee: PickerColumnOption}>();
+  if (undefined === dismiss.role || !['confirm', 'unassign'].includes(dismiss.role)) {
+    return;
+  }
+  let userId: unknown = dismiss.data?.assignee.value;
+  if (typeof userId !== 'number' || dismiss.role === 'unassign') {
+    userId = null;
+  }
 
-    try {
-        await taskClient.assignTo(props.task, userId);
-        store.assignTask(props.household.id, props.task.id, userId);
-        await success(_t('Task assigned successfully!'));
-    } catch (err) {
-        await showThrownError(err);
-    }
+  try {
+    await taskClient.assignTo(props.task, userId);
+    store.assignTask(props.household.id, props.task.id, userId);
+    await success(_t('Task assigned successfully!'));
+  } catch (err) {
+    await showThrownError(err);
+  }
 
 }
 
 async function editTask() {
-    const taskFormModal = await modalController.create({
-        component: TaskForm,
-        componentProps: {
-            task: props.task,
-        },
-    });
-    await taskFormModal.present();
-    await taskFormModal.onDidDismiss();
-    await householdClient.dashboardInfo();
+  const taskFormModal = await modalController.create({
+    component: TaskForm,
+    componentProps: {
+      task: props.task,
+    },
+  });
+  await taskFormModal.present();
+  await taskFormModal.onDidDismiss();
+  await householdClient.dashboardInfo();
 }
 
 async function markDone() {
-    if (props.task.id != null) {
-        try {
-            actionsVisible.value = false;
-            const response = await taskClient.markTaskComplete(props.task.id);
-            store.markTaskDone(props.household.id, props.task.id, response.timestamp);
-            store.assignTask(props.household.id, props.task.id, response.assignee?.id ?? null)
-            void toast.success(_t('Task done'));
-            const householdId = props.household.id;
-            if (null != householdId) {
-                await householdClient.retrieveStars(householdId);
-            }
-        } catch (err) {
-            await showThrownError(err);
-        }
+  if (props.task.id != null) {
+    try {
+      actionsVisible.value = false;
+      const response = await taskClient.markTaskComplete(props.task.id);
+      store.markTaskDone(props.household.id, props.task.id, response.timestamp);
+      store.assignTask(props.household.id, props.task.id, response.assignee?.id ?? null)
+      void toast.success(_t('Task done'));
+      const householdId = props.household.id;
+      if (null != householdId) {
+        await householdClient.retrieveStars(householdId);
+      }
+    } catch (err) {
+      await showThrownError(err);
     }
+  }
 }
 
 function toggleActions(event: MouseEvent) {
-    if (!props.showActions) {
-        return;
-    }
-    actionsVisible.value = !actionsVisible.value;
-    const card = event.currentTarget;
-    if ((card instanceof HTMLElement)) {
-        card.focus();
-    }
+  if (!props.showActions) {
+    return;
+  }
+  actionsVisible.value = !actionsVisible.value;
+  const card = event.currentTarget;
+  if ((card instanceof HTMLElement)) {
+    card.focus();
+  }
 }
 
 function closeActions(event: FocusEvent) {
-    const card = event.currentTarget;
-    const target = event.relatedTarget;
-    if (!(card instanceof HTMLElement)) {
-        return;
-    }
-    if (target instanceof HTMLElement && card.contains(target)) {
-        return;
-    }
+  const card = event.currentTarget;
+  const target = event.relatedTarget;
+  if (!(card instanceof HTMLElement)) {
+    return;
+  }
+  if (target instanceof HTMLElement && card.contains(target)) {
+    return;
+  }
 
-    actionsVisible.value = false;
+  actionsVisible.value = false;
 }
 
 </script>
 
 <style scoped>
 .vertical-center {
-    vertical-align: middle;
-    display: inline-block;
-    margin: 2px;
+  vertical-align: middle;
+  display: inline-block;
+  margin: 2px;
 }
 
 .focus-no-highlight:focus-visible {
-    outline: none;
+  outline: none;
 }
 
 .flex {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .w-100 {
-    width: 100%;
+  width: 100%;
 }
 
 .progress {
-    border-radius: 4px;
-    height: 40px;
-    padding: 4px;
-    text-align: center;
-    color: var(--ion-text-color, #000);
-    margin: 4px 2px 4px 2px;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
+  border-radius: 4px;
+  height: 40px;
+  padding: 4px;
+  text-align: center;
+  color: var(--ion-text-color, #000);
+  margin: 4px 2px 4px 2px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .danger {
-    border: 1px solid var(--ion-color-danger);
+  border: 1px solid var(--ion-color-danger);
 }
 
 .small {
-    font-size: medium;
+  font-size: medium;
 }
 
 .flex-start {
-    align-self: flex-start;
+  align-self: flex-start;
 }
 
 .flex-end {
-    align-self: flex-end;
+  align-self: flex-end;
 }
 
 .row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .center {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-left: 2px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 2px;
 }
 
 .pb-0 {
-    padding-bottom: 0;
+  padding-bottom: 0;
 }
 
 .actions-move,
-    /* apply transition to moving elements */
+  /* apply transition to moving elements */
 .actions-enter-active,
 .actions-leave-active {
-    transition: all 0.25s ease;
+  transition: all 0.25s ease;
 }
 
 .actions-enter-from,
 .actions-leave-to {
-    opacity: 0;
-    height: 0;
+  opacity: 0;
+  height: 0;
 }
 
 .actions-enter-to,
 .actions-leave-from {
-    height: 44px;
+  height: 44px;
 }
 </style>

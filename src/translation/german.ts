@@ -237,5 +237,7 @@ export const german = {
     'years': 'Jahre',
     '{0} ago': 'vor {0}',
     '{0} left': 'Noch {0}',
+    'Are you sure you want to delete this task? All activity entries and corresponding stars will be lost.': 'Bist du dir sicher, dass du diese Aufgabe löschen möchtest? Alle Aktivitätseinträge und Sterne werden gelöscht.',
+    'Delete': 'Löschen',
     '': '',
 };

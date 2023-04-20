@@ -1,5 +1,4 @@
 import { fetchImmediately, fetchJsonImmediately } from "@/client/client";
-import { getWebHost } from '@/client/host';
 import { HeadersData, HTTP_OK, HTTP_UNAUTHORIZED, HttpMethod, JsonData, RequestBody } from "@/client/request";
 import { handleErrorResponse } from "@/client/response/handle-error-response";
 import { isLoginRefreshResponse } from "@/client/response/LoginRefreshResponse.guard";
@@ -39,10 +38,6 @@ export class AuthClient {
     private iteratingQueuePromise: Promise<void>|null = null;
 
     constructor(private store: Store, private push: PushService, private sseClient: SseClient) {
-    }
-
-    get HOST() {
-        return getWebHost();
     }
 
     restoreState() {

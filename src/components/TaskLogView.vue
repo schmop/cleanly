@@ -11,12 +11,14 @@
           <i>{{ task.name }}</i>
         </ion-text>
         {{ relativeInterval }}
-        {{ _t('for') }}
-        <ion-text color="warning">
-          <i>{{ log.stars }}
-            <StarIcon size="18" />
-          </i>
-        </ion-text>
+        <template v-if="log.stars > 0">
+          {{ _t('for') }}
+          <ion-text color="warning">
+            <i>{{ log.stars }}
+              <StarIcon size="18" />
+            </i>
+          </ion-text>
+        </template>
       </ion-card-title>
     </ion-card-header>
   </ion-card>
@@ -32,24 +34,24 @@ import { computed } from "vue";
 import { StarIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
-    log: TaskLog,
+  log: TaskLog,
 }>();
 const task = computed(() => {
-    if (undefined === props.log) {
-        throw Error('TaskLog is mandatory in a TaskLogView');
-    }
-    return props.log.task;
+  if (undefined === props.log) {
+    throw Error('TaskLog is mandatory in a TaskLogView');
+  }
+  return props.log.task;
 });
 const icon = computed(() => isValidIcon(task.value.icon) ? task.value.icon : 'check');
 const userName = computed(() => {
-    return props.log.user?.name ?? _t('<former member>');
+  return props.log.user?.name ?? _t('<former member>');
 });
 const relativeInterval = computed(() => {
-    const hoursSinceDone = secondsSince(props.log.timestamp) / HOUR_IN_SECONDS;
-    if (hoursSinceDone < 1) {
-        return _t('just now');
-    }
-    return __t('{0} ago', formatHours(hoursSinceDone));
+  const hoursSinceDone = secondsSince(props.log.timestamp) / HOUR_IN_SECONDS;
+  if (hoursSinceDone < 1) {
+    return _t('just now');
+  }
+  return __t('{0} ago', formatHours(hoursSinceDone));
 });
 </script>
 
