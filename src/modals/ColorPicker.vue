@@ -69,29 +69,29 @@ import { CircleXIcon, PaletteIcon } from 'vue-tabler-icons';
 
 const emit = defineEmits(['select']);
 const props = defineProps<{
-    colorReceiver: EventTarget,
-    startHue: number|null,
+  colorReceiver: EventTarget,
+  startHue: number|null,
 }>();
 
 const state = inject(stateSymbol)!;
 
-let hue = ref(props.startHue ?? getDefaultTaskHue());
+const hue = ref(props.startHue ?? getDefaultTaskHue());
 const darkColor = computed(() => taskColorFromHue(hue.value, true));
 const lightColor = computed(() => taskColorFromHue(hue.value, false));
 const color = computed(() => state.darkmode ? darkColor.value : lightColor.value);
 
 async function dismiss() {
-    await modalController.dismiss();
+  await modalController.dismiss();
 }
 
 function onColorChange(newHue: number) {
-    hue.value = newHue;
+  hue.value = newHue;
 }
 
 async function select() {
-    props.colorReceiver.dispatchEvent(new CustomEvent('color', {detail: hue.value}));
-    emit('select', hue.value);
-    await dismiss();
+  props.colorReceiver.dispatchEvent(new CustomEvent('color', {detail: hue.value}));
+  emit('select', hue.value);
+  await dismiss();
 }
 </script>
 
@@ -99,48 +99,48 @@ async function select() {
 @import '@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css';
 
 .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
 }
 
 .color-picker {
-    aspect-ratio: 1;
-    margin: 16px 0;
+  aspect-ratio: 1;
+  margin: 16px 0;
 }
 
 .preview-container {
-    width: stretch;
-    padding: 16px;
-    margin: 4px 16px;
-    border-radius: 4px;
+  width: stretch;
+  padding: 16px;
+  margin: 4px 16px;
+  border-radius: 4px;
 }
 
 .preview {
-    width: 100%;
-    height: 40px;
-    padding: 4px;
-    text-align: center;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 4px;
+  text-align: center;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
 }
 </style>
 
 <style>
 .md .dark-preview {
-    color: #fff;
-    background-color: #121212;
+  color: #fff;
+  background-color: #121212;
 }
 
 .ios .dark-preview {
-    color: #fff;
-    background-color: #000;
+  color: #fff;
+  background-color: #000;
 }
 
 .light-preview {
-    color: #000;
-    background-color: #fff;
+  color: #000;
+  background-color: #fff;
 }
 </style>

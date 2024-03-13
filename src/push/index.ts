@@ -21,8 +21,8 @@ export class PushService {
         return this.pushId;
     }
 
-    async getDeviceId() {
-        return (await Device.getId()).uuid;
+    async getDeviceId(): Promise<string> {
+        return (await Device.getId()).identifier;
     }
 
     async requestPermissions() {

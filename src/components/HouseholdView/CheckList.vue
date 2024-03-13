@@ -9,6 +9,7 @@
           <ion-item
             v-for="(todo, index) in todos"
             :key="todo.uuid"
+            :id="todo.uuid"
           >
             <ion-button
               fill="clear"
@@ -21,6 +22,7 @@
             <ion-input
               :id="todo.uuid"
               v-model="todo.content"
+              :aria-label="_t('Checklist entry')"
               @ionInput="updateTodo(index, $event)"
               @keydown.enter="addTodo"
             />
@@ -31,22 +33,25 @@
         </TransitionGroup>
 
         <Transition name="nothing-yet">
-          <ion-card v-if="todos.length === 0">
+          <ion-card
+            v-if="todos.length === 0"
+            key="nothing-yet"
+          >
             <ion-card-header>
               <ion-card-title> {{ _t('There are no checklist entries yet') }}</ion-card-title>
             </ion-card-header>
           </ion-card>
         </Transition>
       </ion-reorder-group>
-      <ion-fab
-        slot="fixed"
+      <ion-button
         vertical="bottom"
+        expand="full"
         horizontal="end"
+        @click="addTodo"
       >
-        <ion-fab-button @click="addTodo">
-          <PlusIcon />
-        </ion-fab-button>
-      </ion-fab>
+        <PlusIcon />
+        {{ _t('Add entry') }}
+      </ion-button>
       <ion-refresher
         slot="fixed"
         @ionRefresh="dashboardRefresher.forceReload($event)"
@@ -60,9 +65,14 @@
 <script setup lang="ts">
 import debounce from '@/common/debounce';
 import { uuid4 } from '@/common/uuid';
-import { dashboardRefresherSymbol, gettersSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
+import {
+  dashboardRefresherSymbol,
+  gettersSymbol,
+  householdClientSymbol,
+  stateSymbol
+} from '@/dependency-injection/injection-keys';
 import { Todo } from '@/models/Todo';
-import { TodoEvent } from "@/models/TodoEvent";
+import { ChecklistEventQueue, TodoEvent } from "@/models/TodoEvent";
 import { showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import {
@@ -72,8 +82,6 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonInput,
   IonItem,
   IonPage,
@@ -83,26 +91,33 @@ import {
   IonReorderGroup,
   ItemReorderCustomEvent
 } from "@ionic/vue";
-import { computed, inject, Ref, ref, watch } from 'vue';
+import { computed, inject, reactive, Ref, ref, watch } from 'vue';
 import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
 
 const getters = inject(gettersSymbol)!;
+const state = inject(stateSymbol)!;
+
 const householdClient = inject(householdClientSymbol)!;
 const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const household = computed(() => getters.household.value);
-const originTodos = computed(() => household.value?.checklist);
+const originTodos = computed(
+  () => household.value?.checklists.find(checklist => checklist.uuid === state.openChecklist)?.checklist ?? []
+);
 
-let todos: Ref<Todo[]> = ref([]);
-let eventQueue: Ref<TodoEvent[]> = ref([]);
+const todos: Ref<Todo[]> = ref([]);
+const eventQueue: ChecklistEventQueue = reactive<ChecklistEventQueue>({
+  checklistUuid: state.openChecklist,
+  events: [],
+});
 const requestFlushQueue = debounce(async () => {
-  if (undefined === household.value || eventQueue.value.length === 0) {
+  if (undefined === household.value || eventQueue.events.length === 0 || null == eventQueue.checklistUuid) {
     return;
   }
-  const sentEventQueue = eventQueue.value;
-  eventQueue.value = [];
+  const sentEventQueue = eventQueue.events;
+  eventQueue.events = [];
   try {
-    await householdClient.updateChecklist(household.value.id, sentEventQueue);
+    await householdClient.updateChecklist(eventQueue.checklistUuid, sentEventQueue);
   } catch (err) {
     await showThrownError(err);
   }
@@ -123,41 +138,55 @@ watch(
 );
 
 function addToQueue(event: TodoEvent) {
-  eventQueue.value.push(event);
+  if (event.checklistUuid !== eventQueue.checklistUuid) {
+    console.warn('Event for different checklist, clearing queue.');
+    eventQueue.checklistUuid = event.checklistUuid;
+    eventQueue.events = [event];
+    return;
+  }
+  eventQueue.events.push(event);
   requestFlushQueue();
 }
 
 function updateTodo(index: number, event: InputCustomEvent) {
+  if (null == state.openChecklist) {
+    throw new Error('No checklist open to update.');
+  }
   const todo = todos.value[index];
   if (undefined === todo) {
     throw new Error('Could not update nonexistent todo.');
   }
   // just the last content update is relevant, clear the rest
-  eventQueue.value = eventQueue.value.filter(
+  eventQueue.events = eventQueue.events.filter(
     (event: TodoEvent) => event.uuid !== todo.uuid || event.type !== 'update'
   );
   addToQueue({
     type: 'update',
+    checklistUuid: state.openChecklist,
     uuid: todo.uuid,
     data: `${event.target.value ?? ''}`,
   });
 }
 
 function markAsCompleted(index: number) {
+  if (null == state.openChecklist) {
+    throw new Error('No checklist open to update.');
+  }
   const [todo] = todos.value.splice(index, 1);
   if (undefined === todo) {
     throw new Error('Could not remove nonexistent todo.');
   }
-  const creationSynced = !eventQueue.value.some(
+  const creationSynced = !eventQueue.events.some(
     (event) => event.uuid === todo.uuid && event.type === 'create'
   );
   // These events won't have an effect after deletion
-  eventQueue.value = eventQueue.value.filter(
+  eventQueue.events = eventQueue.events.filter(
     (event: TodoEvent) => event.uuid !== todo.uuid
   );
   if (creationSynced) {
     addToQueue({
       type: 'delete',
+      checklistUuid: state.openChecklist,
       uuid: todo.uuid,
       data: null,
     });
@@ -165,6 +194,9 @@ function markAsCompleted(index: number) {
 }
 
 function reorder(event: ItemReorderCustomEvent) {
+  if (null == state.openChecklist) {
+    throw new Error('No checklist open to update.');
+  }
   const {from, to} = event.detail;
   const todo = todos.value[from];
   if (undefined === todo) {
@@ -173,6 +205,7 @@ function reorder(event: ItemReorderCustomEvent) {
   const insertBeforeUuid = todos.value[to < from ? to : to + 1]?.uuid ?? null;
   addToQueue({
     type: 'sort',
+    checklistUuid: state.openChecklist,
     uuid: todo.uuid,
     data: insertBeforeUuid,
   });
@@ -181,9 +214,13 @@ function reorder(event: ItemReorderCustomEvent) {
 }
 
 function addTodo() {
+  if (null == state.openChecklist) {
+    throw new Error('No checklist open to update.');
+  }
   const todo: Todo = {uuid: uuid4(), content: ''};
   todos.value.push(todo);
   addToQueue({
+    checklistUuid: state.openChecklist,
     type: 'create',
     uuid: todo.uuid,
     data: null,

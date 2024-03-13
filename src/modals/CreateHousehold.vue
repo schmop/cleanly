@@ -16,6 +16,7 @@
           {{ _t('Name') }}
         </ion-label>
         <ion-input
+          :label="_t('Name')"
           v-model="householdName"
           type="text"
         />
@@ -51,17 +52,17 @@ import { householdClientSymbol } from '@/dependency-injection/injection-keys';
 import { showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import {
-    IonButton,
-    IonContent,
-    IonFooter,
-    IonHeader,
-    IonInput,
-    IonItem,
-    IonItemGroup,
-    IonLabel,
-    IonTitle,
-    IonToolbar,
-    modalController,
+  IonButton,
+  IonContent,
+  IonFooter,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
+  IonTitle,
+  IonToolbar,
+  modalController,
 } from "@ionic/vue";
 import { inject, ref } from 'vue';
 import { CirclePlusIcon, CircleXIcon, PencilIcon } from 'vue-tabler-icons';
@@ -71,17 +72,17 @@ const householdClient = inject(householdClientSymbol)!;
 const householdName = ref('');
 
 async function dismiss() {
-    await modalController.dismiss();
+  await modalController.dismiss();
 }
 
 async function createHousehold() {
-    try {
+  try {
 
-        await householdClient.createHousehold(householdName.value);
-    } catch (err) {
-        await showThrownError(err);
-    }
-    await dismiss();
+    await householdClient.createHousehold(householdName.value);
+  } catch (err) {
+    await showThrownError(err);
+  }
+  await dismiss();
 }
 </script>
 

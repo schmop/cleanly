@@ -21,7 +21,7 @@
 
         <ion-tab-button
           tab="checklist"
-          :href="href('checklist')"
+          :href="href('checklists')"
         >
           <ChecklistIcon />
           <ion-label>{{ _t('Checklist') }}</ion-label>
@@ -73,20 +73,20 @@ const numOverdueTasks = computed(() => tasks.value.filter(task => taskOverDue(ta
 
 
 if (undefined === household.value) {
-    void router.push({name: 'dashboard'});
+  void router.push({name: 'dashboard'});
 }
 onBeforeUnmount(() => {
-    store.viewHousehold(null);
+  store.viewHousehold(null);
 });
 
 function href(path: string) {
-    return `/household/${path}`;
+  return `/household/${path}`;
 }
 </script>
 
 <style scoped>
 .badge-with-custom-icon-fix {
-    left: calc(50% + 6px);
-    top: 8px;
+  left: calc(50% + 6px);
+  top: 8px;
 }
 </style>

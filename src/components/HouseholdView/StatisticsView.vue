@@ -103,9 +103,9 @@ const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
-let selectedTaskId = ref<TaskId|null>(null);
-let analysis = ref<Analysis>("participations");
-let statistics = ref<HouseholdStats|null>(null);
+const selectedTaskId = ref<TaskId|null>(null);
+const analysis = ref<Analysis>("participations");
+const statistics = ref<HouseholdStats|null>(null);
 const options = {responsive: true};
 
 const household = computed(() => getters.household.value);

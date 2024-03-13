@@ -8,47 +8,40 @@ import { isHouseholdPrivilege } from "./HouseholdPrivilege.guard";
 import { isTodo } from "./Todo.guard";
 import { Household } from "./Household";
 
-function evaluate(
-    isCorrect: boolean,
-    varName: string,
-    expected: string,
-    actual: any
-): boolean {
-    if (!isCorrect) {
-        console.error(
-            `${varName} type mismatch, expected: ${expected}, found:`,
-            actual
-        )
-    }
-    return isCorrect
-}
-
-export function isHousehold(obj: unknown, argumentName: string = "household"): obj is Household {
+export function isHousehold(obj: unknown): obj is Household {
     const typedObj = obj as Household
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(typeof typedObj["id"] === "number", `${argumentName}["id"]`, "number", typedObj["id"]) &&
-        evaluate(typeof typedObj["name"] === "string", `${argumentName}["name"]`, "string", typedObj["name"]) &&
-        evaluate(Array.isArray(typedObj["users"]) &&
-            typedObj["users"].every((e: any) =>
-                isUser(e) as boolean
-            ), `${argumentName}["users"]`, "import(\"./src/models/User\").User[]", typedObj["users"]) &&
-        evaluate(Array.isArray(typedObj["tasks"]) &&
-            typedObj["tasks"].every((e: any) =>
-                isTask(e) as boolean
-            ), `${argumentName}["tasks"]`, "import(\"./src/models/Task\").Task[]", typedObj["tasks"]) &&
-        evaluate((typedObj["webhookUrl"] === null ||
-            typeof typedObj["webhookUrl"] === "string"), `${argumentName}["webhookUrl"]`, "string | null", typedObj["webhookUrl"]) &&
-        evaluate(Array.isArray(typedObj["privileges"]) &&
-            typedObj["privileges"].every((e: any) =>
-                isHouseholdPrivilege(e) as boolean
-            ), `${argumentName}["privileges"]`, "import(\"./src/models/HouseholdPrivilege\").HouseholdPrivilege[]", typedObj["privileges"]) &&
-        evaluate(Array.isArray(typedObj["checklist"]) &&
-            typedObj["checklist"].every((e: any) =>
+        typeof typedObj["id"] === "number" &&
+        typeof typedObj["name"] === "string" &&
+        Array.isArray(typedObj["users"]) &&
+        typedObj["users"].every((e: any) =>
+            isUser(e) as boolean
+        ) &&
+        Array.isArray(typedObj["tasks"]) &&
+        typedObj["tasks"].every((e: any) =>
+            isTask(e) as boolean
+        ) &&
+        (typedObj["webhookUrl"] === null ||
+            typeof typedObj["webhookUrl"] === "string") &&
+        Array.isArray(typedObj["privileges"]) &&
+        typedObj["privileges"].every((e: any) =>
+            isHouseholdPrivilege(e) as boolean
+        ) &&
+        Array.isArray(typedObj["checklists"]) &&
+        typedObj["checklists"].every((e: any) =>
+            (e !== null &&
+                typeof e === "object" ||
+                typeof e === "function") &&
+            typeof e["name"] === "string" &&
+            typeof e["uuid"] === "string" &&
+            Array.isArray(e["checklist"]) &&
+            e["checklist"].every((e: any) =>
                 isTodo(e) as boolean
-            ), `${argumentName}["checklist"]`, "import(\"./src/models/Todo\").Todo[]", typedObj["checklist"]) &&
-        evaluate(typeof typedObj["reassignmentStrategy"] === "string", `${argumentName}["reassignmentStrategy"]`, "string", typedObj["reassignmentStrategy"])
+            )
+        ) &&
+        typeof typedObj["reassignmentStrategy"] === "string"
     )
 }

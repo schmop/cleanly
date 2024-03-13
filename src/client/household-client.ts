@@ -150,15 +150,49 @@ export class HouseholdClient {
         }
     }
 
-    async updateChecklist(householdId: number, events: TodoEvent[]) {
+    async updateChecklist(checklistUuid: string, events: TodoEvent[]) {
         const response = await this.client.sendJsonEventually(
             'POST',
-            `api/household/update-checklist/${householdId}`,
+            `api/household/checklist/${checklistUuid}/update`,
             {events},
         );
 
         if (response.status !== 200) {
             await handleErrorResponse(response, "updating the checklist");
+        }
+    }
+
+    async createChecklist(householdId: number) {
+        const response = await this.client.requestEventually(
+            'PUT',
+            `api/household/${householdId}/checklist/add`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "creating the checklist");
+        }
+    }
+
+    async renameChecklist(checklistUuid: string, name: string) {
+        const response = await this.client.sendJsonEventually(
+            'POST',
+            `api/household/checklist/${checklistUuid}/rename`,
+            {name},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "renaming the checklist");
+        }
+    }
+
+    async deleteChecklist(checklistUuid: string) {
+        const response = await this.client.requestEventually(
+            'DELETE',
+            `api/household/checklist/${checklistUuid}`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "deleting the checklist");
         }
     }
 

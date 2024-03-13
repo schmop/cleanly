@@ -5,27 +5,12 @@
 import { isInvite } from "../models/Invite.guard";
 import { InviteEvent } from "./InviteEvent";
 
-function evaluate(
-    isCorrect: boolean,
-    varName: string,
-    expected: string,
-    actual: any
-): boolean {
-    if (!isCorrect) {
-        console.error(
-            `${varName} type mismatch, expected: ${expected}, found:`,
-            actual
-        )
-    }
-    return isCorrect
-}
-
-export function isInviteEvent(obj: unknown, argumentName: string = "inviteEvent"): obj is InviteEvent {
+export function isInviteEvent(obj: unknown): obj is InviteEvent {
     const typedObj = obj as InviteEvent
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(isInvite(typedObj["invite"]) as boolean, `${argumentName}["invite"]`, "import(\"./src/models/Invite\").Invite", typedObj["invite"])
+        isInvite(typedObj["invite"]) as boolean
     )
 }

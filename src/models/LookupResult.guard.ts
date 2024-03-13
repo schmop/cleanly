@@ -4,28 +4,13 @@
  */
 import { LookupResult } from "./LookupResult";
 
-function evaluate(
-    isCorrect: boolean,
-    varName: string,
-    expected: string,
-    actual: any
-): boolean {
-    if (!isCorrect) {
-        console.error(
-            `${varName} type mismatch, expected: ${expected}, found:`,
-            actual
-        )
-    }
-    return isCorrect
-}
-
-export function isLookupResult(obj: unknown, argumentName: string = "lookupResult"): obj is LookupResult {
+export function isLookupResult(obj: unknown): obj is LookupResult {
     const typedObj = obj as LookupResult
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(typeof typedObj["id"] === "number", `${argumentName}["id"]`, "number", typedObj["id"]) &&
-        evaluate(typeof typedObj["name"] === "string", `${argumentName}["name"]`, "string", typedObj["name"])
+        typeof typedObj["id"] === "number" &&
+        typeof typedObj["name"] === "string"
     )
 }

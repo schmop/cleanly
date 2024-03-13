@@ -1,9 +1,8 @@
 import { gettersSymbol, stateSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
-import { Household } from '@/models/Household';
+import { Checklist, Household } from '@/models/Household';
 import { HouseholdPrivilege, PrivilegeLevel } from '@/models/HouseholdPrivilege';
 import { Invite } from '@/models/Invite';
 import { Task } from '@/models/Task';
-import { Todo } from '@/models/Todo';
 import { User } from '@/models/User';
 import { UserSettings } from '@/models/UserSettings';
 import { Localstore } from "@/store/localstore";
@@ -17,6 +16,7 @@ export class State {
     public invites: Invite[] = [];
     public pageTitle: null|string = null;
     public viewedHousehold: null|number = null;
+    public openChecklist: null|string = null;
     public userSettings: UserSettings = {
         notifyInvites: true,
         notifyTaskDone: true,
@@ -31,12 +31,13 @@ export class State {
 export type StateInterface = Pick<State, keyof State>;
 
 export type Getters = {
-    checklist: (householdId: number) => Todo[],
+    checklists: (householdId: number) => Checklist[]|undefined,
     householdById: (householdId: number) => undefined|Household,
     household: undefined|Household,
     privileges: (household?: Household) => Record<UserId, PrivilegeLevel>,
     privilege: (userId?: UserId, household?: Household) => PrivilegeLevel,
     canManageTasks: (userId?: UserId, household?: Household) => boolean,
+    canManageChecklists: (userId?: UserId, household?: Household) => boolean,
     canManageHousehold: (userId?: UserId, household?: Household) => boolean,
     stars: StarsRecord,
     tasks: Task[],
@@ -53,8 +54,8 @@ function makeGettersReactive(getters: GetterFunctions): ComputedGetters {
 }
 
 const getters: GetterFunctions = {
-    checklist: () => (householdId: number): Todo[] => {
-        return store.state.households.find((household: Household) => household.id === householdId)?.checklist ?? [];
+    checklists: () => (householdId: number): Checklist[]|undefined => {
+        return store.state.households.find((household: Household) => household.id === householdId)?.checklists;
     },
     householdById: () => (householdId: number): undefined|Household => {
         return store.state.households.find((household: Household) => household.id === householdId);
@@ -86,6 +87,11 @@ const getters: GetterFunctions = {
         return store.getters.privileges.value(household)[user] ?? PrivilegeLevel.USER;
     },
     canManageTasks: () => (userId?: UserId, household?: Household): boolean => {
+        const privilege = store.getters.privilege.value(userId, household);
+
+        return privilege >= PrivilegeLevel.MODERATOR;
+    },
+    canManageChecklists: () => (userId?: UserId, household?: Household): boolean => {
         const privilege = store.getters.privilege.value(userId, household);
 
         return privilege >= PrivilegeLevel.MODERATOR;
@@ -230,6 +236,10 @@ export class Store {
 
     setDarkmode(darkmode: boolean) {
         this.state.darkmode = darkmode;
+    }
+
+    openChecklist(uuid: string) {
+        this.state.openChecklist = uuid;
     }
 }
 

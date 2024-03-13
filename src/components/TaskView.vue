@@ -163,7 +163,7 @@ const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
-let actionsVisible = ref(false);
+const actionsVisible = ref(false);
 
 const icon = computed(() => isValidIcon(props.task.icon) ? props.task.icon : 'check');
 const assignee = computed(() => props.household.users.find((user) => user.id === props.task.assignee));
@@ -257,7 +257,6 @@ async function assignTo() {
   } catch (err) {
     await showThrownError(err);
   }
-
 }
 
 async function editTask() {

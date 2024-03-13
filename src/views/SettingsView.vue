@@ -16,6 +16,7 @@
               -->
               <ion-toggle
                 :key="notifyTaskDue + (new Date()).toISOString()"
+                :label="_t('Tasks are due')"
                 :checked="notifyTaskDue"
                 @ionChange="toggleNotifyTaskDue"
               />
@@ -26,6 +27,7 @@
             <ion-item>
               <ion-toggle
                 :key="notifyTaskDone + (new Date()).toISOString()"
+                :label="_t('Tasks are completed')"
                 :checked="notifyTaskDone"
                 @ionChange="toggleNotifyTaskDone"
               />
@@ -36,6 +38,7 @@
             <ion-item>
               <ion-toggle
                 :key="notifyInvites + (new Date()).toISOString()"
+                :label="_t('Invited to a household')"
                 :checked="notifyInvites"
                 @ionChange="toggleNotifyInvites"
               />
@@ -85,20 +88,20 @@ import toast from '@/toast';
 import { _t } from '@/translation';
 import { SelectCustomEvent } from "@ionic/core/dist/types/components/select/select-interface";
 import {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonContent,
-    IonFooter,
-    IonItem,
-    IonItemGroup,
-    IonLabel,
-    IonPage,
-    IonSelect,
-    IonSelectOption,
-    IonToggle,
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonContent,
+  IonFooter,
+  IonItem,
+  IonItemGroup,
+  IonLabel,
+  IonPage,
+  IonSelect,
+  IonSelectOption,
+  IonToggle,
 } from "@ionic/vue";
 import { inject, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -114,58 +117,58 @@ const notifyInvites = ref(true);
 const language = ref('de');
 
 function resetUiToStore() {
-    const settings = store.state.userSettings;
-    notifyTaskDue.value = settings.notifyTaskDue;
-    notifyTaskDone.value = settings.notifyTaskDone;
-    notifyInvites.value = settings.notifyInvites;
-    language.value = settings.language;
+  const settings = store.state.userSettings;
+  notifyTaskDue.value = settings.notifyTaskDue;
+  notifyTaskDone.value = settings.notifyTaskDone;
+  notifyInvites.value = settings.notifyInvites;
+  language.value = settings.language;
 }
 
 watch(store.state.userSettings, () => {
-    resetUiToStore();
+  resetUiToStore();
 }, {immediate: true, deep: true});
 
 function toggleNotifyTaskDue() {
-    notifyTaskDue.value = !notifyTaskDue.value;
+  notifyTaskDue.value = !notifyTaskDue.value;
 }
 
 function toggleNotifyTaskDone() {
-    notifyTaskDone.value = !notifyTaskDone.value;
+  notifyTaskDone.value = !notifyTaskDone.value;
 }
 
 function toggleNotifyInvites() {
-    notifyInvites.value = !notifyInvites.value;
+  notifyInvites.value = !notifyInvites.value;
 }
 
 function changeLanguage(event: SelectCustomEvent<string>) {
-    language.value = event.detail.value;
+  language.value = event.detail.value;
 }
 
 async function save() {
-    try {
-        const newSettings: UserSettings = {
-            notifyInvites: notifyInvites.value,
-            notifyTaskDone: notifyTaskDone.value,
-            notifyTaskDue: notifyTaskDue.value,
-            language: language.value,
-        };
-        await userClient.saveUserSettings(newSettings);
-        store.setSettings(newSettings);
-        await router.push({name: 'dashboard'});
-    } catch (error) {
-        await toast.error((error as Error).message);
-    }
+  try {
+    const newSettings: UserSettings = {
+      notifyInvites: notifyInvites.value,
+      notifyTaskDone: notifyTaskDone.value,
+      notifyTaskDue: notifyTaskDue.value,
+      language: language.value,
+    };
+    await userClient.saveUserSettings(newSettings);
+    store.setSettings(newSettings);
+    await router.push({name: 'dashboard'});
+  } catch (error) {
+    await toast.error((error as Error).message);
+  }
 }
 
 async function cancel() {
-    await router.push({name: 'dashboard'});
-    resetUiToStore();
+  await router.push({name: 'dashboard'});
+  resetUiToStore();
 }
 
 </script>
 
 <style scoped>
 .p-2 {
-    padding: 8px;
+  padding: 8px;
 }
 </style>

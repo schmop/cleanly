@@ -55,9 +55,9 @@ const state = inject(stateSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
 let upToFetchId: string|null = null;
-let taskLogs = ref([] as TaskLog[]);
+const taskLogs = ref([] as TaskLog[]);
 let stopScrolling = false;
-let isLoading = ref(true);
+const isLoading = ref(true);
 
 const sortedTaskLogs = computed(() => {
   const logs = taskLogs.value.concat();

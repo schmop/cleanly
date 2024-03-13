@@ -1,12 +1,11 @@
 function getDevHostIp() {
-    return "http://192.168.2.102";
+    return "http://192.168.178.65";
 }
 
 export function getWebHost() {
     if (process.env.NODE_ENV === 'production') {
         return "https://cleanly.schmoppo.de";
     }
-    //return "http://127.0.0.1:8000";
     return `${getDevHostIp()}:8000`;
 }
 

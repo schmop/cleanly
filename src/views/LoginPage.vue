@@ -11,6 +11,7 @@
           </ion-label>
           <ion-input
             v-model="name"
+            :aria-label="_t('Name')"
             type="text"
           />
         </ion-item>
@@ -23,6 +24,7 @@
           </ion-label>
           <ion-input
             v-model="mail"
+            :aria-label="_t('Mail')"
             type="email"
           />
         </ion-item>
@@ -35,6 +37,7 @@
           </ion-label>
           <ion-input
             v-model="password"
+            :aria-label="_t('Password')"
             type="password"
           />
         </ion-item>
@@ -47,6 +50,7 @@
           </ion-label>
           <ion-input
             v-model="retype"
+            :aria-label="_t('Retype Password')"
             type="password"
           />
         </ion-item>
@@ -81,6 +85,7 @@
           <ion-toggle
             ref="toggle"
             :key="isRegistering + (new Date()).toISOString()"
+            :aria-label="_t('Register')"
             :checked="isRegistering"
             @ionChange="onToggle"
           />

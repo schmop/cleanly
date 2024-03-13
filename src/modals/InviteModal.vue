@@ -18,6 +18,7 @@
         </ion-label>
         <ion-input
           v-model="inviteSearch"
+          :label="_t('Search for username')"
           type="text"
         />
       </ion-item>
@@ -73,70 +74,70 @@ import { LookupResult } from "@/models/LookupResult";
 import { showThrownError, success } from "@/toast";
 import { _t } from '@/translation';
 import {
-    IonButton,
-    IonContent,
-    IonFooter,
-    IonHeader,
-    IonInput,
-    IonItem,
-    IonItemDivider,
-    IonItemGroup,
-    IonLabel,
-    IonList,
-    IonListHeader,
-    IonTitle,
-    IonToolbar,
-    modalController
+  IonButton,
+  IonContent,
+  IonFooter,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonItemDivider,
+  IonItemGroup,
+  IonLabel,
+  IonList,
+  IonListHeader,
+  IonTitle,
+  IonToolbar,
+  modalController
 } from "@ionic/vue";
 import { inject, Ref, ref, watch } from 'vue';
 import { CircleXIcon, UserIcon, UserPlusIcon, UserSearchIcon } from 'vue-tabler-icons';
 import debounce from "../common/debounce";
 
 const props = defineProps<{
-    household: Household,
+  household: Household,
 }>();
 const authClient = inject(authClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 const inviteSearch = ref('');
-let suggestions: Ref<LookupResult[]> = ref([]);
+const suggestions: Ref<LookupResult[]> = ref([]);
 const selection: Ref<null|LookupResult> = ref(null);
 
 const search = debounce(async () => {
-    const users = props.household.users;
-    let newSuggestions = await authClient.lookupUsers(inviteSearch.value);
-    newSuggestions = newSuggestions.filter((suggestion: LookupResult) =>
-        !users.some((user) => user.id != null && user.id === suggestion.id)
-    );
-    suggestions.value = newSuggestions;
+  const users = props.household.users;
+  let newSuggestions = await authClient.lookupUsers(inviteSearch.value);
+  newSuggestions = newSuggestions.filter((suggestion: LookupResult) =>
+    !users.some((user) => user.id != null && user.id === suggestion.id)
+  );
+  suggestions.value = newSuggestions;
 }, 250, true);
 
 watch(
-    inviteSearch,
-    search,
+  inviteSearch,
+  search,
 );
 
 async function dismiss() {
-    await modalController.dismiss();
+  await modalController.dismiss();
 }
 
 function add(result: LookupResult) {
-    selection.value = result;
-    suggestions.value = [];
-    inviteSearch.value = "";
+  selection.value = result;
+  suggestions.value = [];
+  inviteSearch.value = "";
 }
 
 async function invite() {
-    if (null == props.household.id || null == selection.value?.id) {
-        return;
-    }
-    try {
-        await householdClient.invite(props.household?.id, selection.value?.id);
-        await success(_t('Successfully invited users to household!'));
-    } catch (err) {
-        await showThrownError(err);
-    }
-    await dismiss();
+  if (null == props.household.id || null == selection.value?.id) {
+    return;
+  }
+  try {
+    await householdClient.invite(props.household?.id, selection.value?.id);
+    await success(_t('Successfully invited users to household!'));
+  } catch (err) {
+    await showThrownError(err);
+  }
+  await dismiss();
 }
 </script>
 

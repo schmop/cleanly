@@ -4,33 +4,19 @@
  */
 import { TodoEvent } from "./TodoEvent";
 
-function evaluate(
-    isCorrect: boolean,
-    varName: string,
-    expected: string,
-    actual: any
-): boolean {
-    if (!isCorrect) {
-        console.error(
-            `${varName} type mismatch, expected: ${expected}, found:`,
-            actual
-        )
-    }
-    return isCorrect
-}
-
-export function isTodoEvent(obj: unknown, argumentName: string = "todoEvent"): obj is TodoEvent {
+export function isTodoEvent(obj: unknown): obj is TodoEvent {
     const typedObj = obj as TodoEvent
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        evaluate(typeof typedObj["uuid"] === "string", `${argumentName}["uuid"]`, "string", typedObj["uuid"]) &&
-        evaluate((typedObj["type"] === "sort" ||
+        typeof typedObj["uuid"] === "string" &&
+        typeof typedObj["checklistUuid"] === "string" &&
+        (typedObj["type"] === "sort" ||
             typedObj["type"] === "delete" ||
             typedObj["type"] === "update" ||
-            typedObj["type"] === "create"), `${argumentName}["type"]`, "import(\"./src/models/TodoEvent\").TodoEventType", typedObj["type"]) &&
-        evaluate((typedObj["data"] === null ||
-            typeof typedObj["data"] === "string"), `${argumentName}["data"]`, "string | null", typedObj["data"])
+            typedObj["type"] === "create") &&
+        (typedObj["data"] === null ||
+            typeof typedObj["data"] === "string")
     )
 }

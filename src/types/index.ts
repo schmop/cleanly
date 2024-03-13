@@ -5,6 +5,7 @@ export type Entries<T> = {
 export type HouseholdId = number;
 export type TaskId = number;
 export type UserId = number;
+export type ChecklistUuid = string;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type JsonRecord<_TKey, TValue> = Record<string, TValue>;
