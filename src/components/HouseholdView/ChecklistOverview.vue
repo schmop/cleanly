@@ -31,6 +31,7 @@
         <ion-card-header
           v-else
           class="action-header"
+          @click.stop
         >
           <ion-input
             ref="renameInput"
@@ -98,7 +99,6 @@ import { Checklist } from "@/models/Household";
 import router from "@/router";
 import { error, success } from "@/toast";
 import { __t, _t } from "@/translation";
-import { Components } from "@ionic/core";
 import {
   IonButton,
   IonButtons,
@@ -133,7 +133,7 @@ const checklists: ComputedRef<Checklist[]> = computed(() => {
   return getters.checklists.value(householdId) ?? [];
 });
 
-const renameInput = ref<Components.IonInput[]|null>(null);
+const renameInput = ref<{$el: HTMLIonInputElement}[]|null>(null);
 const renameState = reactive({
   checklist: null as Readonly<Checklist>|null,
   newName: '',
@@ -152,11 +152,14 @@ async function openChecklist(uuid: string) {
 async function startRenameChecklist(checklist: Checklist) {
   renameState.checklist = checklist;
   renameState.newName = checklist.name;
-  await nextTick();
-  console.log(renameInput.value, renameInput.value![0]!.setFocus);
-  if (renameInput.value && renameInput.value[0]) {
-    await renameInput.value[0].setFocus();
+  await nextTick(); // wait for ion-input to render
+  const ionInput = renameInput.value?.[0]; // refs in v-for are always arrays
+  if (!ionInput) {
+    console.warn('Could not focus input element to rename checklist.', checklist);
+    return;
   }
+  const inputElement = await ionInput.$el.getInputElement(); // wait for <input> to be rendered
+  inputElement.focus();
 }
 
 async function finalizeRenameChecklist() {
