@@ -6,7 +6,7 @@ import { Task } from '@/models/Task';
 import { User } from '@/models/User';
 import { UserSettings } from '@/models/UserSettings';
 import { Localstore } from "@/store/localstore";
-import { HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
+import { ChecklistUuid, HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
 import { App, computed, ComputedGetter, ComputedRef, reactive } from 'vue';
 
 export class State {
@@ -240,6 +240,16 @@ export class Store {
 
     openChecklist(uuid: string) {
         this.state.openChecklist = uuid;
+    }
+
+    renameChecklist(uuid: ChecklistUuid, newName: string) {
+        const checklist = this.state.households
+            .flatMap(household => household.checklists)
+            .find((checklist) => checklist.uuid === uuid);
+        if (null == checklist) {
+            throw new Error('Checklist not found, cannot rename');
+        }
+        checklist.name = newName;
     }
 }
 

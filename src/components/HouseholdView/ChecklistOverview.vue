@@ -6,18 +6,53 @@
         :key="checklist.uuid"
         @click="openChecklist(checklist.uuid)"
       >
-        <ion-card-header>
+        <ion-card-header
+          v-if="checklist.uuid !== renameState.checklist?.uuid"
+          class="action-header"
+        >
           <ion-card-title>
             {{ checklist.name }}
           </ion-card-title>
-          <ion-button
-            color="dark"
-            shape="round"
-            expand="full"
-            @click.stop="openChecklist(checklist.uuid)"
-          >
-            <PencilIcon />
-          </ion-button>
+          <ion-buttons>
+            <ion-button
+              :title="_t('Rename checklist')"
+              @click.stop="startRenameChecklist(checklist)"
+            >
+              <PencilIcon slot="icon-only" />
+            </ion-button>
+            <ion-button
+              :title="_t('Delete checklist')"
+              @click.stop="deleteChecklist(checklist)"
+            >
+              <TrashXIcon slot="icon-only" />
+            </ion-button>
+          </ion-buttons>
+        </ion-card-header>
+        <ion-card-header
+          v-else
+          class="action-header"
+        >
+          <ion-input
+            ref="renameInput"
+            v-model="renameState.newName"
+            :label="_t('New name')"
+          />
+          <ion-buttons>
+            <ion-button
+              color="primary"
+              :title="_t('Submit rename')"
+              @click.stop="finalizeRenameChecklist()"
+            >
+              <CheckIcon slot="icon-only" />
+            </ion-button>
+            <ion-button
+              color="secondary"
+              :title="_t('Abort')"
+              @click.stop="abortRenameChecklist()"
+            >
+              <XIcon slot="icon-only" />
+            </ion-button>
+          </ion-buttons>
         </ion-card-header>
         <ion-card-content>
           {{ checklist.checklist.length }} {{ _t('entries') }}
@@ -52,29 +87,38 @@
 </template>
 
 <script setup lang="ts">
-import { dashboardRefresherSymbol, gettersSymbol, householdClientSymbol } from "@/dependency-injection/injection-keys";
+import { confirmablePrompt } from "@/alert/prompt";
+import {
+  dashboardRefresherSymbol,
+  gettersSymbol,
+  householdClientSymbol,
+  storeSymbol
+} from "@/dependency-injection/injection-keys";
 import { Checklist } from "@/models/Household";
 import router from "@/router";
-import { store } from "@/store";
-import { error } from "@/toast";
-import { _t } from "@/translation";
+import { error, success } from "@/toast";
+import { __t, _t } from "@/translation";
+import { Components } from "@ionic/core";
 import {
   IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
   IonContent,
+  IonInput,
   IonPage,
   IonRefresher,
   IonRefresherContent
 } from "@ionic/vue";
-import { computed, ComputedRef, inject } from "vue";
-import { PlusIcon } from "vue-tabler-icons";
+import { computed, ComputedRef, inject, nextTick, reactive, ref } from "vue";
+import { CheckIcon, PencilIcon, PlusIcon, TrashXIcon, XIcon } from "vue-tabler-icons";
 
 const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 const getters = inject(gettersSymbol)!;
+const store = inject(storeSymbol)!;
 
 const canManageChecklists = computed(() => getters.canManageChecklists.value());
 const household = computed(() => {
@@ -89,6 +133,12 @@ const checklists: ComputedRef<Checklist[]> = computed(() => {
   return getters.checklists.value(householdId) ?? [];
 });
 
+const renameInput = ref<Components.IonInput[]|null>(null);
+const renameState = reactive({
+  checklist: null as Readonly<Checklist>|null,
+  newName: '',
+});
+
 async function createChecklist() {
   await householdClient.createChecklist(household.value!.id);
   await householdClient.dashboardInfo(); // TODO: Do not reload the whole dashboard
@@ -98,8 +148,46 @@ async function openChecklist(uuid: string) {
   store.openChecklist(uuid);
   await router.push({name: 'checklist'});
 }
+
+async function startRenameChecklist(checklist: Checklist) {
+  renameState.checklist = checklist;
+  renameState.newName = checklist.name;
+  await nextTick();
+  console.log(renameInput.value, renameInput.value![0]!.setFocus);
+  if (renameInput.value && renameInput.value[0]) {
+    await renameInput.value[0].setFocus();
+  }
+}
+
+async function finalizeRenameChecklist() {
+  if (null == renameState.checklist) {
+    return;
+  }
+  await householdClient.renameChecklist(renameState.checklist.uuid, renameState.newName);
+  store.renameChecklist(renameState.checklist.uuid, renameState.newName);
+  renameState.checklist = null;
+  renameState.newName = '';
+}
+
+function abortRenameChecklist() {
+  renameState.checklist = null;
+}
+
+async function deleteChecklist(checklist: Checklist) {
+  if (!await confirmablePrompt(__t('Do you really want to delete "{0}" and all its contents?', checklist.name))) {
+    return;
+  }
+  await householdClient.deleteChecklist(checklist.uuid);
+  void success(__t('Checklist "{0}" deleted', checklist.name));
+  await householdClient.dashboardInfo(); // TODO: Do not reload the whole dashboard
+}
 </script>
 
 <style scoped>
-
+.action-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
 </style>
