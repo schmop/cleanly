@@ -17,7 +17,7 @@
         </ion-label>
         <ion-input
           v-model="taskName"
-          :label="_('Name')"
+          :label="_t('Name')"
           type="text"
         />
         <PencilIcon
