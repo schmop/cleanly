@@ -8,8 +8,8 @@
         <TransitionGroup name="checklist">
           <ion-item
             v-for="(todo, index) in todos"
-            :key="todo.uuid"
             :id="todo.uuid"
+            :key="todo.uuid"
           >
             <ion-button
               fill="clear"
@@ -19,12 +19,14 @@
             >
               <SquareIcon slot="icon-only" />
             </ion-button>
-            <ion-input
+            <ion-textarea
               :id="todo.uuid"
               v-model="todo.content"
               :aria-label="_t('Checklist entry')"
+              :auto-grow="true"
+              :rows="1"
               @ionInput="updateTodo(index, $event)"
-              @keydown.enter="addTodo"
+              @keydown.enter.prevent="addTodo"
             />
             <ion-reorder
               slot="end"
@@ -76,23 +78,23 @@ import { ChecklistEventQueue, TodoEvent } from "@/models/TodoEvent";
 import { showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import {
-  InputCustomEvent,
   IonButton,
   IonCard,
   IonCardHeader,
   IonCardTitle,
   IonContent,
-  IonInput,
   IonItem,
   IonPage,
   IonRefresher,
   IonRefresherContent,
   IonReorder,
   IonReorderGroup,
+  IonTextarea,
   ItemReorderCustomEvent
 } from "@ionic/vue";
 import { computed, inject, reactive, Ref, ref, watch } from 'vue';
 import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
+import { IonTextareaCustomEvent } from "@ionic/core";
 
 const getters = inject(gettersSymbol)!;
 const state = inject(stateSymbol)!;
@@ -148,7 +150,7 @@ function addToQueue(event: TodoEvent) {
   requestFlushQueue();
 }
 
-function updateTodo(index: number, event: InputCustomEvent) {
+function updateTodo(index: number, event: IonTextareaCustomEvent<unknown>) {
   if (null == state.openChecklist) {
     throw new Error('No checklist open to update.');
   }
@@ -225,15 +227,12 @@ function addTodo() {
     uuid: todo.uuid,
     data: null,
   });
-  setTimeout(
-    () => {
-      const todoElement: (Element&{setFocus?: () => void})|null = document.querySelector(`[id="${todo.uuid}"]`);
-      if (null !== todoElement && typeof todoElement.setFocus === 'function') {
-        todoElement?.setFocus();
-      }
-    },
-    100,
-  );
+  setTimeout(() => {
+    const todoElement: (Element & {setFocus?: () => void}) | null = document.querySelector(`ion-textarea[id="${todo.uuid}"]`);
+    if (null !== todoElement && typeof todoElement.setFocus === 'function') {
+      todoElement?.setFocus();
+    }
+  }, 100);
 }
 </script>
 
