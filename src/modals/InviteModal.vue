@@ -18,7 +18,6 @@
         </ion-label>
         <ion-input
           v-model="inviteSearch"
-          :label="_t('Search for username')"
           type="text"
         />
       </ion-item>

@@ -12,12 +12,10 @@
   >
     <ion-item-group>
       <ion-item>
-        <ion-label position="stacked">
-          {{ _t('Name') }}
-        </ion-label>
         <ion-input
           v-model="taskName"
           :label="_t('Name')"
+          label-placement="stacked"
           type="text"
         />
         <PencilIcon
@@ -65,9 +63,6 @@
         <PaletteIcon slot="end" />
       </ion-item>
       <ion-item>
-        <ion-label position="stacked">
-          {{ _t('Stars') }}
-        </ion-label>
         <ion-input
           v-model="stars"
           :label="_t('Stars')"

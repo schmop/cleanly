@@ -10,7 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonLoading, IonPage } from "@ionic/vue";</script>
+import { IonContent, IonLoading, IonPage } from "@ionic/vue";
+</script>
 
 <style>
 .no-background > .loading-wrapper {

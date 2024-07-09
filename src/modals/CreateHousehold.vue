@@ -12,12 +12,10 @@
   >
     <ion-item-group>
       <ion-item>
-        <ion-label position="stacked">
-          {{ _t('Name') }}
-        </ion-label>
         <ion-input
-          :label="_t('Name')"
           v-model="householdName"
+          :label="_t('Name')"
+          label-placement="stacked"
           type="text"
         />
         <PencilIcon
@@ -59,7 +57,6 @@ import {
   IonInput,
   IonItem,
   IonItemGroup,
-  IonLabel,
   IonTitle,
   IonToolbar,
   modalController,

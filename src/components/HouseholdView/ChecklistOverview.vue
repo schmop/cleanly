@@ -36,7 +36,9 @@
           <ion-input
             ref="renameInput"
             v-model="renameState.newName"
-            :label="_t('New name')"
+            :label="_t('Name')"
+            label-placement="stacked"
+            type="text"
           />
           <ion-buttons>
             <ion-button
