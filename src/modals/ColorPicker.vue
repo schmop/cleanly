@@ -8,7 +8,7 @@
   </ion-header>
   <ion-content color="light">
     <div class="content">
-      <color-picker
+      <ColorPicker
         class="color-picker"
         :hue="color.hue"
         :saturation="color.saturation"
@@ -60,6 +60,7 @@
 
 <script setup lang="ts">
 import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
+import '@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css';
 import { stateSymbol } from '@/dependency-injection/injection-keys';
 import { __t, _t } from '@/translation';
 import { IonButton, IonContent, IonFooter, IonHeader, IonTitle, IonToolbar, modalController } from "@ionic/vue";
@@ -96,7 +97,6 @@ async function select() {
 </script>
 
 <style scoped>
-@import '@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css';
 
 .content {
   display: flex;
@@ -111,6 +111,9 @@ async function select() {
 }
 
 .preview-container {
+  width: -moz-available;
+  width: -webkit-fill-available;
+  width: fill-available;
   width: stretch;
   padding: 16px;
   margin: 4px 16px;

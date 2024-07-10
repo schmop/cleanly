@@ -3,14 +3,14 @@ function getDevHostIp() {
 }
 
 export function getWebHost() {
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
         return "https://cleanly.schmoppo.de";
     }
     return `${getDevHostIp()}:8000`;
 }
 
 export function getSseHost() {
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
         return "https://cleanly.schmoppo.de:3333";
     }
     return `${getDevHostIp()}:3334`;
