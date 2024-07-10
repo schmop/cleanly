@@ -116,6 +116,7 @@ export const german = {
     'Successfully kicked {0} from the household!': 'Erfolgreich {0} aus dem Haushalt geschmissen!',
     'Successfully left the household!': 'Erfolgreich den Haushalt verlassen!',
     'Successfully transfered ownership to {0}!': 'Besitzrechte erfolgreich an {0} übertragen!',
+    'Swipe to finish tasks': 'Mit Wischgeste Aufgaben erledigen',
     'Task assigned successfully!': 'Aufgabe erfolgreich zugewiesen!',
     'Task created successfully': 'Aufgabe erfolgreich angelegt',
     'Task deleted successfully': 'Aufgabe erfolgreich gelöscht',

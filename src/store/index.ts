@@ -21,6 +21,7 @@ export class State {
         notifyInvites: true,
         notifyTaskDone: true,
         notifyTaskDue: true,
+        swipeToFinishTasks: true,
         language: 'de',
     };
     public stars: Record<HouseholdId, StarsRecord> = {};
@@ -269,7 +270,7 @@ declare global {
     }
 }
 
-if (process.env.NODE_ENV !== 'production') {
+if (import.meta.env.DEV) {
     /**
      * This replaces the Vuex-Dev-Tools (in a poorly fashioned way)
      */

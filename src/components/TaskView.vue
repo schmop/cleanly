@@ -85,30 +85,54 @@
           </template>
         </div>
       </div>
-      <div class="w-100">
-        <div class="progress-background soft">
-          <div
-            class="progress"
-            :style="taskColor"
-          >
-            {{ dueInText }}
+      <template v-if="useSwipe">
+        <div
+          ref="slider"
+          class="w-100 slider"
+          @mousedown="startDrag"
+          @mouseup="endDrag"
+          @mousemove="drag"
+          @touchstart="startDrag"
+          @touchend="endDrag"
+          @touchcancel="endDrag"
+          @touchmove="drag"
+        >
+          <div class="progress-background soft">
+            <div
+              class="progress"
+              :style="taskColor"
+            >
+              {{ dueInText }}
+            </div>
           </div>
         </div>
-      </div>
-      <transition name="actions">
-        <div
-          v-show="actionsVisible"
-          class="w-100"
-        >
-          <ion-button
-            expand="block"
-            color="tertiary"
-            @click.stop="markDone"
-          >
-            {{ _t('Mark done') }}
-          </ion-button>
+      </template>
+      <template v-else>
+        <div class="w-100">
+          <div class="progress-background soft">
+            <div
+              class="progress"
+              :style="taskColor"
+            >
+              {{ dueInText }}
+            </div>
+          </div>
         </div>
-      </transition>
+        <transition name="actions">
+          <div
+            v-show="actionsVisible"
+            class="w-100"
+          >
+            <ion-button
+              expand="block"
+              color="tertiary"
+              @click.stop="markDone"
+            >
+              {{ _t('Mark done') }}
+            </ion-button>
+          </div>
+        </transition>
+      </template>
     </ion-card-content>
   </ion-card>
 </template>
@@ -151,6 +175,8 @@ import {
 } from "@ionic/vue";
 import { computed, inject, ref } from 'vue';
 import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
+import confetti from 'canvas-confetti';
+
 
 const props = defineProps<{
   task: Task,
@@ -165,6 +191,7 @@ const householdClient = inject(householdClientSymbol)!;
 
 const actionsVisible = ref(false);
 
+const useSwipe = computed(() => state.userSettings.swipeToFinishTasks);
 const icon = computed(() => isValidIcon(props.task.icon) ? props.task.icon : 'check');
 const assignee = computed(() => props.household.users.find((user) => user.id === props.task.assignee));
 const contextMenuId = computed(() => `task-contextmenu-${props.task.id}`);
@@ -246,8 +273,15 @@ async function assignTo() {
     return;
   }
   let userId: unknown = dismiss.data?.assignee.value;
-  if (typeof userId !== 'number' || dismiss.role === 'unassign') {
+  if (dismiss.role === 'unassign') {
     userId = null;
+  }
+  if (typeof userId !== 'number') {
+    userId = null;
+  }
+  // typescript is not smart enough to know that userId is a number or null here
+  if (!numberOrNull(userId)) {
+    return;
   }
 
   try {
@@ -257,6 +291,10 @@ async function assignTo() {
   } catch (err) {
     await showThrownError(err);
   }
+}
+
+function numberOrNull(a: unknown): a is number|null {
+  return a === null || typeof a === 'number';
 }
 
 async function editTask() {
@@ -271,7 +309,7 @@ async function editTask() {
   await householdClient.dashboardInfo();
 }
 
-async function markDone() {
+async function markDone(): Promise<boolean> {
   if (props.task.id != null) {
     try {
       actionsVisible.value = false;
@@ -282,11 +320,13 @@ async function markDone() {
       const householdId = props.household.id;
       if (null != householdId) {
         await householdClient.retrieveStars(householdId);
+        return true;
       }
     } catch (err) {
       await showThrownError(err);
     }
   }
+  return false;
 }
 
 function toggleActions(event: MouseEvent) {
@@ -311,6 +351,83 @@ function closeActions(event: FocusEvent) {
   }
 
   actionsVisible.value = false;
+}
+
+// Slider
+const slider = ref<HTMLDivElement | null>(null);
+type Position = {x: number, y: number};
+function positionFromEvent(event: MouseEvent | TouchEvent): Position {
+  if (event instanceof MouseEvent) {
+    return {x: event.clientX, y: event.clientY};
+  }
+  return {x: event.touches[0]!.clientX, y: event.touches[0]!.clientY};
+}
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+let startPos: Position|null = null;
+let lastPos: Position|null = null;
+let startWidth: number = 0;
+let swipeStarted: boolean = false;
+function reset() {
+  startPos = null;
+  lastPos = null;
+  swipeStarted = false;
+}
+function startDrag(event: MouseEvent | TouchEvent) {
+  if (null === slider.value || !props.showActions) {
+    return;
+  }
+  slider.value.style.transition = 'width 0 ease, left 0 ease';
+  startWidth = slider.value.getBoundingClientRect().width;
+  lastPos = startPos = positionFromEvent(event);
+}
+function drag(event: MouseEvent | TouchEvent) {
+  if (null === slider.value || startPos === null) {
+    reset();
+    return;
+  }
+  const pos = positionFromEvent(event);
+  const movement = pos.x - startPos.x;
+  if (!swipeStarted && Math.abs(movement) < 30) {
+    return;
+  }
+  swipeStarted = true;
+  const width = clamp((startWidth - Math.abs(movement)) / startWidth * 100, 0, 100);
+  const swipeWouldTrigger = Math.abs(movement) > startWidth / 2;
+  slider.value.style.width = `${width}%`;
+  slider.value.style.left = `${clamp(movement, 0, startWidth)}px`;
+  slider.value.style.transition = 'width 0s ease, left 0s ease';
+  slider.value.style.backgroundColor = swipeWouldTrigger ? 'var(--ion-color-success)' : 'var(--ion-color-primary)';
+  lastPos = pos;
+
+}
+async function endDrag(_event: MouseEvent | TouchEvent) {
+  if (null === slider.value || startPos === null || lastPos === null) {
+    reset();
+    return;
+  }
+  const movement = lastPos.x - startPos.x;
+  const swipeWouldTrigger = Math.abs(movement) > startWidth / 2;
+  slider.value.style.transition = 'width 0.25s ease, left 0.25s ease';
+  slider.value.style.width = '100%';
+  slider.value.style.left = '0px';
+  slider.value.style.backgroundColor = 'inherit';
+  reset();
+  if (swipeWouldTrigger) {
+    if (await markDone()) {
+      void confetti({
+        shapes: ['star'],
+        colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'],
+        spread: 360,
+        ticks: 50,
+        gravity: 1,
+        decay: 0.94,
+        startVelocity: 15,
+        disableForReducedMotion: true,
+      });
+    }
+  }
 }
 
 </script>
@@ -397,5 +514,11 @@ function closeActions(event: FocusEvent) {
 .actions-enter-to,
 .actions-leave-from {
   height: 44px;
+}
+
+.slider {
+  position: relative;
+  overflow: hidden;
+  text-overflow: clip;
 }
 </style>

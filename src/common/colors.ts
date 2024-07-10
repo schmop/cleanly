@@ -92,10 +92,10 @@ export class HSL {
     }
 
     /**
-     * @param {number} hue [0, 360)
-     * @param {number} saturation [0, 100]
-     * @param {number} luminosity [0, 100]
-     * @param {number} alpha [0,1]
+     * @param hue {number} [0, 360)
+     * @param saturation {number} [0, 100]
+     * @param luminosity {number} [0, 100]
+     * @param alpha {number} [0,1]
      */
     constructor(
         hue: number,

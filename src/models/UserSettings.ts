@@ -3,5 +3,6 @@ export type UserSettings = {
     notifyTaskDone: boolean,
     notifyTaskDue: boolean,
     notifyInvites: boolean,
+    swipeToFinishTasks: boolean,
     language: string,
 }

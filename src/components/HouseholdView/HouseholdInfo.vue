@@ -17,7 +17,7 @@
         >
           <RotateIcon slot="start" />
           <ion-select
-            :value="household.reassignmentStrategy"
+            :value="household?.reassignmentStrategy"
             interface="action-sheet"
             :placeholder="_t('Select reassignment strategy')"
             @ionChange="selectReassignmentStrategy"
