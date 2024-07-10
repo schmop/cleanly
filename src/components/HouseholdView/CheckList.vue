@@ -26,7 +26,7 @@
               :auto-grow="true"
               :rows="1"
               @ionInput="updateTodo(index, $event)"
-              @keydown.enter.prevent="addTodo"
+              @keydown.enter.prevent="addTodo(todo.uuid)"
             />
             <ion-reorder
               slot="end"
@@ -49,7 +49,7 @@
         vertical="bottom"
         expand="full"
         horizontal="end"
-        @click="addTodo"
+        @click="addTodo(null)"
       >
         <PlusIcon />
         {{ _t('Add entry') }}
@@ -95,6 +95,7 @@ import {
 import { computed, inject, reactive, Ref, ref, watch } from 'vue';
 import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
 import { IonTextareaCustomEvent } from "@ionic/core";
+import { ChecklistUuid } from "@/types";
 
 const getters = inject(gettersSymbol)!;
 const state = inject(stateSymbol)!;
@@ -215,7 +216,29 @@ function reorder(event: ItemReorderCustomEvent) {
   todos.value = event.detail.complete(todos.value) as Todo[];
 }
 
-function addTodo() {
+function moveTodoAfterFocus(moveThis: ChecklistUuid, afterThis: ChecklistUuid): void {
+  if (null == state.openChecklist) {
+    throw new Error('No checklist open to update.');
+  }
+  const currentIndex = todos.value.findIndex(todo => todo.uuid === afterThis);
+  const nextTodo = todos.value[currentIndex + 1];
+  if (currentIndex !== -1 && nextTodo !== undefined) {
+    addToQueue({
+      checklistUuid: state.openChecklist,
+      type: 'sort',
+      uuid: moveThis,
+      data: nextTodo.uuid,
+    });
+    const moveIndex = todos.value.findIndex(todo => todo.uuid === moveThis);
+    const [moveTodo] = todos.value.splice(moveIndex, 1);
+    if (!moveTodo) {
+      return;
+    }
+    todos.value.splice(currentIndex + 1, 0, moveTodo);
+  }
+}
+
+function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
   if (null == state.openChecklist) {
     throw new Error('No checklist open to update.');
   }
@@ -227,6 +250,9 @@ function addTodo() {
     uuid: todo.uuid,
     data: null,
   });
+  if (insertAfterUuid !== null) {
+    moveTodoAfterFocus(todo.uuid, insertAfterUuid);
+  }
   setTimeout(() => {
     const todoElement: (Element & {setFocus?: () => void}) | null = document.querySelector(`ion-textarea[id="${todo.uuid}"]`);
     if (null !== todoElement && typeof todoElement.setFocus === 'function') {
