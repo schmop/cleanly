@@ -220,8 +220,9 @@ function moveTodoAfterFocus(moveThis: ChecklistUuid, afterThis: ChecklistUuid): 
   if (null == state.openChecklist) {
     throw new Error('No checklist open to update.');
   }
-  const currentIndex = todos.value.findIndex(todo => todo.uuid === afterThis);
-  const nextTodo = todos.value[currentIndex + 1];
+  const todosWithoutSelf = todos.value.filter(todo => todo.uuid !== moveThis);
+  const currentIndex = todosWithoutSelf.findIndex(todo => todo.uuid === afterThis);
+  const nextTodo = todosWithoutSelf[currentIndex + 1];
   if (currentIndex !== -1 && nextTodo !== undefined) {
     addToQueue({
       checklistUuid: state.openChecklist,
