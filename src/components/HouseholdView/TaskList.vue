@@ -17,13 +17,18 @@
           </ion-chip>
         </div>
       </div>
-      <TaskView
-        v-for="(task) in filteredTasks"
-        :key="task.id"
-        :task="task"
-        :household="household"
-        :show-actions="true"
-      />
+      <TransitionGroup
+        name="task-list"
+        tag="div"
+      >
+        <TaskView
+          v-for="(task) in filteredTasks"
+          :key="task.id"
+          :task="task"
+          :household="household"
+          :show-actions="true"
+        />
+      </TransitionGroup>
 
       <ion-card v-if="sortedTasks.length === 0">
         <ion-card-header>
@@ -160,5 +165,23 @@ async function openTaskFormModal(): Promise<void> {
 .scroll-inner-container {
     display: flex;
     width: fit-content;
+}
+
+.task-list-move, /* apply transition to moving elements */
+.task-list-enter-active,
+.task-list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.task-list-enter-from,
+.task-list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.task-list-leave-active {
+  position: absolute;
 }
 </style>
