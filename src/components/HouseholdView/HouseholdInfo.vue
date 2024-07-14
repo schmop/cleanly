@@ -114,7 +114,7 @@ import { User } from "@/models/User";
 import router from "@/router";
 import toast, { showThrownError, success } from "@/toast";
 import { _t } from "@/translation";
-import { Clipboard } from '@capacitor/clipboard';
+import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
 import {
     IonBadge,
     IonContent,
@@ -225,7 +225,7 @@ async function showSecretToast(secret: string) {
     await secretToast.present();
     const toastDismiss = await secretToast.onDidDismiss();
     if (toastDismiss.role === 'copy') {
-        await Clipboard.write({
+        await CapacitorClipboard.write({
             string: secret,
         });
         void toast.success('Secret was successfully copied to the clipboard!');
