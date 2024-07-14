@@ -88,7 +88,7 @@
       <template v-if="useSwipe">
         <div
           ref="slider"
-          class="w-100 slider"
+          :class="['w-100', 'slider', {'loading': waitingForTaskDoneResponse}]"
           @mousedown="startDrag"
           @mouseup="endDrag"
           @mousemove="drag"
@@ -108,7 +108,7 @@
         </div>
       </template>
       <template v-else>
-        <div class="w-100">
+        <div :class="['w-100', {'loading': waitingForTaskDoneResponse}]">
           <div class="progress-background soft">
             <div
               class="progress"
@@ -176,6 +176,7 @@ import {
 import { computed, inject, ref } from 'vue';
 import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
 import confetti from 'canvas-confetti';
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 
 const props = defineProps<{
@@ -190,6 +191,7 @@ const taskClient = inject(taskClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 
 const actionsVisible = ref(false);
+const waitingForTaskDoneResponse = ref(false);
 
 const useSwipe = computed(() => state.userSettings.swipeToFinishTasks);
 const icon = computed(() => isValidIcon(props.task.icon) ? props.task.icon : 'check');
@@ -279,7 +281,7 @@ async function assignTo() {
   if (typeof userId !== 'number') {
     userId = null;
   }
-  // typescript is not smart enough to know that userId is a number or null here
+  // typescript is not smart enough to know that userId is of type `number|null` here
   if (!numberOrNull(userId)) {
     return;
   }
@@ -310,21 +312,25 @@ async function editTask() {
 }
 
 async function markDone(): Promise<boolean> {
-  if (props.task.id != null) {
-    try {
-      actionsVisible.value = false;
-      const response = await taskClient.markTaskComplete(props.task.id);
-      store.markTaskDone(props.household.id, props.task.id, response.timestamp);
-      store.assignTask(props.household.id, props.task.id, response.assignee?.id ?? null)
-      void toast.success(_t('Task done'));
-      const householdId = props.household.id;
-      if (null != householdId) {
-        await householdClient.retrieveStars(householdId);
-        return true;
-      }
-    } catch (err) {
-      await showThrownError(err);
+  if (props.task.id == null) {
+    return false;
+  }
+  waitingForTaskDoneResponse.value = true;
+  try {
+    actionsVisible.value = false;
+    const response = await taskClient.markTaskComplete(props.task.id);
+    store.markTaskDone(props.household.id, props.task.id, response.timestamp);
+    store.assignTask(props.household.id, props.task.id, response.assignee?.id ?? null)
+    void toast.success(_t('Task done'));
+    const householdId = props.household.id;
+    if (null != householdId) {
+      void householdClient.retrieveStars(householdId);
+      return true;
     }
+  } catch (err) {
+    await showThrownError(err);
+  } finally {
+    waitingForTaskDoneResponse.value = false;
   }
   return false;
 }
@@ -383,18 +389,25 @@ function startDrag(event: MouseEvent | TouchEvent) {
   lastPos = startPos = positionFromEvent(event);
 }
 function drag(event: MouseEvent | TouchEvent) {
-  if (null === slider.value || startPos === null) {
+  if (null === slider.value || startPos === null || lastPos === null) {
     reset();
     return;
   }
   const pos = positionFromEvent(event);
   const movement = pos.x - startPos.x;
+  const lastMovement = lastPos.x - startPos.x;
   if (!swipeStarted && Math.abs(movement) < 30) {
     return;
   }
   swipeStarted = true;
   const width = clamp((startWidth - Math.abs(movement)) / startWidth * 100, 0, 100);
   const swipeWouldTrigger = Math.abs(movement) > startWidth / 2;
+  const swipeWasTriggering = Math.abs(lastMovement) > startWidth / 2;
+  if (swipeWouldTrigger !== swipeWasTriggering) {
+    void Haptics.impact({
+      style: ImpactStyle.Light
+    });
+  }
   slider.value.style.width = `${width}%`;
   slider.value.style.left = `${clamp(movement, 0, startWidth)}px`;
   slider.value.style.transition = 'width 0s ease, left 0s ease';
@@ -410,11 +423,14 @@ async function endDrag(_event: MouseEvent | TouchEvent) {
   const movement = lastPos.x - startPos.x;
   const swipeWouldTrigger = Math.abs(movement) > startWidth / 2;
   slider.value.style.transition = 'width 0.25s ease, left 0.25s ease';
+  slider.value.style.backgroundColor = 'inherit';
   slider.value.style.width = '100%';
   slider.value.style.left = '0px';
-  slider.value.style.backgroundColor = 'inherit';
   reset();
   if (swipeWouldTrigger) {
+    void Haptics.impact({
+      style: ImpactStyle.Heavy
+    });
     if (await markDone()) {
       void confetti({
         shapes: ['star'],
@@ -432,7 +448,7 @@ async function endDrag(_event: MouseEvent | TouchEvent) {
 
 </script>
 
-<style scoped>
+<style lang="css" scoped>
 .vertical-center {
   vertical-align: middle;
   display: inline-block;
@@ -462,6 +478,11 @@ async function endDrag(_event: MouseEvent | TouchEvent) {
   white-space: nowrap;
   display: flex;
   align-items: center;
+}
+
+.progress-background {
+  width: 100%;
+  margin: 0 2px;
 }
 
 .danger {
@@ -521,4 +542,49 @@ async function endDrag(_event: MouseEvent | TouchEvent) {
   overflow: hidden;
   text-overflow: clip;
 }
+/* ---------- Begin .rotating-border ---------- */
+
+@keyframes rotate {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+.loading {
+  position: relative;
+  z-index: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    width: 110%;
+    aspect-ratio: 1;
+    background-color: #399953;
+    background-repeat: no-repeat;
+    background-size: 50% 50%, 50% 50%;
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    background-image: linear-gradient(#c8c8c8, #c8c8c8), linear-gradient(#8a8a8a, #8a8a8a), linear-gradient(#B5B5B5, #B5B5B5), linear-gradient(#575757, #575757);
+    animation: rotate 4s linear infinite;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 6px;
+    top: 6px;
+    width: calc(100% - 12px);
+    height: calc(100% - 12px);
+    background: inherit;
+    border-radius: 5px;
+  }
+}
+
+/** Rotating border end */
 </style>
