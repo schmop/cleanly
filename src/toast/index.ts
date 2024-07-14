@@ -1,5 +1,6 @@
 import { _t } from '@/translation';
 import { toastController } from '@ionic/vue';
+import { Haptics, NotificationType } from "@capacitor/haptics";
 
 export async function info(message: string, duration = 5000): Promise<void> {
     const toast = await toastController.create({
@@ -28,6 +29,8 @@ export async function success(message: string, duration = 5000): Promise<void> {
             },
         ],
     });
+    void Haptics.notification({type: NotificationType.Success});
+
     return toast.present();
 }
 
@@ -43,6 +46,8 @@ export async function warning(message: string, duration = 5000): Promise<void> {
             },
         ],
     });
+    void Haptics.notification({type: NotificationType.Warning});
+
     return toast.present();
 }
 
@@ -58,6 +63,7 @@ export async function error(message: string, duration = 5000): Promise<void> {
             },
         ],
     });
+    void Haptics.notification({type: NotificationType.Error});
 
     return toast.present();
 }
