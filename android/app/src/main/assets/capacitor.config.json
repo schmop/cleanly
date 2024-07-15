@@ -11,5 +11,9 @@
 				"alert"
 			]
 		}
+	},
+	"server": {
+		"cleartext": true,
+		"androidScheme": "http"
 	}
 }

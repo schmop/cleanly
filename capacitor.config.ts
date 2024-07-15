@@ -11,5 +11,11 @@ const config: CapacitorConfig = {
     },
   },
 };
+if (process.env.NODE_ENV === 'development') {
+    config.server = {
+        cleartext: true,
+        androidScheme: 'http',
+    };
+}
 
 export default config;

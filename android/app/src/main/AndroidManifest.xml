@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Permissions -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- android:usesCleartextTraffic="true" -->
     <application
         android:allowBackup="true"
@@ -40,8 +44,4 @@
         </provider>
         <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/push_logo" />
     </application>
-
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

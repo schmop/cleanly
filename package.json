@@ -6,6 +6,9 @@
   "scripts": {
     "serve": "vite",
     "build": "vite build",
+    "build:dev": "NODE_ENV='development' vite build --mode development",
+    "sync": "cap sync android",
+    "sync:dev": "NODE_ENV='development' cap sync android",
     "preview": "vite preview"
   },
   "dependencies": {
