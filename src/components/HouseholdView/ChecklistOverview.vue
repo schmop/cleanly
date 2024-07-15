@@ -15,6 +15,20 @@
           </ion-card-title>
           <ion-buttons>
             <ion-button
+              v-if="store.state.checklistSubscriptions.includes(checklist.uuid)"
+              :title="_t('Unsubscribe from checklist')"
+              @click.stop="unsubscribe(checklist)"
+            >
+              <BellXIcon slot="icon-only" />
+            </ion-button>
+            <ion-button
+              v-else
+              :title="_t('Subscribe to checklist')"
+              @click.stop="subscribe(checklist)"
+            >
+              <BellIcon slot="icon-only" />
+            </ion-button>
+            <ion-button
               :title="_t('Rename checklist')"
               @click.stop="startRenameChecklist(checklist)"
             >
@@ -99,7 +113,7 @@ import {
 } from "@/dependency-injection/injection-keys";
 import { Checklist } from "@/models/Household";
 import router from "@/router";
-import { error, success } from "@/toast";
+import { error, showThrownError, success } from "@/toast";
 import { __t, _t } from "@/translation";
 import {
   IonButton,
@@ -115,7 +129,7 @@ import {
   IonRefresherContent
 } from "@ionic/vue";
 import { computed, ComputedRef, inject, nextTick, reactive, ref } from "vue";
-import { CheckIcon, PencilIcon, PlusIcon, TrashXIcon, XIcon } from "vue-tabler-icons";
+import { BellIcon, BellXIcon, CheckIcon, PencilIcon, PlusIcon, TrashXIcon, XIcon } from "vue-tabler-icons";
 
 const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -149,6 +163,26 @@ async function createChecklist() {
 async function openChecklist(uuid: string) {
   store.openChecklist(uuid);
   await router.push({name: 'checklist'});
+}
+
+async function subscribe(checklist: Checklist) {
+  try {
+    await householdClient.subscribeToChecklist(checklist.uuid);
+    store.subscribeToChecklist(checklist.uuid);
+    await success(__t('Subscribed to "{0}"', checklist.name));
+  } catch (err) {
+    await showThrownError(err);
+  }
+}
+
+async function unsubscribe(checklist: Checklist) {
+  try {
+    await householdClient.unsubscribeFromChecklist(checklist.uuid);
+    store.unsubscribeFromChecklist(checklist.uuid);
+    await success(__t('Unsubscribed from "{0}"', checklist.name));
+  } catch (err) {
+    await showThrownError(err);
+  }
 }
 
 async function startRenameChecklist(checklist: Checklist) {

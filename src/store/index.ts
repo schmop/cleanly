@@ -13,6 +13,7 @@ export class State {
     public loggedIn = false;
     public households: Household[] = [];
     public user: null|User = null;
+    public checklistSubscriptions: ChecklistUuid[] = [];
     public invites: Invite[] = [];
     public pageTitle: null|string = null;
     public viewedHousehold: null|number = null;
@@ -193,10 +194,11 @@ export class Store {
         this.state.invites.push(invite);
     }
 
-    dashboard(households: Household[], user: User, invites: Invite[]) {
+    dashboard(households: Household[], user: User, invites: Invite[], checklistSubscriptions: ChecklistUuid[]) {
         this.state.households = households;
         this.state.user = user;
         this.state.invites = invites;
+        this.state.checklistSubscriptions = checklistSubscriptions;
     }
 
     addStars(householdId: number, entries: {user: UserId, stars: number}[]) {
@@ -251,6 +253,14 @@ export class Store {
             throw new Error('Checklist not found, cannot rename');
         }
         checklist.name = newName;
+    }
+
+    subscribeToChecklist(uuid: ChecklistUuid) {
+        this.state.checklistSubscriptions.push(uuid);
+    }
+
+    unsubscribeFromChecklist(uuid: ChecklistUuid) {
+        this.state.checklistSubscriptions = this.state.checklistSubscriptions.filter(sub => sub !== uuid);
     }
 }
 

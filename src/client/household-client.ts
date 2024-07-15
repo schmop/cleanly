@@ -44,7 +44,7 @@ export class HouseholdClient {
             console.error('Invalid data given:', data);
             throw new Error('Invalid dashboard data given!');
         }
-        this.store.dashboard(data.households, data.user, data.invites);
+        this.store.dashboard(data.households, data.user, data.invites, data.checklistSubscriptions);
         this.store.setSettings(data.settings);
     }
 
@@ -193,6 +193,28 @@ export class HouseholdClient {
 
         if (response.status !== 200) {
             await handleErrorResponse(response, "deleting the checklist");
+        }
+    }
+
+    async subscribeToChecklist(checklistUuid: string) {
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/checklist/${checklistUuid}/subscribe`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "subscribing to the checklist");
+        }
+    }
+
+    async unsubscribeFromChecklist(checklistUuid: string) {
+        const response = await this.client.requestEventually(
+            'POST',
+            `api/household/checklist/${checklistUuid}/unsubscribe`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "unsubscribing from the checklist");
         }
     }
 

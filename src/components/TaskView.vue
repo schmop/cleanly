@@ -328,7 +328,7 @@ async function markDone(): Promise<boolean> {
       return true;
     }
   } catch (err) {
-    await showThrownError(err);
+    void showThrownError(err);
   } finally {
     waitingForTaskDoneResponse.value = false;
   }

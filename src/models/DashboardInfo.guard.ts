@@ -19,6 +19,10 @@ export function isDashboardInfo(obj: unknown): obj is DashboardInfo {
         typedObj["households"].every((e: any) =>
             isHousehold(e) as boolean
         ) &&
+        Array.isArray(typedObj["checklistSubscriptions"]) &&
+        typedObj["checklistSubscriptions"].every((e: any) =>
+            typeof e === "string"
+        ) &&
         Array.isArray(typedObj["invites"]) &&
         typedObj["invites"].every((e: any) =>
             isInvite(e) as boolean

@@ -5,34 +5,32 @@
         :disabled="false"
         @ionItemReorder="reorder"
       >
-        <TransitionGroup name="checklist">
-          <ion-item
-            v-for="(todo, index) in todos"
-            :id="todo.uuid"
-            :key="todo.uuid"
+        <ion-item
+          v-for="(todo, index) in todos"
+          :id="todo.uuid"
+          :key="todo.uuid"
+        >
+          <ion-button
+            fill="clear"
+            color="dark"
+            shape="round"
+            @click.stop="markAsCompleted(index)"
           >
-            <ion-button
-              fill="clear"
-              color="dark"
-              shape="round"
-              @click.stop="markAsCompleted(index)"
-            >
-              <SquareIcon slot="icon-only" />
-            </ion-button>
-            <ion-textarea
-              :id="todo.uuid"
-              v-model="todo.content"
-              :aria-label="_t('Checklist entry')"
-              :auto-grow="true"
-              :rows="1"
-              @ionInput="updateTodo(index, $event)"
-              @keydown.enter.prevent="addTodo(todo.uuid)"
-            />
-            <ion-reorder
-              slot="end"
-            />
-          </ion-item>
-        </TransitionGroup>
+            <SquareIcon slot="icon-only" />
+          </ion-button>
+          <ion-textarea
+            :id="todo.uuid"
+            v-model="todo.content"
+            :aria-label="_t('Checklist entry')"
+            :auto-grow="true"
+            :rows="1"
+            @ionInput="updateTodo(index, $event)"
+            @keydown.enter.prevent="addTodo(todo.uuid)"
+          />
+          <ion-reorder
+            slot="end"
+          />
+        </ion-item>
 
         <Transition name="nothing-yet">
           <ion-card
@@ -264,32 +262,4 @@ function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
 </script>
 
 <style scoped>
-.checklist-move,
-  /* apply transition to moving elements */
-.checklist-enter-active,
-.checklist-leave-active {
-  transition: all 0.5s ease;
-}
-
-.checklist-enter-from,
-.checklist-leave-to {
-  opacity: 0;
-}
-
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.checklist-leave-active {
-  position: absolute;
-  width: 100%;
-}
-
-.nothing-yet-enter-active {
-  transition: opacity 0.5s ease;
-}
-
-.nothing-yet-enter-from,
-.nothing-yet-leave-from,
-.nothing-yet-leave-active {
-  opacity: 0;
-}
 </style>

@@ -21,6 +21,10 @@ export function isState(obj: unknown): obj is StateInterface {
         ) &&
         (typedObj["user"] === null ||
             isUser(typedObj["user"]) as boolean) &&
+        Array.isArray(typedObj["checklistSubscriptions"]) &&
+        typedObj["checklistSubscriptions"].every((e: any) =>
+            typeof e === "string"
+        ) &&
         Array.isArray(typedObj["invites"]) &&
         typedObj["invites"].every((e: any) =>
             isInvite(e) as boolean
