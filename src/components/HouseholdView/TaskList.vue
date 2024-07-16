@@ -1,6 +1,11 @@
 <template>
   <ion-page>
-    <ion-content v-if="household">
+    <ion-content
+      v-if="household"
+      :scroll-y="scrollingInTaskListAllowed"
+      :scroll-events="true"
+      @ionScroll="onTaskViewScroll"
+    >
       <div class="horizontal-scroll">
         <div class="scroll-inner-container">
           <ion-chip
@@ -23,6 +28,7 @@
       >
         <TaskView
           v-for="(task) in filteredTasks"
+          ref="taskView"
           :key="task.id"
           :task="task"
           :household="household"
@@ -90,13 +96,15 @@ import {
 } from "@ionic/vue";
 import { computed, inject, ref } from 'vue';
 import { CirclePlusIcon, PlusIcon, XIcon } from 'vue-tabler-icons';
-import TaskView from '../TaskView.vue';
+import TaskView from "@/components/TaskView.vue";
+import { onTaskViewScroll, scrollingInTaskListAllowed } from "@/swipe/task-list-scroll";
 
 const getters = inject(gettersSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const selectedCategory = ref<IconName|null>(null);
+const taskView = ref<InstanceType<typeof TaskView>>();
 
 const household = computed(() => getters.household.value);
 const sortedTasks = computed(() => getters.tasks.value.concat().sort(taskSortByPriority));

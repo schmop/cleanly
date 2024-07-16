@@ -89,13 +89,6 @@
         <div
           ref="slider"
           :class="['w-100', 'slider', {'loading': waitingForTaskDoneResponse}]"
-          @mousedown="startDrag"
-          @mouseup="endDrag"
-          @mousemove="drag"
-          @touchstart="startDrag"
-          @touchend="endDrag"
-          @touchcancel="endDrag"
-          @touchmove="drag"
         >
           <div class="progress-background soft">
             <div
@@ -173,10 +166,10 @@ import {
   PickerColumnOption,
   pickerController,
 } from "@ionic/vue";
-import { computed, inject, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
 import confetti from 'canvas-confetti';
-import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { clearTaskSwipe, registerTaskSwipe } from "@/swipe/task-swipe";
 
 
 const props = defineProps<{
@@ -192,6 +185,7 @@ const householdClient = inject(householdClientSymbol)!;
 
 const actionsVisible = ref(false);
 const waitingForTaskDoneResponse = ref(false);
+const slider = ref<HTMLElement | null>(null);
 
 const useSwipe = computed(() => state.userSettings.swipeToFinishTasks);
 const icon = computed(() => isValidIcon(props.task.icon) ? props.task.icon : 'check');
@@ -359,78 +353,15 @@ function closeActions(event: FocusEvent) {
   actionsVisible.value = false;
 }
 
-// Slider
-const slider = ref<HTMLDivElement | null>(null);
-type Position = {x: number, y: number};
-function positionFromEvent(event: MouseEvent | TouchEvent): Position {
-  if (event instanceof MouseEvent) {
-    return {x: event.clientX, y: event.clientY};
-  }
-  return {x: event.touches[0]!.clientX, y: event.touches[0]!.clientY};
-}
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-let startPos: Position|null = null;
-let lastPos: Position|null = null;
-let startWidth: number = 0;
-let swipeStarted: boolean = false;
-function reset() {
-  startPos = null;
-  lastPos = null;
-  swipeStarted = false;
-}
-function startDrag(event: MouseEvent | TouchEvent) {
-  if (null === slider.value || !props.showActions) {
+onMounted(() => {
+  if (!props.showActions || !useSwipe.value) {
     return;
   }
-  slider.value.style.transition = 'width 0 ease, left 0 ease';
-  startWidth = slider.value.getBoundingClientRect().width;
-  lastPos = startPos = positionFromEvent(event);
-}
-function drag(event: MouseEvent | TouchEvent) {
-  if (null === slider.value || startPos === null || lastPos === null) {
-    reset();
+  if (slider.value == null) {
+    console.error('Could not find slider element, swipe was deactivated!');
     return;
   }
-  const pos = positionFromEvent(event);
-  const movement = pos.x - startPos.x;
-  const lastMovement = lastPos.x - startPos.x;
-  if (!swipeStarted && Math.abs(movement) < 30) {
-    return;
-  }
-  swipeStarted = true;
-  const width = clamp((startWidth - Math.abs(movement)) / startWidth * 100, 0, 100);
-  const swipeWouldTrigger = Math.abs(movement) > startWidth / 2;
-  const swipeWasTriggering = Math.abs(lastMovement) > startWidth / 2;
-  if (swipeWouldTrigger !== swipeWasTriggering) {
-    void Haptics.impact({
-      style: ImpactStyle.Light
-    });
-  }
-  slider.value.style.width = `${width}%`;
-  slider.value.style.left = `${clamp(movement, 0, startWidth)}px`;
-  slider.value.style.transition = 'width 0s ease, left 0s ease';
-  slider.value.style.backgroundColor = swipeWouldTrigger ? 'var(--ion-color-success)' : 'var(--ion-color-primary)';
-  lastPos = pos;
-
-}
-async function endDrag(_event: MouseEvent | TouchEvent) {
-  if (null === slider.value || startPos === null || lastPos === null) {
-    reset();
-    return;
-  }
-  const movement = lastPos.x - startPos.x;
-  const swipeWouldTrigger = Math.abs(movement) > startWidth / 2;
-  slider.value.style.transition = 'width 0.25s ease, left 0.25s ease';
-  slider.value.style.backgroundColor = 'inherit';
-  slider.value.style.width = '100%';
-  slider.value.style.left = '0px';
-  reset();
-  if (swipeWouldTrigger) {
-    void Haptics.impact({
-      style: ImpactStyle.Heavy
-    });
+  registerTaskSwipe(slider.value, async () => {
     if (await markDone()) {
       void confetti({
         shapes: ['star'],
@@ -443,8 +374,12 @@ async function endDrag(_event: MouseEvent | TouchEvent) {
         disableForReducedMotion: true,
       });
     }
-  }
-}
+  })
+});
+onBeforeUnmount(() => {
+  clearTaskSwipe();
+})
+
 
 </script>
 
@@ -481,7 +416,7 @@ async function endDrag(_event: MouseEvent | TouchEvent) {
 }
 
 .progress-background {
-  width: 100%;
+  width: calc(100% - 4px);
   margin: 0 2px;
 }
 
