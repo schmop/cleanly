@@ -1,80 +1,89 @@
 <template>
   <ion-page>
     <ion-content>
-      <ion-card
-        v-for="(checklist) in checklists"
-        :key="checklist.uuid"
-        @click="openChecklist(checklist.uuid)"
+      <ion-reorder-group
+        :disabled="false"
+        @ionItemReorder="reorder"
       >
-        <ion-card-header
-          v-if="checklist.uuid !== renameState.checklist?.uuid"
-          class="action-header"
+        <ion-card
+          v-for="(checklist) in checklists"
+          :key="checklist.uuid"
+          @click="openChecklist(checklist.uuid)"
         >
-          <ion-card-title>
-            {{ checklist.name }}
-          </ion-card-title>
-          <ion-buttons>
-            <ion-button
-              v-if="store.state.checklistSubscriptions.includes(checklist.uuid)"
-              :title="_t('Unsubscribe from checklist')"
-              @click.stop="unsubscribe(checklist)"
-            >
-              <BellXIcon slot="icon-only" />
-            </ion-button>
-            <ion-button
-              v-else
-              :title="_t('Subscribe to checklist')"
-              @click.stop="subscribe(checklist)"
-            >
-              <BellIcon slot="icon-only" />
-            </ion-button>
-            <ion-button
-              :title="_t('Rename checklist')"
-              @click.stop="startRenameChecklist(checklist)"
-            >
-              <PencilIcon slot="icon-only" />
-            </ion-button>
-            <ion-button
-              :title="_t('Delete checklist')"
-              @click.stop="deleteChecklist(checklist)"
-            >
-              <TrashXIcon slot="icon-only" />
-            </ion-button>
-          </ion-buttons>
-        </ion-card-header>
-        <ion-card-header
-          v-else
-          class="action-header"
-          @click.stop
-        >
-          <ion-input
-            ref="renameInput"
-            v-model="renameState.newName"
-            :label="_t('Name')"
-            label-placement="stacked"
-            type="text"
-          />
-          <ion-buttons>
-            <ion-button
-              color="primary"
-              :title="_t('Submit rename')"
-              @click.stop="finalizeRenameChecklist()"
-            >
-              <CheckIcon slot="icon-only" />
-            </ion-button>
-            <ion-button
-              color="secondary"
-              :title="_t('Abort')"
-              @click.stop="abortRenameChecklist()"
-            >
-              <XIcon slot="icon-only" />
-            </ion-button>
-          </ion-buttons>
-        </ion-card-header>
-        <ion-card-content>
-          {{ checklist.checklist.length }} {{ _t('entries') }}
-        </ion-card-content>
-      </ion-card>
+          <ion-card-header
+            v-if="checklist.uuid !== renameState.checklist?.uuid"
+            class="action-header"
+          >
+            <ion-card-title>
+              {{ checklist.name }}
+            </ion-card-title>
+            <ion-buttons>
+              <ion-button
+                v-if="store.state.checklistSubscriptions.includes(checklist.uuid)"
+                :title="_t('Unsubscribe from checklist')"
+                @click.stop="unsubscribe(checklist)"
+              >
+                <BellXIcon slot="icon-only" />
+              </ion-button>
+              <ion-button
+                v-else
+                :title="_t('Subscribe to checklist')"
+                @click.stop="subscribe(checklist)"
+              >
+                <BellIcon slot="icon-only" />
+              </ion-button>
+              <ion-button
+                :title="_t('Rename checklist')"
+                @click.stop="startRenameChecklist(checklist)"
+              >
+                <PencilIcon slot="icon-only" />
+              </ion-button>
+              <ion-button
+                :title="_t('Delete checklist')"
+                @click.stop="deleteChecklist(checklist)"
+              >
+                <TrashXIcon slot="icon-only" />
+              </ion-button>
+            </ion-buttons>
+          </ion-card-header>
+          <ion-card-header
+            v-else
+            class="action-header"
+            @click.stop
+          >
+            <ion-input
+              ref="renameInput"
+              v-model="renameState.newName"
+              :label="_t('Name')"
+              label-placement="stacked"
+              type="text"
+            />
+            <ion-buttons>
+              <ion-button
+                color="primary"
+                :title="_t('Submit rename')"
+                @click.stop="finalizeRenameChecklist()"
+              >
+                <CheckIcon slot="icon-only" />
+              </ion-button>
+              <ion-button
+                color="secondary"
+                :title="_t('Abort')"
+                @click.stop="abortRenameChecklist()"
+              >
+                <XIcon slot="icon-only" />
+              </ion-button>
+            </ion-buttons>
+          </ion-card-header>
+          <ion-card-content class="action-header fixed-height">
+            <ion-reorder
+              slot="end"
+              @click.stop
+            />
+            {{ checklist.checklist.length }} {{ _t('entries') }}
+          </ion-card-content>
+        </ion-card>
+      </ion-reorder-group>
       <ion-card
         v-if="checklists.length === 0"
         key="nothing-yet"
@@ -113,7 +122,7 @@ import {
 } from "@/dependency-injection/injection-keys";
 import { Checklist } from "@/models/Household";
 import router from "@/router";
-import { error, showThrownError, success } from "@/toast";
+import { showThrownError, success, warning } from "@/toast";
 import { __t, _t } from "@/translation";
 import {
   IonButton,
@@ -126,9 +135,12 @@ import {
   IonInput,
   IonPage,
   IonRefresher,
-  IonRefresherContent
+  IonRefresherContent,
+  IonReorder,
+  IonReorderGroup,
+  ItemReorderCustomEvent
 } from "@ionic/vue";
-import { computed, ComputedRef, inject, nextTick, reactive, ref } from "vue";
+import { computed, inject, nextTick, reactive, ref, watch } from "vue";
 import { BellIcon, BellXIcon, CheckIcon, PencilIcon, PlusIcon, TrashXIcon, XIcon } from "vue-tabler-icons";
 
 const dashboardRefresher = inject(dashboardRefresherSymbol)!;
@@ -140,18 +152,24 @@ const canManageChecklists = computed(() => getters.canManageChecklists.value());
 const household = computed(() => {
   return getters.household.value;
 });
-const checklists: ComputedRef<Checklist[]> = computed(() => {
-  const householdId = household.value?.id;
-  if (null == householdId) {
-    void error('No household selected');
-    return [];
-  }
-  return getters.checklists.value(householdId) ?? [];
-});
+const checklists = ref<Checklist[]>([]);
+watch(household, () => {
+  const unsortedChecklists = household.value?.checklists ?? [];
 
-const renameInput = ref<{$el: HTMLIonInputElement}[]|null>(null);
+  checklists.value = unsortedChecklists.sort((a: Checklist, b: Checklist) => {
+    if (a.rank < b.rank) {
+      return -1;
+    }
+    if (a.rank > b.rank) {
+      return 1;
+    }
+    return 0;
+  });
+}, {immediate: true});
+
+const renameInput = ref<{ $el: HTMLIonInputElement }[] | null>(null);
 const renameState = reactive({
-  checklist: null as Readonly<Checklist>|null,
+  checklist: null as Readonly<Checklist> | null,
   newName: '',
 });
 
@@ -161,6 +179,7 @@ async function createChecklist() {
 }
 
 async function openChecklist(uuid: string) {
+  abortRenameChecklist();
   store.openChecklist(uuid);
   await router.push({name: 'checklist'});
 }
@@ -180,6 +199,23 @@ async function unsubscribe(checklist: Checklist) {
     await householdClient.unsubscribeFromChecklist(checklist.uuid);
     store.unsubscribeFromChecklist(checklist.uuid);
     await success(__t('Unsubscribed from "{0}"', checklist.name));
+  } catch (err) {
+    await showThrownError(err);
+  }
+}
+
+async function reorder(event: ItemReorderCustomEvent) {
+  const movingUuid = checklists.value[event.detail.from]?.uuid;
+  if (null == movingUuid) {
+    void warning(_t('You just resorted nonexistent checklists!'));
+    return;
+  }
+  const moveAfterUuid = event.detail.from < event.detail.to
+    ? checklists.value[event.detail.to]?.uuid
+    : checklists.value[event.detail.to - 1]?.uuid;
+  checklists.value = event.detail.complete(checklists.value) as Checklist[];
+  try {
+    await householdClient.moveChecklist(movingUuid, moveAfterUuid ?? null);
   } catch (err) {
     await showThrownError(err);
   }
@@ -228,5 +264,8 @@ async function deleteChecklist(checklist: Checklist) {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+}
+.fixed-height {
+  height: 32px;
 }
 </style>

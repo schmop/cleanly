@@ -248,5 +248,7 @@ export const german = {
     'Abort': 'Abbrechen',
     'Submit rename': 'Umbenennen',
     'New name': 'Neuer Name',
+    'Subscribe to checklist': 'Checkliste abonnieren',
+    'Unsubscribe from checklist': 'Checkliste deabonnieren',
     '': '',
 };

@@ -40,7 +40,8 @@ export function isHousehold(obj: unknown): obj is Household {
             Array.isArray(e["checklist"]) &&
             e["checklist"].every((e: any) =>
                 isTodo(e) as boolean
-            )
+            ) &&
+            typeof e["rank"] === "string"
         ) &&
         typeof typedObj["reassignmentStrategy"] === "string"
     )

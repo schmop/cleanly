@@ -185,6 +185,18 @@ export class HouseholdClient {
         }
     }
 
+    async moveChecklist(checklistUuid: string, moveAfterUuid: string|null) {
+        const response = await this.client.sendJsonEventually(
+            'POST',
+            `api/household/checklist/${checklistUuid}/move`,
+            {moveAfterUuid},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "reordering the checklist");
+        }
+    }
+
     async deleteChecklist(checklistUuid: string) {
         const response = await this.client.requestEventually(
             'DELETE',

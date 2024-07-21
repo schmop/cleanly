@@ -79,7 +79,6 @@ function createSwipeState(node: HTMLElement, triggerCallback: Callback) {
         const pos = positionFromEvent(event);
         const movement = pos.x - startPos.x;
         const lastMovement = lastPos.x - startPos.x;
-        const width = clamp((startRect.width - Math.abs(movement)) / startRect.width * 100, 0, 100);
         const swipeWouldTrigger = Math.abs(movement) > startRect.width / 2;
         const swipeWasTriggering = Math.abs(lastMovement) > startRect.width / 2;
         if (swipeWouldTrigger !== swipeWasTriggering) {
@@ -87,6 +86,7 @@ function createSwipeState(node: HTMLElement, triggerCallback: Callback) {
                 style: ImpactStyle.Light
             });
         }
+        const width = clamp((startRect.width - Math.abs(movement)) / startRect.width * 100, 0, 100);
         node.style.width = `${width}%`;
         node.style.left = `${clamp(movement, 0, startRect?.width)}px`;
         node.style.transition = 'width 0s ease, left 0s ease';
