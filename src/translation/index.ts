@@ -1,8 +1,10 @@
 import { container } from '@/dependency-injection/container';
 import { keyOf } from "@/types";
 import { german } from './german';
+import { schwobi } from "@/translation/german_schwobi";
 
 const state = container.getStore().state;
+export type Language = 'en' | 'de' | 'schwobi';
 
 function formatString(string: string, ...args: (string|number)[]) {
     return string.replace(/{([0-9]+)}/g, (match, index) => {
@@ -16,21 +18,36 @@ function formatString(string: string, ...args: (string|number)[]) {
     });
 }
 
-function language(): string {
+function language(): Language {
     return state?.userSettings.language ?? 'de';
 }
 
+function languageDict() {
+    if (language() === 'en') {
+        return {};
+    }
+    if (language() === 'de') {
+        return german;
+    }
+    if (language() === 'schwobi') {
+        return schwobi;
+    }
+    console.warn('Unknown language', language());
+    return {};
+}
+
 export function _t(text: string) {
-    if (language() !== 'de') {
+    if (language() === 'en') {
         return text;
     }
-    if (!keyOf(text, german)) {
-        console.warn('Untranslated text', text);
+    const dict = languageDict();
+    if (!keyOf(text, dict)) {
+        console.warn(`Untranslated text "${text}" in language ${language()}`);
 
         return text;
     }
 
-    return german[text];
+    return dict[text];
 }
 
 export function _n(singular: string, plural: string, num: number) {

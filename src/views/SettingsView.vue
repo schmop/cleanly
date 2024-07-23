@@ -19,6 +19,9 @@
                 <ion-select-option value="de">
                   {{ _t('German') }}
                 </ion-select-option>
+                <ion-select-option value="schwobi">
+                  {{ _t('Swabian') }}
+                </ion-select-option>
                 <ion-select-option value="en">
                   {{ _t('English') }}
                 </ion-select-option>
@@ -111,7 +114,7 @@
 import { storeSymbol, userClientSymbol } from "@/dependency-injection/injection-keys";
 import { UserSettings } from '@/models/UserSettings';
 import toast from '@/toast';
-import { _t } from '@/translation';
+import { _t, Language } from '@/translation';
 import { SelectCustomEvent } from "@ionic/core";
 import {
   IonButton,
@@ -141,7 +144,7 @@ const notifyTaskDue = ref(true);
 const notifyTaskDone = ref(true);
 const notifyInvites = ref(true);
 const swipeToFinishTasks = ref(false);
-const language = ref('de');
+const language = ref<Language>('de');
 
 function resetUiToStore() {
   const settings = store.state.userSettings;
@@ -172,7 +175,7 @@ function toggleSwipeToFinishTasks() {
   swipeToFinishTasks.value = !swipeToFinishTasks.value;
 }
 
-function changeLanguage(event: SelectCustomEvent<string>) {
+function changeLanguage(event: SelectCustomEvent<Language>) {
   language.value = event.detail.value;
 }
 

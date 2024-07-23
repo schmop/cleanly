@@ -208,5 +208,6 @@ export const german = {
     'Do you really want to delete "{0}" and all its contents?': 'Willst du wirklich "{0}" und alle seine Inhalte löschen?',
     'Checklist "{0}" deleted': 'Checkliste "{0}" wurde gelöscht',
     'You have no checklists': 'Du hast keine Checklisten',
+    'Swabian': 'Schwäbisch',
     '': '',
 };

@@ -4,6 +4,7 @@ import chalk from "chalk";
 import { german } from "../src/translation/german";
 import { keys } from "../src/common/keys";
 import { entries } from "../src/common/entries";
+import { schwobi } from "../src/translation/german_schwobi";
 
 const project = new Project({
     tsConfigFilePath: "./tsconfig.json",
@@ -14,6 +15,11 @@ const sourceFiles = await addSourceFiles(project);
 const excludedPaths = [
     "src/translation/",
 ]
+
+const languages = {
+    german,
+    schwobi,
+};
 
 const translationFunctionNames = ["_t", "__t", "_n", "__n"];
 // Vue compiler unrefs imports
@@ -40,7 +46,6 @@ function warn(node: Node, message: string) {
     const highlightColStart = sourceFile.getLineAndColumnAtPos(node.getStart()).column - 1;
     const highlightColEnd = sourceFile.getLineAndColumnAtPos(node.getEnd()).column - 1;
     const squiggle = " ".repeat(highlightColStart) + "^".repeat(highlightColEnd - highlightColStart);
-    //console.warn(`${fileName} (${startLine}:${startLinePos}): ${message}\n${faultySource}\n${squiggle}`);
     console.warn(
         chalk.white(fileName)
         + chalk.cyan(` (${startLine}:${startLinePos})`) + ": "
@@ -91,7 +96,6 @@ function collectExpressionStringLiterals(node: Node) {
 }
 
 sourceFiles.forEach(sourceFile => {
-    //console.log("Checking file", sourceFile.getFilePath());
     if (excludedPaths.some(path => sourceFile.getFilePath().includes(path))) {
         return;
     }
@@ -111,9 +115,6 @@ sourceFiles.forEach(sourceFile => {
     });
 });
 
-const languages = {
-    german,
-};
 let hasMissingTranslations: boolean = false;
 entries(languages).forEach(([languageName, language]) => {
     const translationStringCopy: Set<string> = new Set(translatableStrings);
