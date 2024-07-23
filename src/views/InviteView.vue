@@ -8,7 +8,7 @@
         <ion-card-header>
           <ion-card-title>
             <ion-text color="secondary">
-              <i>{{ invite.inviter?.name ?? _t('Someone') }}</i>
+              <i>{{ invite.inviter?.name ?? _t('someone') }}</i>
             </ion-text>
             {{ _t('invited you to') }}
             <ion-text color="secondary">

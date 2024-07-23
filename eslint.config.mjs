@@ -15,7 +15,7 @@ const compat = new FlatCompat({
 });
 
 export default [{
-    ignores: ["**/*.guard.ts", "**/*.js", "**/capacitor.config.ts", "**/eslint.config.mjs"],
+    ignores: ["**/*.guard.ts", "**/*.js", "**/capacitor.config.ts", "**/eslint.config.mjs", "bin/**"],
 }, ...compat.extends(
     "plugin:vue/vue3-recommended",
     "eslint:recommended",

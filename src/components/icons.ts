@@ -1,6 +1,56 @@
-import { AlarmIcon, BarbellIcon, BikeIcon, BookIcon, BooksIcon, CandleIcon, CarIcon, CheckIcon, DiceIcon, FlagIcon, HammerIcon, HeadphonesIcon, HeartIcon, HeartbeatIcon, HourglassEmptyIcon, MoonIcon, RadioIcon, ScissorsIcon, ShoeIcon, SunglassesIcon, VideoIcon, NewsIcon, AppleIcon, PawIcon, UserIcon, GlassIcon, ToolsKitchenIcon, FlowerIcon, SchoolIcon, ShirtIcon, TrainIcon, WalletIcon, DropletIcon, BucketIcon, BottleIcon, BathIcon, VacuumCleanerIcon, WashMachineIcon, HangerIcon, SockIcon, TeapotIcon, FridgeIcon, ToiletPaperIcon, MicrowaveIcon, BasketIcon, TrashIcon, Ironing2Icon } from 'vue-tabler-icons';
+import {
+    AlarmIcon,
+    BarbellIcon,
+    BikeIcon,
+    BookIcon,
+    BooksIcon,
+    CandleIcon,
+    CarIcon,
+    CheckIcon,
+    DiceIcon,
+    FlagIcon,
+    HammerIcon,
+    HeadphonesIcon,
+    HeartIcon,
+    HeartbeatIcon,
+    HourglassEmptyIcon,
+    MoonIcon,
+    RadioIcon,
+    ScissorsIcon,
+    ShoeIcon,
+    SunglassesIcon,
+    VideoIcon,
+    NewsIcon,
+    AppleIcon,
+    PawIcon,
+    UserIcon,
+    GlassIcon,
+    ToolsKitchenIcon,
+    FlowerIcon,
+    SchoolIcon,
+    ShirtIcon,
+    TrainIcon,
+    WalletIcon,
+    DropletIcon,
+    BucketIcon,
+    BottleIcon,
+    BathIcon,
+    VacuumCleanerIcon,
+    WashMachineIcon,
+    HangerIcon,
+    SockIcon,
+    TeapotIcon,
+    FridgeIcon,
+    ToiletPaperIcon,
+    MicrowaveIcon,
+    BasketIcon,
+    TrashIcon,
+    Ironing2Icon,
+    TablerIconComponent
+} from 'vue-tabler-icons';
+import { keys } from "@/common/keys";
 
-export const icons = {
+const _icons = {
     'alarm': AlarmIcon,
     'apple': AppleIcon,
     'barbell': BarbellIcon,
@@ -50,8 +100,11 @@ export const icons = {
     'wash-machine': WashMachineIcon,
 };
 
-export type IconName = keyof typeof icons;
+export type IconName = keyof typeof _icons;
 
 export function isValidIcon(icon: string): icon is IconName {
     return icon in icons;
 }
+
+export const icons: Record<IconName, TablerIconComponent> = _icons;
+export const iconNames: IconName[] = keys(_icons);

@@ -124,6 +124,7 @@ import { computed, inject, Ref, ref } from "vue";
 import { CirclePlusIcon, CircleXIcon, ClockIcon, PaletteIcon, PencilIcon, StarIcon } from 'vue-tabler-icons';
 import ColorPicker from "./ColorPicker.vue";
 import IconPicker from "./IconPicker.vue";
+import { entries } from "@/common/entries";
 
 const props = defineProps<{
   id?: number,
@@ -198,7 +199,7 @@ async function openDurationPicker() {
     .filter((val) => val)
     .map((index) => ({text: `${index}`, value: index}));
   const countSelectedIndex = countOptions.findIndex(count => count.value === duration.value);
-  const modifierOptions = Object.entries(durationModifiers).map(
+  const modifierOptions = entries(durationModifiers).map(
     ([text]) => ({text: _t(text), value: text, selected: text === durationModifier.value})
   );
   type ConfirmData = {
@@ -235,7 +236,7 @@ async function openDurationPicker() {
         text: _t("Confirm"),
         handler: ({count, modifier}: ConfirmData) => {
           duration.value = count.value;
-          durationModifier.value = modifier.value as keyof typeof DURATION_SIZES;
+          durationModifier.value = modifier.value;
         },
       },
     ],

@@ -1,5 +1,6 @@
-import { _n, _t, __t, } from "@/translation";
+import { __t, _n, _t, } from "@/translation";
 import { Entries } from "@/types";
+import { entries, entriesOfPartial } from "@/common/entries";
 
 export const DAY_IN_SECONDS = 60 * 60 * 24;
 export const DAY_IN_HOURS = 24;
@@ -13,7 +14,7 @@ export function secondsToDays(seconds: number) {
     return Math.floor(seconds / DAY_IN_SECONDS);
 }
 
-export const DAY_FORMATTING_SIZES: { [durationName: string]: number } = {
+export const DAY_FORMATTING_SIZES = {
     days: 1,
     months: 30,
     years: 365,
@@ -33,15 +34,30 @@ export const DURATION_SIZES = {
     years: 365,
 };
 
-function pluralToSingular(timeName: string): string {
-    // remove plural (s)
-    // weeks -> week
-    return timeName.slice(0, -1);
+export type DurationName = keyof typeof DURATION_SIZES
+    | keyof typeof DAY_FORMATTING_SIZES
+    | keyof typeof HOUR_FORMATTING_SIZES;
+
+export type SingularDurationName = 'day' | 'week' | 'month' | 'year' | 'hour';
+
+function pluralToSingular(timeName: DurationName): SingularDurationName {
+    switch (timeName) {
+        case 'days':
+            return 'day';
+        case 'weeks':
+            return 'week';
+        case 'months':
+            return 'month';
+        case 'years':
+            return 'year';
+        case 'hours':
+            return 'hour';
+    }
 }
 
-function formatInterval(someTime: number, someDurations: { [durationName: string]: number }, maxDepth = Infinity): string {
+function formatInterval(someTime: number, someDurations: Partial<Record<DurationName, number>>, maxDepth = Infinity): string {
     let string = '';
-    const sortedDurations = Object.entries(someDurations).sort(([, a], [, b]) => b - a);
+    const sortedDurations: ([DurationName, number])[] = entriesOfPartial(someDurations).sort(([, a], [, b]) => b - a);
     let depth = 0;
 
     for (const [name, duration] of sortedDurations) {
@@ -99,17 +115,26 @@ export function roundedRecurringInterval(days: number|null): string {
         return _t('everyday');
     }
 
-    const sortedDurations = Object.entries(DURATION_SIZES).sort(([, a], [, b]) => b - a);
+    const sortedDurations = entries(DURATION_SIZES).sort(([, a], [, b]) => b - a);
 
     for (const [name, duration] of sortedDurations) {
         const num = Math.floor(days / duration);
         const rest = days % duration;
         if (num > 0 && rest === 0) {
             if (num === 1) {
-                return _t(`every ${pluralToSingular(name)}`);
+                switch (name) {
+                    case 'days':
+                        return _t('everyday');
+                    case 'weeks':
+                        return _t('every week');
+                    case 'months':
+                        return _t('every month');
+                    case 'years':
+                        return _t('every year');
+                }
             }
 
-            return __t(`every {0} ${name}`, num);
+            return __t('every {0} {1}', num, _t(name));
         }
     }
 

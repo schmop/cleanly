@@ -1,5 +1,5 @@
 export default function debounce(func: (...args: any[]) => any, wait: number, immediate: boolean) {
-    let timeout = undefined as number|undefined;
+    let timeout: number|undefined = undefined;
     let calledBetween = false;
     return function (this: any, ...rest: []) {
         const later = () => {
