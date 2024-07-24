@@ -1,0 +1,36 @@
+name: Cleanly Actions
+run-name: ${{ gitea.actor }} is running ${{ gitea.workflow }} on ${{ gitea.repository }}
+on: [push]
+
+jobs:
+  Check client build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install npm
+        uses: actions/setup-node@v4
+      - name: Install yarn
+        run: npm install -g yarn
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: yarn --immutable
+      - name: Build
+        run: yarn build
+      - name: Check Translations
+        run: yarn translations
+      - name: Check ts-auto-guard up to date
+        run: yarn ts-auto-guard && [ -z "$(git diff)" ]
+      - name: Send mail
+        if: failure()
+        uses: https://github.com/dawidd6/action-send-mail@v3
+        with:
+          connection_url: ${{ secrets.MAIL_CONNECTION }}
+          to: ${{ secrets.MAIL_TO }}
+          from: Gitea <gitea@schmoppo.de>
+          subject: ${{ gitea.repository }} ${{gitea.workflow}} ${{ job.status }}
+          priority: high
+          convert_markdown: true
+          html_body: |
+            ### Job ${{ job.status }}
+            
+            ${{ github.repository }}: [${{ github.ref }}@${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/actions)

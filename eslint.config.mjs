@@ -15,7 +15,15 @@ const compat = new FlatCompat({
 });
 
 export default [{
-    ignores: ["**/*.guard.ts", "**/*.js", "**/capacitor.config.ts", "**/eslint.config.mjs", "bin/**"],
+    ignores: [
+        "**/*.guard.ts",
+        "**/*.js",
+        "**/capacitor.config.ts",
+        "**/eslint.config.mjs",
+        "babel.config.cjs",
+        "jest.config.cjs",
+        "bin/**",
+    ],
 }, ...compat.extends(
     "plugin:vue/vue3-recommended",
     "eslint:recommended",
@@ -51,6 +59,7 @@ export default [{
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-inferrable-types": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
+        //"@typescript-eslint/explicit-function-return-type": "error",
 
         "@typescript-eslint/no-unused-vars": ["error", {
             argsIgnorePattern: "^_",
