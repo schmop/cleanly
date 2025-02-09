@@ -8,7 +8,7 @@
   </ion-header>
   <ion-content color="light">
     <div class="content">
-      <ColorPicker
+      <VueColorPicker
         class="color-picker"
         :hue="color.hue"
         :saturation="color.saturation"
@@ -64,7 +64,7 @@ import '@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css';
 import { stateSymbol } from '@/dependency-injection/injection-keys';
 import { __t, _t } from '@/translation';
 import { IonButton, IonContent, IonFooter, IonHeader, IonTitle, IonToolbar, modalController } from "@ionic/vue";
-import ColorPicker from '@radial-color-picker/vue-color-picker';
+import VueColorPicker from '@radial-color-picker/vue-color-picker';
 import { computed, inject, ref } from 'vue';
 import { CircleXIcon, PaletteIcon } from 'vue-tabler-icons';
 
