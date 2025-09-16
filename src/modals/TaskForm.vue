@@ -102,7 +102,7 @@ import { DURATION_SIZES, exactRecurringInterval } from '@/common/time';
 import { IconName, icons, isValidIcon } from "@/components/icons";
 import { stateSymbol, taskClientSymbol } from "@/dependency-injection/injection-keys";
 import { Task } from '@/models/Task';
-import toast from "@/toast";
+import toast, { showThrownError } from "@/toast";
 import { __t, _t } from "@/translation";
 import { ArrayElement } from "@/types";
 import {
@@ -250,14 +250,14 @@ async function submit() {
       await taskClient.editTask(props.task!, taskName.value, icon.value, hue.value, calculatedDuration.value, parseInt(stars.value));
       await toast.success(_t('Task edited successfully'));
     } catch (e) {
-      await toast.error(_t('Could not edit task'));
+      await showThrownError(e, 'editing the task');
     }
   } else {
     try {
       await taskClient.addNewTask(props.id!, taskName.value, icon.value, hue.value, calculatedDuration.value, parseInt(stars.value));
       await toast.success(_t('Task created successfully'));
     } catch (e) {
-      await toast.error(_t('Could not add task'));
+      await showThrownError(e, 'adding the task');
     }
   }
   await dismiss();

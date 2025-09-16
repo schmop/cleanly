@@ -48,7 +48,7 @@ export class PushService {
             });
             void PushNotifications.addListener('registrationError', err => {
                 console.error('Registration error: ', err.error);
-                reject(err);
+                reject(new Error(err.error));
             });
         })
         await PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => console.info('Received a notification', notification));

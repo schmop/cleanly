@@ -40,7 +40,7 @@ export class Localstore {
             this.store.overrideState(reactive(localState));
             console.info("State loaded from device storage!");
         } catch (err) {
-            console.warn('No local state found...');
+            console.warn('No local state found...', err);
         }
     }
 

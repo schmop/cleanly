@@ -138,8 +138,9 @@ import {
   IonRefresherContent,
   IonReorder,
   IonReorderGroup,
-  ItemReorderCustomEvent
+  ItemReorderCustomEvent,
 } from "@ionic/vue";
+import {Components} from "@ionic/core";
 import { computed, inject, nextTick, reactive, ref, watch } from "vue";
 import { BellIcon, BellXIcon, CheckIcon, PencilIcon, PlusIcon, TrashXIcon, XIcon } from "vue-tabler-icons";
 
@@ -167,7 +168,7 @@ watch(household, () => {
   });
 }, {immediate: true});
 
-const renameInput = ref<{ $el: HTMLIonInputElement }[] | null>(null);
+const renameInput = ref<{ $el: Components.IonInput }[] | null>(null);
 const renameState = reactive({
   checklist: null as Readonly<Checklist> | null,
   newName: '',

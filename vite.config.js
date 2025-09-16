@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import * as path from "node:path";
 import checker from 'vite-plugin-checker';
 import eslintPlugin from "vite-plugin-eslint";
+import legacy from '@vitejs/plugin-legacy';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
             vueTsc: true,
         }),
         eslintPlugin(),
+        legacy(),
     ],
     server: {
         port: 8080,

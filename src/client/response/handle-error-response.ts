@@ -7,7 +7,7 @@ export async function handleErrorResponse(response: Response, context: string) {
         if (isErrorResponse(data)) {
             reason = data.reason;
         }
-    } catch (err: any) {
+    } catch (_err: any) {
         /** Ignore errors parsing invalid JSON */
     }
     if (typeof reason !== 'string') {

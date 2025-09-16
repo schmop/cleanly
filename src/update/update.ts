@@ -16,7 +16,7 @@ export async function checkAppVersion() {
     }
     try {
         await AppUpdate.performImmediateUpdate();
-    } catch (err) {
+    } catch (_err) {
         await AppUpdate.openAppStore();
     }
 }
