@@ -4,6 +4,12 @@
 	"webDir": "dist",
 	"bundledWebRuntime": false,
 	"plugins": {
+		"Keyboard": {
+			"resizeOnFullScreen": true
+		},
+		"StatusBar": {
+			"overlaysWebView": false
+		},
 		"PushNotifications": {
 			"presentationOptions": [
 				"badge",
@@ -11,5 +17,12 @@
 				"alert"
 			]
 		}
+	},
+	"android": {
+		"adjustMarginsForEdgeToEdge": "force"
+	},
+	"server": {
+		"cleartext": true,
+		"androidScheme": "http"
 	}
 }

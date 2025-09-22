@@ -2,4 +2,5 @@
 export interface Todo {
     uuid: string,
     content: string,
+    checked_at: number|null,
 }

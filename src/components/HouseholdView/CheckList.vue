@@ -1,6 +1,29 @@
 <template>
   <ion-page>
     <ion-content>
+      <ion-toolbar class="position-sticky">
+        <ion-button
+          slot="start"
+          vertical="bottom"
+          horizontal="end"
+          color="danger"
+          @click="removeChecked()"
+        >
+          <TrashIcon />
+          {{ _t('Clear checked') }}
+        </ion-button>
+        <ion-button
+          slot="end"
+          vertical="bottom"
+          horizontal="end"
+          class="position-sticky"
+          @click="addTodo(null)"
+        >
+          <PlusIcon />
+          {{ _t('Add entry') }}
+        </ion-button>
+      </ion-toolbar>
+
       <ion-reorder-group
         :disabled="false"
         @ionItemReorder="reorder"
@@ -14,7 +37,7 @@
             fill="clear"
             color="dark"
             shape="round"
-            @click.stop="markAsCompleted(index)"
+            @click.stop="markAsCompleted(todo.uuid)"
           >
             <SquareIcon slot="icon-only" />
           </ion-button>
@@ -43,15 +66,32 @@
           </ion-card>
         </Transition>
       </ion-reorder-group>
-      <ion-button
-        vertical="bottom"
-        expand="full"
-        horizontal="end"
-        @click="addTodo(null)"
-      >
-        <PlusIcon />
-        {{ _t('Add entry') }}
-      </ion-button>
+      <ion-list>
+        <ion-item
+          v-for="(todo, index) in checkedTodos"
+          :id="todo.uuid"
+          :key="todo.uuid"
+        >
+          <ion-button
+            fill="clear"
+            color="dark"
+            shape="round"
+            @click.stop="markAsCompleted(todo.uuid)"
+          >
+            <SquareXIcon slot="icon-only" />
+          </ion-button>
+          <ion-textarea
+            :id="todo.uuid"
+            v-model="todo.content"
+            :disabled="true"
+            :aria-label="_t('Checklist entry')"
+            :auto-grow="true"
+            :rows="1"
+            @ionInput="updateTodo(index, $event)"
+            @keydown.enter.prevent="addTodo(todo.uuid)"
+          />
+        </ion-item>
+      </ion-list>
       <ion-refresher
         slot="fixed"
         @ionRefresh="dashboardRefresher.forceReload($event)"
@@ -82,16 +122,18 @@ import {
   IonCardTitle,
   IonContent,
   IonItem,
+  IonList,
   IonPage,
   IonRefresher,
   IonRefresherContent,
   IonReorder,
   IonReorderGroup,
   IonTextarea,
+  IonToolbar,
   ItemReorderCustomEvent
 } from "@ionic/vue";
 import { computed, inject, reactive, Ref, ref, watch } from 'vue';
-import { PlusIcon, SquareIcon } from 'vue-tabler-icons';
+import { PlusIcon, SquareIcon, SquareXIcon, TrashIcon } from 'vue-tabler-icons';
 import { IonTextareaCustomEvent } from "@ionic/core";
 import { ChecklistUuid } from "@/types";
 
@@ -102,11 +144,13 @@ const householdClient = inject(householdClientSymbol)!;
 const dashboardRefresher = inject(dashboardRefresherSymbol)!;
 
 const household = computed(() => getters.household.value);
+const openChecklist = computed(() => household.value?.checklists.find(checklist => checklist.uuid === state.openChecklist));
 const originTodos = computed(
-  () => household.value?.checklists.find(checklist => checklist.uuid === state.openChecklist)?.checklist ?? []
+  () => openChecklist.value?.checklist ?? []
 );
 
 const todos: Ref<Todo[]> = ref([]);
+const checkedTodos: Ref<Todo[]> = ref([]);
 const eventQueue: ChecklistEventQueue = reactive<ChecklistEventQueue>({
   checklistUuid: state.openChecklist,
   events: [],
@@ -129,7 +173,14 @@ watch(
   originTodos,
   () => {
     if (undefined !== originTodos.value) {
-      todos.value = originTodos.value;
+      todos.value = originTodos.value.filter(todo => todo.checked_at === null);
+      checkedTodos.value = originTodos.value.filter(todo => todo.checked_at !== null);
+      checkedTodos.value.sort((a, b) => {
+        if (a.checked_at === null || b.checked_at === null) {
+          return 0;
+        }
+        return b.checked_at - a.checked_at;
+      });
     }
   },
   {
@@ -169,29 +220,21 @@ function updateTodo(index: number, event: IonTextareaCustomEvent<unknown>) {
   });
 }
 
-function markAsCompleted(index: number) {
+function markAsCompleted(uuid: string) {
   if (null == state.openChecklist) {
     throw new Error('No checklist open to update.');
   }
-  const [todo] = todos.value.splice(index, 1);
+  const todo = todos.value.find((t) => t.uuid === uuid) ?? checkedTodos.value.find((t) => t.uuid === uuid);
   if (undefined === todo) {
     throw new Error('Could not remove nonexistent todo.');
   }
-  const creationSynced = !eventQueue.events.some(
-    (event) => event.uuid === todo.uuid && event.type === 'create'
-  );
-  // These events won't have an effect after deletion
-  eventQueue.events = eventQueue.events.filter(
-    (event: TodoEvent) => event.uuid !== todo.uuid
-  );
-  if (creationSynced) {
-    addToQueue({
-      type: 'delete',
-      checklistUuid: state.openChecklist,
-      uuid: todo.uuid,
-      data: null,
-    });
-  }
+  todo.checked_at = null === todo.checked_at ? Date.now() : null;
+  addToQueue({
+    type: 'check',
+    checklistUuid: state.openChecklist,
+    uuid: todo.uuid,
+    data: null === todo.checked_at ? null : `${todo.checked_at}`,
+  });
 }
 
 function reorder(event: ItemReorderCustomEvent) {
@@ -237,12 +280,32 @@ function moveTodoAfterFocus(moveThis: ChecklistUuid, afterThis: ChecklistUuid): 
   }
 }
 
+function removeChecked() {
+  if (null == state.openChecklist) {
+    throw new Error('No checklist open to update.');
+  }
+  for (const checkedTodo of checkedTodos.value) {
+    const index = openChecklist.value?.checklist.indexOf(checkedTodo);
+    if (index !== undefined && index !== -1) {
+      openChecklist.value?.checklist.splice(index, 1);
+    }
+    addToQueue({
+      checklistUuid: state.openChecklist,
+      type: 'delete',
+      uuid: checkedTodo.uuid,
+      data: null,
+    });
+  }
+  checkedTodos.value = [];
+}
+
 function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
   if (null == state.openChecklist) {
     throw new Error('No checklist open to update.');
   }
-  const todo: Todo = {uuid: uuid4(), content: ''};
+  const todo: Todo = {uuid: uuid4(), content: '', checked_at: null};
   todos.value.push(todo);
+  openChecklist.value?.checklist.push(todo);
   addToQueue({
     checklistUuid: state.openChecklist,
     type: 'create',
@@ -253,7 +316,9 @@ function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
     moveTodoAfterFocus(todo.uuid, insertAfterUuid);
   }
   setTimeout(() => {
-    const todoElement: (Element & {setFocus?: () => void}) | null = document.querySelector(`ion-textarea[id="${todo.uuid}"]`);
+    const todoElement: (Element & {
+      setFocus?: () => void
+    }) | null = document.querySelector(`ion-textarea[id="${todo.uuid}"]`);
     if (null !== todoElement && typeof todoElement.setFocus === 'function') {
       todoElement?.setFocus();
     }
@@ -262,4 +327,14 @@ function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
 </script>
 
 <style scoped>
+.position-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/** Remove last line of todos */
+ion-item:last-child {
+  --inner-border-width: 0 0 0 0 !important;
+}
 </style>

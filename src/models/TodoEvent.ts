@@ -11,4 +11,4 @@ export interface ChecklistEventQueue {
     events: TodoEvent[],
 }
 
-export type TodoEventType = 'sort'|'delete'|'update'|'create';
+export type TodoEventType = 'sort'|'check'|'update'|'create'|'delete';

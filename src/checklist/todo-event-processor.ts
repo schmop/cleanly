@@ -47,6 +47,9 @@ export class TodoEventProcessor {
             case 'sort':
                 this.sort(event, checklist);
                 break;
+            case 'check':
+                this.check(event, checklist);
+                break;
             case 'delete':
                 this.delete(event, checklist);
                 break;
@@ -62,6 +65,7 @@ export class TodoEventProcessor {
         checklist.checklist.push({
             uuid: event.uuid,
             content: event.data ?? '',
+            checked_at: null,
         } as Todo);
     }
 
@@ -92,6 +96,15 @@ export class TodoEventProcessor {
             insertBeforeIndex--;
         }
         checklist.checklist.splice(insertBeforeIndex, 0, todo);
+    }
+
+    private check(event: TodoEvent, checklist: Checklist) {
+        const todo = checklist.checklist.find((todo: Todo) => todo.uuid === event.uuid);
+        if (null == todo) {
+            this.error('checking checklist entries');
+            return;
+        }
+        todo.checked_at = event.data ? Number(event.data) : null;
     }
 
     private delete(event: TodoEvent, checklist: Checklist) {

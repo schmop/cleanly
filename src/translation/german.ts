@@ -15,6 +15,7 @@ export const german = {
     'Checklist entry': 'Checklisten Eintrag',
     'Checklist': 'Checkliste',
     'Cleanly': 'Cleanly',
+    'Clear checked': 'Abgehakte löschen',
     'Color': 'Farbe',
     'Confirm': 'Bestätigen',
     'Copy': 'Kopieren',

@@ -13,9 +13,10 @@ export function isTodoEvent(obj: unknown): obj is TodoEvent {
         typeof typedObj["uuid"] === "string" &&
         typeof typedObj["checklistUuid"] === "string" &&
         (typedObj["type"] === "sort" ||
-            typedObj["type"] === "delete" ||
+            typedObj["type"] === "check" ||
             typedObj["type"] === "update" ||
-            typedObj["type"] === "create") &&
+            typedObj["type"] === "create" ||
+            typedObj["type"] === "delete") &&
         (typedObj["data"] === null ||
             typeof typedObj["data"] === "string")
     )

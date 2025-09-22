@@ -11,6 +11,8 @@ export function isTodo(obj: unknown): obj is Todo {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typeof typedObj["uuid"] === "string" &&
-        typeof typedObj["content"] === "string"
+        typeof typedObj["content"] === "string" &&
+        (typedObj["checked_at"] === null ||
+            typeof typedObj["checked_at"] === "number")
     )
 }
