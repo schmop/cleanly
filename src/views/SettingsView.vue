@@ -33,9 +33,9 @@
                 @link: https://github.com/ionic-team/ionic-framework/issues/20106#issuecomment-774001524
               -->
               <ion-toggle
-                :key="swipeToFinishTasks + (new Date()).toISOString()"
                 :label="_t('Swipe to finish tasks')"
                 :checked="swipeToFinishTasks"
+                :enable-on-off-labels="true"
                 @ionChange="toggleSwipeToFinishTasks"
               >
                 <ion-label>
@@ -56,7 +56,7 @@
           <ion-item-group>
             <ion-item>
               <ion-toggle
-                :key="notifyTaskDue + (new Date()).toISOString()"
+                :enable-on-off-labels="true"
                 :label="_t('Tasks are due')"
                 :checked="notifyTaskDue"
                 @ionChange="toggleNotifyTaskDue"
@@ -68,7 +68,7 @@
             </ion-item>
             <ion-item>
               <ion-toggle
-                :key="notifyTaskDone + (new Date()).toISOString()"
+                :enable-on-off-labels="true"
                 :label="_t('Tasks are completed')"
                 :checked="notifyTaskDone"
                 @ionChange="toggleNotifyTaskDone"
@@ -80,7 +80,7 @@
             </ion-item>
             <ion-item>
               <ion-toggle
-                :key="notifyInvites + (new Date()).toISOString()"
+                :enable-on-off-labels="true"
                 :label="_t('Invited to a household')"
                 :checked="notifyInvites"
                 @ionChange="toggleNotifyInvites"

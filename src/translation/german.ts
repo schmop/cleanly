@@ -43,6 +43,7 @@ export const german = {
     'Do you want to make {0} {1}?': 'Möchtest du {0} zum {1} ernennen?',
     'Edit task': 'Aufgabe bearbeiten',
     'English': 'Englisch',
+    'Finances': 'Finanzen',
     'Forgot password?': 'Passwort vergessen?',
     'German': 'Deutsch',
     'Household settings': 'Haushalteinstellungen',

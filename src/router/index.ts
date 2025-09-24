@@ -1,4 +1,5 @@
 import ActivityView from '@/components/HouseholdView/ActivityView.vue';
+import FinancesView from '@/components/HouseholdView/FinancesView.vue';
 import CheckList from "@/components/HouseholdView/CheckList.vue";
 import ChecklistOverview from "@/components/HouseholdView/ChecklistOverview.vue";
 import HouseholdInfo from '@/components/HouseholdView/HouseholdInfo.vue';
@@ -53,6 +54,11 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'activity',
                 component: ActivityView,
                 name: 'activity',
+            },
+            {
+                path: 'finances',
+                component: FinancesView,
+                name: 'finances',
             },
             {
                 path: 'statistics',
