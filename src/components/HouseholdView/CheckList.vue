@@ -1,29 +1,6 @@
 <template>
   <ion-page>
     <ion-content>
-      <ion-toolbar class="position-sticky">
-        <ion-button
-          slot="start"
-          vertical="bottom"
-          horizontal="end"
-          color="danger"
-          @click="removeChecked()"
-        >
-          <TrashIcon />
-          {{ _t('Clear checked') }}
-        </ion-button>
-        <ion-button
-          slot="end"
-          vertical="bottom"
-          horizontal="end"
-          class="position-sticky"
-          @click="addTodo(null)"
-        >
-          <PlusIcon />
-          {{ _t('Add entry') }}
-        </ion-button>
-      </ion-toolbar>
-
       <ion-reorder-group
         :disabled="false"
         @ionItemReorder="reorder"
@@ -92,6 +69,28 @@
           />
         </ion-item>
       </ion-list>
+      <ion-toolbar class="position-sticky">
+        <ion-button
+          slot="start"
+          vertical="bottom"
+          horizontal="end"
+          color="danger"
+          @click="removeChecked()"
+        >
+          <TrashIcon />
+          {{ _t('Clear checked') }}
+        </ion-button>
+        <ion-button
+          slot="end"
+          vertical="bottom"
+          horizontal="end"
+          class="position-sticky"
+          @click="addTodo(null)"
+        >
+          <PlusIcon />
+          {{ _t('Add entry') }}
+        </ion-button>
+      </ion-toolbar>
       <ion-refresher
         slot="fixed"
         @ionRefresh="dashboardRefresher.forceReload($event)"
@@ -329,7 +328,7 @@ function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
 <style scoped>
 .position-sticky {
   position: sticky;
-  top: 0;
+  bottom: 0;
   z-index: 10;
 }
 

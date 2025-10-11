@@ -1,7 +1,7 @@
 import { HouseholdStats, TaskStats } from "@/models/HouseholdStats";
 import { __t, _t } from "@/translation";
 import { secondsToDays } from "@/common/time";
-import { Analysis } from "@/components/HouseholdView/statistics/types";
+import { Analysis } from "@/components/HouseholdView/StatisticsView/types";
 import { Task } from "@/models/Task";
 
 export function getPunctualityData(task: Task|undefined, analysis: Analysis, statistics: HouseholdStats|null) {

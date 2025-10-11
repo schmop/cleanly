@@ -1,6 +1,6 @@
 import { Task } from "@/models/Task";
 import { __t } from "@/translation";
-import { Analysis } from "@/components/HouseholdView/statistics/types";
+import { Analysis } from "@/components/HouseholdView/StatisticsView/types";
 import { HouseholdStats } from "@/models/HouseholdStats";
 import { Household } from "@/models/Household";
 

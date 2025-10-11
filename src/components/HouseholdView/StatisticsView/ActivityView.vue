@@ -1,31 +1,21 @@
 <template>
-  <ion-page>
-    <ion-content>
-      <IonSpinner
-        v-if="isLoading"
-        class="center"
-      />
-      <ion-card v-else-if="sortedTaskLogs.length === 0">
-        <ion-card-header>
-          <ion-card-title> {{ _t('There was no activity yet in this household') }}</ion-card-title>
-        </ion-card-header>
-      </ion-card>
-      <TaskLogView
-        v-for="(log, index) in sortedTaskLogs"
-        :key="index"
-        :log="log"
-      />
-      <ion-infinite-scroll @ionInfinite="ionInfinite">
-        <ion-infinite-scroll-content />
-      </ion-infinite-scroll>
-      <ion-refresher
-        slot="fixed"
-        @ionRefresh="reload"
-      >
-        <ion-refresher-content />
-      </ion-refresher>
-    </ion-content>
-  </ion-page>
+  <IonSpinner
+    v-if="isLoading"
+    class="center"
+  />
+  <ion-card v-else-if="sortedTaskLogs.length === 0">
+    <ion-card-header>
+      <ion-card-title> {{ _t('There was no activity yet in this household') }}</ion-card-title>
+    </ion-card-header>
+  </ion-card>
+  <TaskLogView
+    v-for="(log, index) in sortedTaskLogs"
+    :key="index"
+    :log="log"
+  />
+  <ion-infinite-scroll @ionInfinite="ionInfinite">
+    <ion-infinite-scroll-content />
+  </ion-infinite-scroll>
 </template>
 
 <script setup lang="ts">
@@ -38,18 +28,12 @@ import {
   IonCard,
   IonCardHeader,
   IonCardTitle,
-  IonContent,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
-  IonPage,
-  IonRefresher,
-  IonRefresherContent,
-  IonSpinner,
-  onIonViewWillEnter,
-  RefresherCustomEvent
+  IonSpinner
 } from "@ionic/vue";
-import { computed, inject, ref } from "vue";
-import TaskLogView from '../TaskLogView.vue';
+import { computed, inject, onMounted, ref } from "vue";
+import TaskLogView from '@/components/TaskLogView.vue';
 
 const state = inject(stateSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
@@ -63,12 +47,6 @@ const sortedTaskLogs = computed(() => {
   const logs = taskLogs.value.concat();
   return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
 });
-
-async function reload(event: RefresherCustomEvent) {
-  await reset();
-  event.detail.complete();
-}
-
 async function fetchLogs() {
   const id = state.viewedHousehold;
   if (null === id) {
@@ -105,9 +83,13 @@ async function reset() {
   await fetchLogs();
 }
 
-onIonViewWillEnter(async () => {
+defineExpose({
+  reset,
+})
+
+onMounted(async () => {
   await reset();
-});
+})
 
 </script>
 

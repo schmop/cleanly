@@ -1,6 +1,12 @@
 <template>
   <ion-page>
     <ion-content>
+      <ion-refresher
+        slot="fixed"
+        @ionRefresh="reloadStatistics"
+      >
+        <ion-refresher-content />
+      </ion-refresher>
       <ion-loading
         v-if="statistics === null || household === undefined"
         backdrop-dismiss
@@ -11,20 +17,33 @@
         </ion-card-header>
       </ion-card>
       <template v-else>
+        <ion-toolbar class="pt-2">
+          <ion-segment
+            :value="analysis"
+            @ionChange="selectAnalysis"
+          >
+            <ion-segment-button value="activity">
+              <ActivityIcon />
+              <ion-label>
+                {{ _t('Activity') }}
+              </ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="participations">
+              <ChartPieIcon />
+              <ion-label>
+                {{ _t('Participations') }}
+              </ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="punctuality">
+              <ChartInfographicIcon />
+              <ion-label>
+                {{ _t('Punctuality') }}
+              </ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </ion-toolbar>
         <ion-select
-          :value="analysis"
-          interface="action-sheet"
-          :placeholder="_t('Select analysis')"
-          @ionChange="selectAnalysis"
-        >
-          <ion-select-option value="participations">
-            {{ _t('Participations') }}
-          </ion-select-option>
-          <ion-select-option value="punctuality">
-            {{ _t('Punctuality') }}
-          </ion-select-option>
-        </ion-select>
-        <ion-select
+          v-if="analysis === 'participations' || analysis === 'punctuality'"
           :value="selectedTaskId"
           interface="action-sheet"
           :placeholder="_t('Select task')"
@@ -48,39 +67,44 @@
           :data="punctualityData"
           :options="options"
         />
-        <ion-refresher
-          slot="fixed"
-          @ionRefresh="reloadStatistics"
-        >
-          <ion-refresher-content />
-        </ion-refresher>
+        <ActivityView
+          v-else
+          ref="activityView"
+        />
       </template>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { getParticipationData } from "@/components/HouseholdView/statistics/participations";
-import { getPunctualityData } from "@/components/HouseholdView/statistics/punctuality";
-import { Analysis, BarChartData, DoughnutChartData } from "@/components/HouseholdView/statistics/types";
+import { getParticipationData } from "@/components/HouseholdView/StatisticsView/participations";
+import { getPunctualityData } from "@/components/HouseholdView/StatisticsView/punctuality";
+import { Analysis, BarChartData, DoughnutChartData, isAnalysis } from "@/components/HouseholdView/StatisticsView/types";
 import { gettersSymbol, stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 import { HouseholdStats } from '@/models/HouseholdStats';
 import { error, showThrownError } from "@/toast";
 import { _t } from '@/translation';
 import { TaskId } from '@/types';
+import ActivityView from "@/components/HouseholdView/StatisticsView/ActivityView.vue";
+import { ActivityIcon, ChartInfographicIcon, ChartPieIcon } from 'vue-tabler-icons';
 import {
   IonCard,
   IonCardHeader,
   IonCardTitle,
   IonContent,
+  IonLabel,
   IonLoading,
   IonPage,
   IonRefresher,
   IonRefresherContent,
+  IonSegment,
+  IonSegmentButton,
   IonSelect,
   IonSelectOption,
+  IonToolbar,
   onIonViewWillEnter,
   RefresherCustomEvent,
+  SegmentChangeEventDetail,
   SelectCustomEvent
 } from "@ionic/vue";
 import {
@@ -94,8 +118,9 @@ import {
   Title,
   Tooltip
 } from 'chart.js';
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, useTemplateRef } from "vue";
 import { Bar, Doughnut } from 'vue-chartjs';
+import { IonSegmentCustomEvent } from "@ionic/core/dist/types/components";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Colors);
 
@@ -103,8 +128,9 @@ const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
+const activityView = useTemplateRef<InstanceType<typeof ActivityView>>('activityView');
 const selectedTaskId = ref<TaskId|null>(null);
-const analysis = ref<Analysis>("participations");
+const analysis = ref<Analysis>("activity");
 const statistics = ref<HouseholdStats|null>(null);
 const options = {responsive: true};
 
@@ -129,11 +155,17 @@ function selectTask(event: SelectCustomEvent<TaskId>) {
   selectedTaskId.value = event.detail.value;
 }
 
-function selectAnalysis(event: SelectCustomEvent<Analysis>) {
+function selectAnalysis(event: IonSegmentCustomEvent<SegmentChangeEventDetail>) {
+  if (!isAnalysis(event.detail.value)) {
+    return;
+  }
   analysis.value = event.detail.value;
 }
 
 async function reloadStatistics(event: RefresherCustomEvent) {
+  if (activityView.value != null) {
+    await activityView.value.reset();
+  }
   await fetchStatistics();
   event.detail.complete();
 }
@@ -168,5 +200,8 @@ onIonViewWillEnter(async () => {
   canvas {
     filter: invert(1) hue-rotate(180deg);
   }
+}
+.pt-2 {
+  padding-top: 8px;
 }
 </style>

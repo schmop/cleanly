@@ -28,14 +28,6 @@
         </ion-tab-button>
 
         <ion-tab-button
-          tab="activity"
-          :href="href('activity')"
-        >
-          <TimelineIcon />
-          <ion-label>{{ _t('Activity') }}</ion-label>
-        </ion-tab-button>
-
-        <ion-tab-button
           tab="finances"
           :href="href('finances')"
         >
@@ -70,7 +62,7 @@ import router from "@/router";
 import { _t } from '@/translation';
 import { IonBadge, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from "@ionic/vue";
 import { computed, inject, onBeforeUnmount } from "vue";
-import { ChartBarIcon, CheckboxIcon, ChecklistIcon, HomeCogIcon, TimelineIcon, MoneybagIcon } from "vue-tabler-icons";
+import { ChartBarIcon, CheckboxIcon, ChecklistIcon, HomeCogIcon, MoneybagIcon } from "vue-tabler-icons";
 
 const store = inject(storeSymbol)!;
 const getters = inject(gettersSymbol)!;
