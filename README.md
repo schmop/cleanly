@@ -11,6 +11,7 @@ Cleanly is based on Users, coming together in a shared *Household*.
 
 ### Tasks
 Recurring _tasks_ may help your cleaning schedules, getting reminders to feed your pets, not forget to buy groceries in time or to do sportly activities.
+
 ![PhoneShot2.png](imgs/PhoneShot2.png)
 
 You can receive push-notifications
@@ -20,12 +21,13 @@ You can receive push-notifications
 ### Stars
 Gamify your tasks by giving them _stars_!
 Then after being competitive about the cleaning in your household for a while, you can compare your star-count ;)
+
 ![PhoneShot5.png](imgs/PhoneShot5.png)
 
 ### Checklists
 _Checklists_ help you collect, order and remind yourselves on collaborative lists. This can be a grocery list or a watch list for tv shows!
-![PhoneShot3.png](imgs/PhoneShot3.png)
 
+![PhoneShot3.png](imgs/PhoneShot3.png)
 
 ## Development
 
