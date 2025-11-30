@@ -37,8 +37,9 @@
     "uuid": "^13.0.0",
     "vue": "^3.3.0",
     "vue-chartjs": "^5.0.1",
+    "vue-currency-input": "^3.2.1",
     "vue-router": "^4.2.0",
-    "vue-tabler-icons": "^2.17.0"
+    "vue-tabler-icons": "^2.21.0"
   },
   "devDependencies": {
     "@capacitor/cli": "7.4.3",
@@ -73,7 +74,7 @@
     "ts-morph": "^27.0.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
-    "vite": "^7.1.5",
+    "vite": "^7.2.4",
     "vite-plugin-checker": "^0.10.3",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^3.2.4",

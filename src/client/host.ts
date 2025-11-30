@@ -1,5 +1,6 @@
 function getDevHostIp() {
     return "http://192.168.178.29";
+//    return "http://localhost";
 }
 
 export function getWebHost() {

@@ -120,7 +120,7 @@ import {
 } from 'chart.js';
 import { computed, inject, ref, useTemplateRef } from "vue";
 import { Bar, Doughnut } from 'vue-chartjs';
-import { IonSegmentCustomEvent } from "@ionic/core/dist/types/components";
+import { IonSegmentCustomEvent } from "@ionic/core";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Colors);
 

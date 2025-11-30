@@ -69,12 +69,13 @@
           />
         </ion-item>
       </ion-list>
-      <ion-toolbar class="position-sticky">
+      <ion-toolbar class="position-sticky maximize-buttons">
         <ion-button
           slot="start"
           vertical="bottom"
           horizontal="end"
           color="danger"
+          class="maximize-buttons"
           @click="removeChecked()"
         >
           <TrashIcon />
@@ -84,7 +85,7 @@
           slot="end"
           vertical="bottom"
           horizontal="end"
-          class="position-sticky"
+          class="maximize-buttons"
           @click="addTodo(null)"
         >
           <PlusIcon />
@@ -330,6 +331,10 @@ function addTodo(insertAfterUuid: ChecklistUuid | null = null) {
   position: sticky;
   bottom: 0;
   z-index: 10;
+}
+.maximize-buttons {
+  display: flex;
+  flex-grow: 1;
 }
 
 /** Remove last line of todos */
