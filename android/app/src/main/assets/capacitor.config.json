@@ -20,9 +20,5 @@
 	},
 	"android": {
 		"adjustMarginsForEdgeToEdge": "force"
-	},
-	"server": {
-		"cleartext": true,
-		"androidScheme": "http"
 	}
 }

@@ -99,12 +99,13 @@ const financeSummary = computed(() => {
 })
 
 function formatOweString(debt: Debt) {
-  const youAreOwing = debt.fromUserId === store.state.user?.id;
-  if (youAreOwing) {
+  if (debt.fromUserId === store.state.user?.id) {
     return __t('You owe {0} {1}', userName(debt.toUserId), formatMoney(debt.amount));
-  } else {
-    return __t('{0} owes {1} {2}', userName(debt.fromUserId), userName(debt.toUserId), formatMoney(debt.amount));
   }
+  if (debt.toUserId === store.state.user?.id) {
+    return __t('{0} owes you {1}', userName(debt.fromUserId), formatMoney(debt.amount));
+  }
+  return __t('{0} owes {1} {2}', userName(debt.fromUserId), userName(debt.toUserId), formatMoney(debt.amount));
 }
 
 async function fetchFinanceSummary(event?: RefresherCustomEvent) {

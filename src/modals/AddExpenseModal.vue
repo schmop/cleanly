@@ -142,7 +142,7 @@
             v-if="!isEquallySplitBetweenEveryone"
             slot="start"
           />
-          {{ _t('Equally between everyone') }}
+          {{ _t('Other') }}
           <ChevronDownIcon slot="end" />
         </ion-button>
         <SplitSharesSettingsDialog
