@@ -10,6 +10,10 @@ import { error } from '@/toast';
 import { AuthClient } from './auth-client';
 import { WebhookResponse } from './response/WebhookResponse';
 import { isWebhookResponse } from './response/WebhookResponse.guard';
+import { FinanceSummary, FinanceTransaction } from "@/components/HouseholdView/FinancesView/finance-types";
+import { isFinanceTransactionResponse } from "@/client/response/FinanceTransactionResponse.guard";
+import { HouseholdId } from "@/types";
+import { isFinanceSummary } from "@/components/HouseholdView/FinancesView/finance-types.guard";
 
 export class HouseholdClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
@@ -73,7 +77,7 @@ export class HouseholdClient {
         }
     }
 
-    async removeHousehold(householdId: number) {
+    async removeHousehold(householdId: HouseholdId) {
         const response = await this.client.requestEventually(
             'DELETE',
             `api/household/${householdId}`,
@@ -86,7 +90,7 @@ export class HouseholdClient {
         return true;
     }
 
-    async kickFromHousehold(memberId: number, householdId: number) {
+    async kickFromHousehold(memberId: number, householdId: HouseholdId) {
         const response = await this.client.requestEventually(
             'POST',
             `api/household/kick/${householdId}/${memberId}`,
@@ -101,7 +105,7 @@ export class HouseholdClient {
         return true;
     }
 
-    async changePrivilege(memberId: number, householdId: number, level: PrivilegeLevel) {
+    async changePrivilege(memberId: number, householdId: HouseholdId, level: PrivilegeLevel) {
         const response = await this.client.requestEventually(
             'POST',
             `api/household/privilege/${householdId}/${memberId}/${level}`,
@@ -112,7 +116,7 @@ export class HouseholdClient {
         }
     }
 
-    async leaveHousehold(householdId: number) {
+    async leaveHousehold(householdId: HouseholdId) {
         const response = await this.client.requestEventually(
             'POST',
             `api/household/leave/${householdId}`,
@@ -123,7 +127,7 @@ export class HouseholdClient {
         }
     }
 
-    async retrieveStars(householdId: number) {
+    async retrieveStars(householdId: HouseholdId) {
         const response = await this.client.requestImmediately(
             'GET',
             `api/household/${householdId}/stars`,
@@ -139,7 +143,7 @@ export class HouseholdClient {
         this.store.addStars(householdId, data);
     }
 
-    async invite(householdId: number, ...ids: number[]) {
+    async invite(householdId: HouseholdId, ...ids: number[]) {
         const response = await this.client.sendJsonEventually(
             'POST',
             `api/household/invite/${householdId}`,
@@ -162,7 +166,7 @@ export class HouseholdClient {
         }
     }
 
-    async createChecklist(householdId: number) {
+    async createChecklist(householdId: HouseholdId) {
         const response = await this.client.requestEventually(
             'PUT',
             `api/household/${householdId}/checklist/add`,
@@ -230,7 +234,7 @@ export class HouseholdClient {
         }
     }
 
-    async setReassignmentStrategy(householdId: number, reassignmentStrategy: string) {
+    async setReassignmentStrategy(householdId: HouseholdId, reassignmentStrategy: string) {
         const response = await this.client.sendJsonEventually(
             'POST',
             `api/household/reassignment-strategy/${householdId}`,
@@ -242,7 +246,7 @@ export class HouseholdClient {
         }
     }
 
-    async setWebhook(householdId: number, url: string): Promise<WebhookResponse> {
+    async setWebhook(householdId: HouseholdId, url: string): Promise<WebhookResponse> {
         const response = await this.client.sendJsonEventually(
             'POST',
             `api/household/webhook/${householdId}`,
@@ -258,6 +262,50 @@ export class HouseholdClient {
             throw new Error('Invalid response given when setting webhook!');
         }
 
+        return data;
+    }
+
+    async addTransaction(householdId: HouseholdId, transaction: FinanceTransaction): Promise<void> {
+        const response = await this.client.sendJsonEventually(
+            'PUT',
+            `api/household/${householdId}/finance/transaction/add`,
+            {transaction},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'adding finance transaction');
+        }
+    }
+
+    async getTransactions(householdId: HouseholdId): Promise<FinanceTransaction[]> {
+        const response = await this.client.requestImmediately(
+            'GET',
+            `api/household/${householdId}/finance/transactions`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'fetching finance transactions');
+        }
+        const data: unknown = await response.json();
+        if (!isFinanceTransactionResponse(data)) {
+            throw new Error('Invalid finance transaction response received!');
+        }
+        return data.transactions;
+    }
+
+    async fetchFinanceSummary(householdId: HouseholdId): Promise<FinanceSummary> {
+        const response = await this.client.requestImmediately(
+            'GET',
+            `api/household/${householdId}/finance/summary`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'fetching finance summaries');
+        }
+        const data: unknown = await response.json();
+        if (!isFinanceSummary(data)) {
+            throw new Error('Invalid finance summary response received!');
+        }
         return data;
     }
 }

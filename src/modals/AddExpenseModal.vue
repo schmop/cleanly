@@ -109,7 +109,10 @@
         />
       </ion-modal>
     </div>
-    <div class="row">
+    <div
+      v-if="transactionType !== 'transfer'"
+      class="row"
+    >
       <ion-label for="datetime-button">
         <div class="label-header">
           <UsersGroupIcon />
@@ -118,7 +121,7 @@
       </ion-label>
       <div class="button-row">
         <ion-button
-          color="light"
+          :color="isEquallySplitBetweenEveryone ? 'tertiary' : 'light'"
           size="small"
           class="max-50"
           @click="splitEquallyBetweenEveryone"
@@ -131,7 +134,7 @@
         </ion-button>
         <ion-button
           id="open-split-shares-settings-dialog"
-          color="light"
+          :color="!isEquallySplitBetweenEveryone ? 'tertiary' : 'light'"
           size="small"
           class="max-50"
         >
@@ -150,17 +153,66 @@
         />
       </div>
     </div>
+    <div class="row">
+      <ion-label>
+        <h2><CheckupListIcon /> {{ _t('Summary') }}</h2>
+        <p
+          v-if="transactionType === 'transfer'"
+        >
+          {{ transferSummary }}
+        </p>
+        <p
+          v-for="summary in shareSummaries"
+          v-else
+          :key="summary.member.id"
+          class="summary-row"
+        >
+          <span>{{ userName(summary.member.id) }}</span>
+          <span>{{ formatMoney(summary.amount) }}</span>
+        </p>
+      </ion-label>
+    </div>
   </ion-content>
+  <ion-footer>
+    <ion-toolbar>
+      <ion-button
+        slot="start"
+        color="primary"
+        :disabled="!expenseValid"
+        @click="finalizeExpense()"
+      >
+        <CirclePlusIcon slot="start" />
+        {{ _t('Ok') }}
+      </ion-button>
+      <ion-button
+        slot="end"
+        color="light"
+        @click="dismiss()"
+      >
+        <CircleXIcon slot="start" />
+        {{ _t('Cancel') }}
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
 </template>
 
 <script setup lang="ts">
-import { CalendarIcon, CheckIcon, ChevronDownIcon, CircleXIcon, UsersGroupIcon } from 'vue-tabler-icons';
-import { _t } from '@/translation';
+import {
+  CalendarIcon,
+  CheckIcon,
+  CheckupListIcon,
+  ChevronDownIcon,
+  CirclePlusIcon,
+  CircleXIcon,
+  UsersGroupIcon
+} from 'vue-tabler-icons';
+import { __t, _t } from '@/translation';
 import {
   IonButton,
   IonContent,
   IonDatetime,
   IonDatetimeButton,
+  IonFooter,
   IonHeader,
   IonInput,
   IonLabel,
@@ -171,22 +223,27 @@ import {
   IonToolbar,
   modalController
 } from "@ionic/vue";
-import { ComponentInstance, computed, inject, ref } from "vue";
+import { ComponentInstance, computed, inject, ref, watch } from "vue";
 import {
+  FinanceTransaction,
+  formatMoney,
   getTransactionLabel,
   imgMap,
-  isTransactionType,
+  SplitSharesEvent,
   TransactionShare,
   TransactionType,
   userName
 } from "@/components/HouseholdView/FinancesView/finance-types";
 import SelectExpenseDialog from "@/components/HouseholdView/FinancesView/SelectExpenseDialog.vue";
-import { OverlayEventDetail } from "@ionic/core";
+import { IonModalCustomEvent, OverlayEventDetail } from "@ionic/core";
 import { gettersSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
 import { UserId } from "@/types";
 import { randomIndex } from "@/common/random";
 import CurrencyInput from "@/common/CurrencyInput.vue";
 import SplitSharesSettingsDialog from "@/components/HouseholdView/FinancesView/SplitSharesSettingsDialog.vue";
+import { floor } from "@/common/math";
+import { isSplitSharesEvent, isTransactionType } from "@/components/HouseholdView/FinancesView/finance-types.guard";
+import { uuid4 } from "@/common/uuid";
 
 const state = inject(stateSymbol)!;
 const getters = inject(gettersSymbol)!;
@@ -235,12 +292,42 @@ const senderLabel = computed(() => {
   return "Invalid transaction type";
 });
 const isEquallySplitBetweenEveryone = computed(() => {
-  console.log("every bug", shares.value);
   return shares.value.every((share) => share.share === 1)
     && shares.value.length === members.value.length
     && members.value.every(
       (member) => shares.value.some((share) => member.id === share.userId)
     );
+});
+const shareSummaries = computed(() => {
+  const sumShares = shares.value.reduce((sum, share) => sum + share.share, 0);
+  return members.value.map((member) => {
+    const share = shares.value.find((share) => share.userId === member.id);
+    return {
+      member,
+      amount: share ? floor(share.share * amount.value / sumShares) : 0,
+    };
+  });
+});
+const expenseValid = computed(() => {
+  if (title.value.trim().length === 0) {
+    return false;
+  }
+  if (amount.value <= 0) {
+    return false;
+  }
+  if (shares.value.length === 0) {
+    return false;
+  }
+  const totalShares = shares.value.reduce((sum, share) => sum + share.share, 0);
+
+  return totalShares > 0;
+});
+const transferSummary = computed(() => {
+  const receiverName = userName(transferReceiver.value);
+  if (sender.value === state.user?.id) {
+    return __t('You send {0} to {1}', formatMoney(amount.value), receiverName);
+  }
+  return __t('{0} sends {1} to {2}', userName(sender.value), formatMoney(amount.value), receiverName);
 });
 
 const emit = defineEmits(['select']);
@@ -249,19 +336,38 @@ async function dismiss() {
   await modalController.dismiss();
 }
 
-async function _select(icon: string) {
-  props.resultReceiver.dispatchEvent(new CustomEvent('icon', {detail: icon}));
-  emit('select', icon);
+async function finalizeExpense() {
+  const transaction: FinanceTransaction = {
+    uuid: uuid4(),
+    title: title.value,
+    type: transactionType.value,
+    amount: floor(amount.value),
+    date: date.value,
+    sender: sender.value,
+    shares: shares.value,
+  }
+  props.resultReceiver.dispatchEvent(new CustomEvent('select', {detail: transaction}));
+  emit('select', transaction);
   await dismiss();
 }
 
-function selectShares(newShares: TransactionShare[]) {
-  console.error("Not supported yet", "selectShares", newShares);
-  //shares.value = newShares;
+function selectShares(event: IonModalCustomEvent<OverlayEventDetail<SplitSharesEvent>>) {
+  if (event.detail.role !== 'select') {
+    return; // probably canceled
+  }
+  if (!isSplitSharesEvent(event.detail.data)) {
+    console.warn("Selecting shares failed", event.detail);
+    return;
+  }
+  amount.value = event.detail.data.amount;
+  shares.value = event.detail.data.shares;
 }
 
 function selectTransferType(event: CustomEvent<OverlayEventDetail>) {
   if (isTransactionType(event.detail.data)) {
+    if (transactionType.value === "transfer" && event.detail.data !== "transfer") {
+      splitEquallyBetweenEveryone();
+    }
     transactionType.value = event.detail.data;
   } else {
     console.warn("Selecting transfertype failed", event.detail);
@@ -272,8 +378,19 @@ function splitEquallyBetweenEveryone() {
   shares.value = members.value.map((member) => ({
     userId: member.id,
     share: 1,
+    uuid: uuid4(),
   }));
 }
+
+watch([transferReceiver, transactionType], () => {
+  if (transactionType.value === "transfer") {
+    shares.value = [{
+      userId: transferReceiver.value,
+      share: 1,
+      uuid: uuid4(),
+    }];
+  }
+})
 
 splitEquallyBetweenEveryone();
 </script>
@@ -301,5 +418,10 @@ splitEquallyBetweenEveryone();
   flex-direction: row;
   gap: 8px;
   justify-content: space-between;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px !important;
 }
 </style>

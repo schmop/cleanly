@@ -1,5 +1,5 @@
 <template>
-  <ion-card :class="{'cash-disbursements': !isCashTaking, 'cash-taking': isCashTaking }">
+  <ion-card :class="transaction.type">
     <div class="row padding">
       <div class="align-left">
         <ion-card-title>{{ transaction.title }}</ion-card-title>
@@ -13,47 +13,56 @@
       </div>
       <div class="align-right">
         <ion-card-title>
-          <ion-text :color="isCashTaking ? 'success' : 'danger'">
-            {{ amountString }}
-          </ion-text>
+          {{ amountString }}
         </ion-card-title>
+        <ion-card-subtitle
+          v-if="yourShareString !== null"
+          class="m-1"
+        >
+          {{ yourShareString }}
+        </ion-card-subtitle>
       </div>
     </div>
   </ion-card>
 </template>
 
 <script setup lang="ts">
-import { IonCard, IonCardSubtitle, IonCardTitle, IonText } from '@ionic/vue'
+import { IonCard, IonCardSubtitle, IonCardTitle } from '@ionic/vue'
 import { CalendarIcon, UsersIcon } from 'vue-tabler-icons';
 import { computed, inject } from "vue";
 import { storeSymbol } from "@/dependency-injection/injection-keys";
 import { __t, _t } from "@/translation";
-import { CURRENCY, FinanceTransaction, userName } from "@/components/HouseholdView/FinancesView/finance-types";
+import { FinanceTransaction, formatMoney, userName } from "@/components/HouseholdView/FinancesView/finance-types";
 import { formatDate } from "@/common/time";
 
 const store = inject(storeSymbol)!;
 
 const props = defineProps<{transaction: FinanceTransaction}>();
 
-const isCashTaking = computed(() => {
-  switch (props.transaction.type) {
-    case "expense":
-      return false;
-    case "transfer": // when I am a receiver of a transfer, mark it green
-      return props.transaction.shares.some(receiver => receiver.userId === store.state.user?.id);
-    case "income":
-      return true;
-  }
-  return false;
-});
-const amountString = computed(() => `${isCashTaking.value ? '':'-'}${props.transaction.amount.toFixed(2)}${CURRENCY}`);
+const amountString = computed(() => formatMoney(props.transaction.amount));
 const whoPaidString = computed(() => {
+  const myId = store.state.user?.id;
   if (props.transaction.type === "transfer") {
-    const receiver = props.transaction.shares[0];
-    if (null == receiver) {
-      return __t('{0} settled with no one', userName(props.transaction.sender));
+    const share = props.transaction.shares[0];
+    if (null == share) {
+      return __t('{0} gave no one money', userName(props.transaction.sender));
     }
-    return __t('{0} gave to {1}', userName(props.transaction.sender), userName(receiver.userId));
+    if (share.userId === myId) {
+      return __t('{0} gave you money', userName(props.transaction.sender));
+    }
+    if (props.transaction.sender === myId) {
+      return __t('You gave {0} money', userName(share.userId));
+    }
+    return __t('{0} gave to {1}', userName(props.transaction.sender), userName(share.userId));
+  }
+  if (props.transaction.type === 'income') {
+    if (props.transaction.sender === myId) {
+      return _t('You received money');
+    }
+    return __t('Received by {0}', userName(props.transaction.sender));
+  }
+  if (props.transaction.sender === myId) {
+    return _t('You paid');
   }
   return __t('Paid by {0}', userName(props.transaction.sender));
 });
@@ -74,12 +83,30 @@ const receiverString = computed(() => {
     return _t('Everyone');
   }
   if (notParticipatingMembers.length === 1) {
+    if (store.state.user?.id === notParticipatingMembers[0]!.id) {
+      return _t('Everyone except you');
+    }
     return __t('Everyone except {0}', userName(notParticipatingMembers[0]!.id));
   }
   return props.transaction.shares.map((share) => userName(share.userId)).join(', ');
 });
 const dateString = computed(() => {
-  return formatDate(props.transaction.date);
+  return formatDate(new Date(props.transaction.date));
+});
+
+const yourShareString = computed(() => {
+  const userId = store.state.user?.id;
+  if (!userId) {
+    return null;
+  }
+  const yourShare = props.transaction.shares.find(share => share.userId === userId);
+  if (!yourShare) {
+    return null;
+  }
+  const totalShares = props.transaction.shares.reduce((sum, share) => {
+    return sum + share.share;
+  }, 0);
+  return __t('Your share: {0}', formatMoney(yourShare.share * props.transaction.amount / totalShares));
 });
 </script>
 
@@ -107,15 +134,23 @@ const dateString = computed(() => {
   margin: 8px 0;
 }
 
-.cash-disbursements {
+/** Transaction type styles **/
+.expense {
   --background: rgb(237, 187, 187);
   @media (prefers-color-scheme: dark) {
     --background: rgb(38, 13, 13);
   }
 }
 
+.transfer {
+  --background: rgb(138, 184, 236);
+  @media (prefers-color-scheme: dark) {
+    --background: rgb(16, 33, 53);
+  }
+}
 
-.cash-taking {
+
+.income {
   --background: rgb(191, 232, 191);
   @media (prefers-color-scheme: dark) {
     --background: rgb(13, 38, 13);

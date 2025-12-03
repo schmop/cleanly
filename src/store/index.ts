@@ -8,6 +8,7 @@ import { UserSettings } from '@/models/UserSettings';
 import { Localstore } from "@/store/localstore";
 import { ChecklistUuid, HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
 import { App, computed, ComputedGetter, ComputedRef, reactive } from 'vue';
+import { FinanceSummary, FinanceTransaction } from "@/components/HouseholdView/FinancesView/finance-types";
 
 export class State {
     public loggedIn = false;
@@ -18,6 +19,8 @@ export class State {
     public pageTitle: null|string = null;
     public viewedHousehold: null|number = null;
     public openChecklist: null|string = null;
+    public financeTransactions: Record<HouseholdId, FinanceTransaction[]> = {};
+    public financeSummaries: Record<HouseholdId, FinanceSummary> = {};
     public userSettings: UserSettings = {
         notifyInvites: true,
         notifyTaskDone: true,
@@ -223,6 +226,21 @@ export class Store {
         if (task) {
             task.assignee = userId;
         }
+    }
+
+    setTransactions(householdId: HouseholdId, transactions: FinanceTransaction[]) {
+        transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        this.state.financeTransactions[householdId] = transactions;
+    }
+
+    addTransaction(householdId: HouseholdId, transaction: FinanceTransaction) {
+        const transactions = this.state.financeTransactions[householdId] ?? [];
+        transactions.push(transaction);
+        this.state.financeTransactions[householdId] = transactions;
+    }
+
+    setFinanceSummary(householdId: HouseholdId, financeSummary: FinanceSummary) {
+        this.state.financeSummaries[householdId] = financeSummary;
     }
 
     joinHousehold(household: Household) {

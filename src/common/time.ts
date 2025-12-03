@@ -1,8 +1,7 @@
 import { __t, _n, _t, } from "@/translation";
 import { Entries } from "@/types";
 import { entries, entriesOfPartial } from "@/common/entries";
-import { inject } from "vue";
-import { storeSymbol } from "@/dependency-injection/injection-keys";
+import { store } from "@/store";
 
 export const DAY_IN_SECONDS = 60 * 60 * 24;
 export const DAY_IN_HOURS = 24;
@@ -144,7 +143,6 @@ export function roundedRecurringInterval(days: number|null): string {
 }
 
 export function formatDate(date: Date): string {
-    const store = inject(storeSymbol)!;
     const language = store.state.userSettings.language;
     const locale = language === 'de' || language === 'schwobi' ? 'de-DE' : 'en-US';
 

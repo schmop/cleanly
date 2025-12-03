@@ -1,23 +1,65 @@
-import { UserId } from "@/types";
+import { ISODateString, UserId } from "@/types";
 import { Uuid } from "@/common/uuid";
-import { computed, inject } from "vue";
-import { gettersSymbol, stateSymbol } from "@/dependency-injection/injection-keys";
+import { computed } from "vue";
 import { _t } from "@/translation";
 import transferImg from '@img/transfer.png';
 import expenseImg from '@img/expense.png';
 import incomeImg from '@img/income.png';
+import { store } from "@/store";
 
+/**
+ * @see {isTransactionType} ts-auto-guard:type-guard
+ */
 export type TransactionType = "transfer" | "expense" | "income";
-
-export function isTransactionType(value: any): value is TransactionType {
-    return value === "expense" || value === "income" || value === "transfer";
-}
 
 export const imgMap: Record<TransactionType, string> = {
     transfer: transferImg,
     expense: expenseImg,
     income: incomeImg,
 };
+export const CURRENCY = "€";
+export const CURRENCY_CODE = "EUR";
+
+/** @see {isFinanceTransaction} ts-auto-guard:type-guard */
+export type FinanceTransaction = {
+    uuid: Uuid,
+    title: string,
+    sender: UserId
+    shares: TransactionShare[],
+    amount: number, // number in cents
+    type: TransactionType,
+    date: ISODateString,
+};
+
+/** @see {isTransactionShare} ts-auto-guard:type-guard */
+export type TransactionShare = {
+    uuid: Uuid,
+    userId: UserId,
+    share: number,
+};
+
+/** @see {isSplitSharesEvent} ts-auto-guard:type-guard */
+export type SplitSharesEvent = {
+    shares: TransactionShare[];
+    amount: number;
+}
+
+/** @see {isFinanceSummary} ts-auto-guard:type-guard */
+export type FinanceSummary = {
+    totalCosts: number;
+    yourCost: number;
+    yourIncome: number;
+    yourExpense: number;
+    debts: Debt[];
+}
+
+/** @see {isDebt} ts-auto-guard:type-guard */
+export type Debt = {
+    fromUserId: UserId;
+    toUserId: UserId;
+    amount: number; // in cents
+}
+
 export function getTransactionLabel(type: TransactionType): string {
     if (type === 'transfer') {
         return _t('Transfer');
@@ -30,31 +72,12 @@ export function getTransactionLabel(type: TransactionType): string {
     }
     return 'Unsupported transaction type';
 }
-export const CURRENCY = "€";
-export const CURRENCY_CODE = "EUR";
-
-export type FinanceTransaction = {
-    uuid: Uuid,
-    title: string,
-    sender: UserId
-    shares: TransactionShare[],
-    amount: number, // number in cents
-    type: TransactionType,
-    date: Date,
-};
-
-export type TransactionShare = {
-    userId: UserId,
-    share: number,
-};
 
 export function userName(userId: UserId): string {
-    const state = inject(stateSymbol);
-    if (userId === state?.user?.id) {
+    if (userId === store.state?.user?.id) {
         return _t('You');
     }
-    const getters = inject(gettersSymbol);
-    const household = computed(() => getters?.household.value);
+    const household = computed(() => store.getters.household.value);
 
     return household.value?.users.find(u => u.id === userId)?.name ?? _t("Unknown User");
 }

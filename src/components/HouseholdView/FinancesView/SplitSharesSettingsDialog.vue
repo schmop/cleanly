@@ -174,7 +174,7 @@ import {
   modalController,
   SegmentChangeEventDetail
 } from '@ionic/vue';
-import { formatMoney, userName } from "@/components/HouseholdView/FinancesView/finance-types";
+import { formatMoney, SplitSharesEvent, userName } from "@/components/HouseholdView/FinancesView/finance-types";
 import { ComponentInstance, computed, ref, watch } from "vue";
 import CurrencyInput from "@/common/CurrencyInput.vue";
 import { _t } from "@/translation";
@@ -182,6 +182,7 @@ import { IonSegmentCustomEvent } from "@ionic/core";
 import { UserId } from "@/types";
 import { User } from "@/models/User";
 import { floor } from "@/common/math";
+import { uuid4 } from "@/common/uuid";
 
 type WorkInProgressShare = {
   memberId: UserId;
@@ -191,10 +192,6 @@ type WorkInProgressShare = {
   shares: number;
 };
 
-export type Share = {
-  memberId: UserId;
-  amount: number;
-}
 type SplitType = 'equally' | 'amount' | 'shares';
 
 const modal = ref<ComponentInstance<typeof IonModal>>();
@@ -245,7 +242,6 @@ const sharesInvalidReason = computed(() => {
     const total = shares.value.reduce((sum, share) => {
       return sum + (share.include ? share.amount : 0);
     }, 0);
-    console.log("Total of shares", total, "expected", _amount.value);
     if (total !== _amount.value) {
       return _t('The total of all amounts must equal the split amount.');
     }
@@ -308,48 +304,62 @@ function resetShare(share: WorkInProgressShare) {
   share.amountSet = false;
 }
 
-function updateShares() {
-  if (splitType.value === 'equally') {
-    for (const share of shares.value) {
-      if (share.include) {
-        share.amount = floor(_amount.value / shares.value.filter(s => s.include).length);
-      }
-    }
-    return;
-  }
-  if (splitType.value === 'shares') {
-    const totalShares = shares.value.reduce((sum, share) => {
-      return sum + (share.include ? share.shares : 0);
-    }, 0);
-    console.log("Total shares", totalShares);
-    for (const share of shares.value) {
-      if (share.include) {
-        share.amount = floor((_amount.value * share.shares) / totalShares);
-      }
-    }
-    console.log("Updated shares", shares.value);
-    return;
-  }
-  if (splitType.value === 'amount') {
-    const predefinedAmount = shares.value.reduce((sum, share) => {
-      return sum + (share.include && share.amountSet ? share.amount : 0);
-    }, 0);
-    const remainingAmount = _amount.value - predefinedAmount;
-    const remainingPersons = shares.value.filter(share => share.include && !share.amountSet).length;
-    const remainingAmountPerPerson = floor(remainingAmount / remainingPersons);
-    for (const share of shares.value) {
-      if (share.include && !share.amountSet) {
-        share.amount = remainingAmountPerPerson;
-      }
+function updateSharesEqually() {
+  for (const share of shares.value) {
+    if (share.include) {
+      share.amount = Math.max(1, floor(_amount.value / shares.value.filter(s => s.include).length));
     }
   }
 }
 
+function updateAmountByShares() {
+  const totalShares = shares.value.reduce((sum, share) => {
+    return sum + (share.include ? share.shares : 0);
+  }, 0);
+  for (const share of shares.value) {
+    if (share.include) {
+      share.amount = Math.max(1, floor((_amount.value * share.shares) / totalShares));
+    }
+  }
+}
+
+function updateNonFixedAmounts() {
+  const predefinedAmount = shares.value.reduce((sum, share) => {
+    return sum + (share.include && share.amountSet ? share.amount : 0);
+  }, 0);
+  const remainingAmount = _amount.value - predefinedAmount;
+  const remainingPersons = shares.value.filter(share => share.include && !share.amountSet).length;
+  const remainingAmountPerPerson = remainingAmount / remainingPersons;
+  for (const share of shares.value) {
+    if (share.include && !share.amountSet) {
+      share.amount = remainingAmountPerPerson;
+    }
+  }
+}
+
+function updateShares() {
+  switch (splitType.value) {
+    case 'equally':
+      updateSharesEqually();
+      break;
+    case 'shares':
+      updateAmountByShares();
+      break;
+    case 'amount':
+      updateNonFixedAmounts();
+      break;
+  }
+}
+
 function finalizeShares() {
-  const sharesResult: Share[] = shares.value.filter(share => share.include).map(share => ({
-    memberId: share.memberId,
-    amount: share.amount,
-  }));
+  const sharesResult: SplitSharesEvent = {
+    shares: shares.value.filter(share => share.include).map(share => ({
+      userId: share.memberId,
+      share: share.amount,
+      uuid: uuid4(),
+    })),
+    amount: _amount.value,
+  };
   modal.value?.$el.dismiss(sharesResult, 'select');
 }
 
@@ -387,7 +397,7 @@ initShares();
   overflow: visible;
 }
 .fixed-height {
-  height: 3em;
+  height: 4em;
 }
 .float-right {
   float:right;

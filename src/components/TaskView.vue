@@ -227,7 +227,7 @@ async function deleteTask() {
     store.removeTask(props.task.id);
     await toast.success(_t('Task deleted successfully'));
   } catch (e) {
-    console.log(e);
+    console.error(e);
     await toast.error(_t('Could not delete task'));
   }
 }

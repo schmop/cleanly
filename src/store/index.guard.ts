@@ -5,6 +5,7 @@
 import { isHousehold } from "../models/Household.guard";
 import { isUser } from "../models/User.guard";
 import { isInvite } from "../models/Invite.guard";
+import { isFinanceTransaction, isFinanceSummary } from "../components/HouseholdView/FinancesView/finance-types.guard";
 import { isUserSettings } from "../models/UserSettings.guard";
 import { StateInterface } from "./index";
 
@@ -35,6 +36,21 @@ export function isState(obj: unknown): obj is StateInterface {
             typeof typedObj["viewedHousehold"] === "number") &&
         (typedObj["openChecklist"] === null ||
             typeof typedObj["openChecklist"] === "string") &&
+        (typedObj["financeTransactions"] !== null &&
+            typeof typedObj["financeTransactions"] === "object" ||
+            typeof typedObj["financeTransactions"] === "function") &&
+        Object.entries<any>(typedObj["financeTransactions"])
+            .every(([key, value]) => (Array.isArray(value) &&
+                value.every((e: any) =>
+                    isFinanceTransaction(e) as boolean
+                ) &&
+                (+key).toString() === key)) &&
+        (typedObj["financeSummaries"] !== null &&
+            typeof typedObj["financeSummaries"] === "object" ||
+            typeof typedObj["financeSummaries"] === "function") &&
+        Object.entries<any>(typedObj["financeSummaries"])
+            .every(([key, value]) => (isFinanceSummary(value) as boolean &&
+                (+key).toString() === key)) &&
         isUserSettings(typedObj["userSettings"]) as boolean &&
         (typedObj["stars"] !== null &&
             typeof typedObj["stars"] === "object" ||
