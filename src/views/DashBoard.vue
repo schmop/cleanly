@@ -12,7 +12,7 @@
           <ion-card-title> {{ _t('No households yet...') }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          {{ _t('To start, join a household or create one:') }}
+          <p>{{ _t('To start, join a household or create one:') }}</p>
           <ion-button
             color="primary"
             @click="openCreateHouseholdModal"

@@ -9,6 +9,7 @@ import { Localstore } from "@/store/localstore";
 import { ChecklistUuid, HouseholdId, StarsRecord, TaskId, UserId } from '@/types';
 import { App, computed, ComputedGetter, ComputedRef, reactive } from 'vue';
 import { FinanceSummary, FinanceTransaction } from "@/components/HouseholdView/FinancesView/finance-types";
+import { getDefaultWebHost } from "@/client/host";
 
 export class State {
     public loggedIn = false;
@@ -30,6 +31,7 @@ export class State {
     };
     public stars: Record<HouseholdId, StarsRecord> = {};
     public darkmode = false;
+    public serverUrl: string = getDefaultWebHost();
 }
 
 /** @see {isState} ts-auto-guard:type-guard */
@@ -179,6 +181,10 @@ export class Store {
         if (household != null) {
             household.tasks.splice(household.tasks.findIndex((t: Task) => t.id === taskId), 1);
         }
+    }
+
+    setServerUrl(url: string) {
+        this.state.serverUrl = url;
     }
 
     markTaskDone(householdId: HouseholdId, taskId: TaskId, timestamp: number) {

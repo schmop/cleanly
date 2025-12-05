@@ -23,6 +23,8 @@ import { PushService } from '@/push';
 import router from '@/router';
 import { localstore, Store } from '@/store';
 import { error } from "@/toast";
+import { SignupSuccessResponse } from "@/client/response/SignupResponse";
+import { isSignupFailureResponse, isSignupSuccessResponse } from "@/client/response/SignupResponse.guard";
 
 class AuthClientError extends Error {
 }
@@ -105,7 +107,10 @@ export class AuthClient {
         return true;
     }
 
-    async signUp(name: string, mail: string, password: string): Promise<void> {
+    /**
+     * @return True if sign up was successful
+     */
+    async signUp(name: string, mail: string, password: string): Promise<SignupSuccessResponse> {
         const response = await fetchJsonImmediately(
             'POST',
             'signup',
@@ -114,6 +119,16 @@ export class AuthClient {
         if (response.status !== HTTP_OK) {
             await handleErrorResponse(response, 'signing up');
         }
+
+        const data: unknown = await response.json();
+        if (isSignupFailureResponse(data)) {
+            throw new Error(`Signup failed: ${data.reason ?? 'unknown reason'}`);
+        }
+        if (!isSignupSuccessResponse(data)) {
+            throw new Error('Invalid signup response given!');
+        }
+
+        return data;
     }
 
     async signIn(mail: string, password: string): Promise<void> {

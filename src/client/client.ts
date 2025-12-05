@@ -1,5 +1,5 @@
-import { getWebHost } from "@/client/host";
 import { HeadersData, HttpMethod, JsonData, RequestBody } from "@/client/request";
+import { store } from "@/store";
 
 export async function fetchImmediately(
     method: HttpMethod,
@@ -7,7 +7,7 @@ export async function fetchImmediately(
     body?: RequestBody,
     headers?: HeadersData,
 ): Promise<Response> {
-    return await fetch(`${getWebHost()}/${url}`, {
+    return await fetch(`${store.state.serverUrl}/${url}`, {
         method,
         headers,
         body,
