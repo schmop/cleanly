@@ -277,6 +277,30 @@ export class HouseholdClient {
         }
     }
 
+    async deleteTransaction(householdId: number, transaction: FinanceTransaction): Promise<void> {
+        const response = await this.client.sendJsonEventually(
+            'DELETE',
+            `api/household/${householdId}/finance/transaction`,
+            {transaction},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'deleting finance transaction');
+        }
+    }
+
+    async updateTransaction(householdId: number, transaction: FinanceTransaction): Promise<void> {
+        const response = await this.client.sendJsonEventually(
+            'PUT',
+            `api/household/${householdId}/finance/transaction/update`,
+            {transaction},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'updating finance transaction');
+        }
+    }
+
     async getTransactions(householdId: HouseholdId): Promise<FinanceTransaction[]> {
         const response = await this.client.requestImmediately(
             'GET',

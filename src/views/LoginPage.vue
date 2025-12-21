@@ -51,8 +51,12 @@
               </ion-label>
               <ion-input
                 v-model="mail"
+                v-autofillpatch
                 :aria-label="_t('Mail')"
+                autocomplete="email"
+                name="email"
                 type="email"
+                required
               />
             </ion-item>
             <ion-item>
@@ -64,8 +68,12 @@
               </ion-label>
               <ion-input
                 v-model="password"
+                v-autofillpatch
                 :aria-label="_t('Password')"
+                :autocomplete="isRegistering ? 'new-password' : 'current-password'"
+                name="password"
                 type="password"
+                required
               />
             </ion-item>
             <ion-item v-if="isRegistering">

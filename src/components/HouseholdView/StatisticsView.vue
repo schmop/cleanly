@@ -42,28 +42,34 @@
             </ion-segment-button>
           </ion-segment>
         </ion-toolbar>
-        <ion-select
-          v-if="analysis === 'participations' || analysis === 'punctuality'"
-          :value="selectedTaskId"
-          interface="action-sheet"
-          :placeholder="_t('Select task')"
-          @ionChange="selectTask"
-        >
-          <ion-select-option
-            v-for="task in sortedTasks"
-            :key="task.id"
-            :value="task.id"
-          >
-            {{ task.name }}
-          </ion-select-option>
-        </ion-select>
+        <ion-card v-if="analysis === 'participations' || analysis === 'punctuality'">
+          <ion-item lines="none">
+            <ion-select
+              :value="selectedTaskId"
+              :label="_t('Task')"
+              interface="action-sheet"
+              :placeholder="_t('Select task')"
+              @ionChange="selectTask"
+            >
+              <ion-select-option
+                v-for="task in sortedTasks"
+                :key="task.id"
+                :value="task.id"
+              >
+                {{ task.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-card>
         <Doughnut
           v-if="analysis === 'participations'"
+          class="p-2"
           :data="participationData"
           :options="options"
         />
         <Bar
           v-else-if="analysis === 'punctuality'"
+          class="p-2"
           :data="punctualityData"
           :options="options"
         />
@@ -100,6 +106,7 @@ import {
   IonSegment,
   IonSegmentButton,
   IonSelect,
+  IonItem,
   IonSelectOption,
   IonToolbar,
   onIonViewWillEnter,
@@ -203,5 +210,8 @@ onIonViewWillEnter(async () => {
 }
 .pt-2 {
   padding-top: 8px;
+}
+.p-2 {
+  padding: 8px;
 }
 </style>

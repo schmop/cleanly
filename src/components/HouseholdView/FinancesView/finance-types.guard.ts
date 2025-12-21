@@ -2,7 +2,7 @@
  * Generated type guards for "finance-types.ts".
  * WARNING: Do not manually change this file.
  */
-import { TransactionType, FinanceTransaction, TransactionShare, SplitSharesEvent, FinanceSummary, Debt } from "./finance-types";
+import { TransactionType, FinanceTransaction, TransactionShare, SplitSharesEvent, FinanceSummary, Debt, FinanceEvent } from "./finance-types";
 
 export function isTransactionType(obj: unknown): obj is TransactionType {
     const typedObj = obj as TransactionType
@@ -28,7 +28,8 @@ export function isFinanceTransaction(obj: unknown): obj is FinanceTransaction {
         ) &&
         typeof typedObj["amount"] === "number" &&
         isTransactionType(typedObj["type"]) as boolean &&
-        typeof typedObj["date"] === "string"
+        typeof typedObj["date"] === "string" &&
+        typeof typedObj["createdAt"] === "string"
     )
 }
 
@@ -84,5 +85,19 @@ export function isDebt(obj: unknown): obj is Debt {
         typeof typedObj["fromUserId"] === "number" &&
         typeof typedObj["toUserId"] === "number" &&
         typeof typedObj["amount"] === "number"
+    )
+}
+
+export function isFinanceEvent(obj: unknown): obj is FinanceEvent {
+    const typedObj = obj as FinanceEvent
+    return (
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        (typedObj["type"] === "create" ||
+            typedObj["type"] === "update" ||
+            typedObj["type"] === "delete") &&
+        isFinanceTransaction(typedObj["transaction"]) as boolean &&
+        typeof typedObj["household_id"] === "number"
     )
 }

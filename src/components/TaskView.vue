@@ -25,65 +25,67 @@
         <span class="small row">
           {{ durationText }}
         </span>
-        <span
-          v-if="assignee"
-          class="small row"
-        >
-          <UserIcon />
-          {{ assignee.name }}
-        </span>
-        <div class="flex-end row">
-          <ion-text
-            v-if="task.stars > 0"
-            color="warning"
+        <span class="center">
+          <span
+            v-if="assignee"
+            class="small row"
           >
-            <span class="vertical-center">{{ task.stars }}</span>
-            <StarIcon class="vertical-center" />
-          </ion-text>
-          <template v-if="canManageTasks && showActions">
-            <ion-buttons>
-              <ion-button
-                :id="contextMenuId"
-                @click.stop="() => {/** Noop */ }"
-              >
-                <DotsVerticalIcon slot="icon-only" />
-              </ion-button>
-            </ion-buttons>
-            <ion-popover
-              :trigger="contextMenuId"
-              dismiss-on-select
+            <UserIcon />
+            {{ assignee.name }}
+          </span>
+          <span class="flex-end row fixed-width">
+            <ion-text
+              v-if="task.stars > 0"
+              color="warning"
             >
-              <ion-content>
-                <ion-list>
-                  <ion-item
-                    button
-                    lines="none"
-                    @click="editTask"
-                  >
-                    <PencilIcon slot="start" />
-                    <ion-label> {{ _t('Edit task') }}</ion-label>
-                  </ion-item>
-                  <ion-item
-                    button
-                    lines="none"
-                    @click="assignTo"
-                  >
-                    <UserCheckIcon slot="start" />
-                    <ion-label> {{ _t('Assign to') }}</ion-label>
-                  </ion-item>
-                  <ion-item
-                    button
-                    lines="none"
-                    @click="deleteTask"
-                  >
-                    <TrashXIcon slot="start" />
-                    <ion-label> {{ _t('Delete task') }}</ion-label>
-                  </ion-item>
-                </ion-list>
-              </ion-content>
-            </ion-popover>
-          </template>
-        </div>
+              <span class="vertical-center">{{ task.stars }}</span>
+              <StarIcon class="vertical-center" />
+            </ion-text>
+            <template v-if="canManageTasks && showActions">
+              <ion-buttons>
+                <ion-button
+                  :id="contextMenuId"
+                  @click.stop="() => {/** Noop */ }"
+                >
+                  <DotsVerticalIcon slot="icon-only" />
+                </ion-button>
+              </ion-buttons>
+              <ion-popover
+                :trigger="contextMenuId"
+                dismiss-on-select
+              >
+                <ion-content>
+                  <ion-list>
+                    <ion-item
+                      button
+                      lines="none"
+                      @click="editTask"
+                    >
+                      <PencilIcon slot="start" />
+                      <ion-label> {{ _t('Edit task') }}</ion-label>
+                    </ion-item>
+                    <ion-item
+                      button
+                      lines="none"
+                      @click="assignTo"
+                    >
+                      <UserCheckIcon slot="start" />
+                      <ion-label> {{ _t('Assign to') }}</ion-label>
+                    </ion-item>
+                    <ion-item
+                      button
+                      lines="none"
+                      @click="deleteTask"
+                    >
+                      <TrashXIcon slot="start" />
+                      <ion-label> {{ _t('Delete task') }}</ion-label>
+                    </ion-item>
+                  </ion-list>
+                </ion-content>
+              </ion-popover>
+            </template>
+          </span>
+        </span>
       </div>
       <template v-if="useSwipe">
         <div
@@ -265,7 +267,7 @@ async function assignTo() {
     ],
   });
   await picker.present();
-  const dismiss = await picker.onDidDismiss<{assignee: PickerColumnOption}>();
+  const dismiss = await picker.onDidDismiss<{ assignee: PickerColumnOption }>();
   if (undefined === dismiss.role || !['confirm', 'unassign'].includes(dismiss.role)) {
     return;
   }
@@ -290,7 +292,7 @@ async function assignTo() {
   }
 }
 
-function numberOrNull(a: unknown): a is number|null {
+function numberOrNull(a: unknown): a is number | null {
   return a === null || typeof a === 'number';
 }
 
@@ -435,6 +437,7 @@ onBeforeUnmount(() => {
 
 .flex-end {
   align-self: flex-end;
+  justify-content: end;
 }
 
 .row {
@@ -478,6 +481,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: clip;
 }
+
 /* ---------- Begin .rotating-border ---------- */
 
 @keyframes rotate {
@@ -520,6 +524,9 @@ onBeforeUnmount(() => {
     background: inherit;
     border-radius: 5px;
   }
+}
+.fixed-width {
+  width: 120px;
 }
 
 /** Rotating border end */

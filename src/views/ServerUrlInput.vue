@@ -101,7 +101,7 @@
                     v-if="customServerSelect === 'custom'"
                     v-model="enteredServerUrl"
                     :autofocus="true"
-                    :aria-label="_t('Custom Server URL')"
+                    :aria-label="_t('Custom server URL')"
                     type="url"
                   />
                   <p
@@ -178,7 +178,6 @@ const serverUrl = computed(() => {
 const shortServerUrl = computed(() => {
   try {
     const url = new URL(serverUrl.value);
-    console.log(url);
     return url.hostname;
   } catch {
     return serverUrl.value;

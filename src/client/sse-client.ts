@@ -4,6 +4,7 @@ import { isEventSourceMessage } from "@/client/sse/EventSourceMessage.guard";
 import { ListenerBag } from "@/common/listener-bag";
 import { InviteEventProcessor } from '@/invite/invite-event-processor';
 import { warning } from "@/toast";
+import { FinanceEventProcessor } from "@/components/HouseholdView/FinancesView/finance-event-processor";
 
 export class SseClient {
     private source: EventSource|null;
@@ -22,6 +23,7 @@ export class SseClient {
     constructor(
         private todoEventProcessor: TodoEventProcessor,
         private inviteEventProcessor: InviteEventProcessor,
+        private financeEventProcessor: FinanceEventProcessor,
     ) {
         this.source = null;
         this.listenerBag = new ListenerBag();
@@ -73,6 +75,9 @@ export class SseClient {
                     break;
                 case 'invites':
                     this.inviteEventProcessor.process(payload);
+                    break;
+                case 'finance_transactions':
+                    this.financeEventProcessor.process(payload);
                     break;
             }
         };

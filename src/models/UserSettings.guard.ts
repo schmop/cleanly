@@ -13,6 +13,7 @@ export function isUserSettings(obj: unknown): obj is UserSettings {
         typeof typedObj["notifyTaskDone"] === "boolean" &&
         typeof typedObj["notifyTaskDue"] === "boolean" &&
         typeof typedObj["notifyInvites"] === "boolean" &&
+        typeof typedObj["notifyNewTransactions"] === "boolean" &&
         typeof typedObj["swipeToFinishTasks"] === "boolean" &&
         (typedObj["language"] === "en" ||
             typedObj["language"] === "de" ||

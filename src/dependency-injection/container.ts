@@ -22,19 +22,21 @@ import {
     taskClientSymbol,
     userClientSymbol
 } from './injection-keys';
+import { FinanceEventProcessor } from "@/components/HouseholdView/FinancesView/finance-event-processor";
 
 class Container {
-    authClient?: AuthClient;
-    householdClient?: HouseholdClient;
-    sseClient?: SseClient;
-    taskClient?: TaskClient;
-    userClient?: UserClient;
-    todoEventProcessor?: TodoEventProcessor;
-    inviteEventProcessor?: InviteEventProcessor;
-    push?: PushService;
-    foregroundListener?: ForegroundListener;
-    colorschemeListener?: ColorschemeListener;
-    dashboardRefresher?: DashboardRefresher;
+    private authClient?: AuthClient;
+    private householdClient?: HouseholdClient;
+    private sseClient?: SseClient;
+    private taskClient?: TaskClient;
+    private userClient?: UserClient;
+    private todoEventProcessor?: TodoEventProcessor;
+    private inviteEventProcessor?: InviteEventProcessor;
+    private push?: PushService;
+    private foregroundListener?: ForegroundListener;
+    private colorschemeListener?: ColorschemeListener;
+    private dashboardRefresher?: DashboardRefresher;
+    private financeEventProcessor?: FinanceEventProcessor;
 
     /** Installation as Vue plugin */
     install(app: App) {
@@ -70,7 +72,7 @@ class Container {
     }
 
     getSseClient(): SseClient {
-        return this.sseClient ??= new SseClient(this.getTodoEventProcessor(), this.getInviteEventProcessor());
+        return this.sseClient ??= new SseClient(this.getTodoEventProcessor(), this.getInviteEventProcessor(), this.getFinanceEventProcessor());
     }
 
     getTodoEventProcessor(): TodoEventProcessor {
@@ -79,6 +81,10 @@ class Container {
 
     getInviteEventProcessor(): InviteEventProcessor {
         return this.inviteEventProcessor ??= new InviteEventProcessor(store);
+    }
+
+    getFinanceEventProcessor(): FinanceEventProcessor {
+        return this.financeEventProcessor ??= new FinanceEventProcessor(store);
     }
 
     getTaskClient(): TaskClient {

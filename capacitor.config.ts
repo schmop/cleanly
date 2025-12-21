@@ -1,10 +1,13 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-    appId: 'io.ionic.starter',
+    appId: 'de.schmoppo.cleanly',
     appName: 'cleanly',
+    server: {
+        hostname: 'deeplink.cleanly.schmoppo.de',
+        androidScheme: 'https',
+    },
     webDir: 'dist',
-    bundledWebRuntime: false,
     plugins: {
         Keyboard: {
             resizeOnFullScreen: true,
@@ -22,6 +25,7 @@ const config: CapacitorConfig = {
 };
 if (process.env.NODE_ENV === 'development') {
     config.server = {
+        hostname: 'deeplink.cleanly.schmoppo.de',
         cleartext: true,
         androidScheme: 'http',
     };

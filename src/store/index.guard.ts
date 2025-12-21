@@ -63,6 +63,7 @@ export function isState(obj: unknown): obj is StateInterface {
                     .every(([key, value]) => (typeof value === "number" &&
                         (+key).toString() === key)) &&
                 (+key).toString() === key)) &&
-        typeof typedObj["darkmode"] === "boolean"
+        typeof typedObj["darkmode"] === "boolean" &&
+        typeof typedObj["serverUrl"] === "string"
     )
 }

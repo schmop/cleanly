@@ -253,9 +253,13 @@ async function deleteChecklist(checklist: Checklist) {
   if (!await confirmablePrompt(__t('Do you really want to delete "{0}" and all its contents?', checklist.name))) {
     return;
   }
-  await householdClient.deleteChecklist(checklist.uuid);
-  void success(__t('Checklist "{0}" deleted', checklist.name));
-  await householdClient.dashboardInfo(); // TODO: Do not reload the whole dashboard
+  try {
+    await householdClient.deleteChecklist(checklist.uuid);
+    void success(__t('Checklist "{0}" deleted', checklist.name));
+    await householdClient.dashboardInfo(); // TODO: Do not reload the whole dashboard
+  } catch (e) {
+    void showThrownError(e);
+  }
 }
 </script>
 

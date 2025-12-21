@@ -27,7 +27,7 @@
         vertical="bottom"
         horizontal="end"
       >
-        <ion-fab-button @click="openAddExpenseModal">
+        <ion-fab-button @click="openExpenseFormModal()">
           <PlusIcon />
         </ion-fab-button>
       </ion-fab>
@@ -37,6 +37,7 @@
 
 <script setup lang="ts">
 import {
+  IonContent,
   IonFab,
   IonFabButton,
   IonLabel,
@@ -44,29 +45,20 @@ import {
   IonSegment,
   IonSegmentButton,
   IonToolbar,
-  IonContent,
-  modalController,
   SegmentChangeEventDetail
 } from "@ionic/vue";
 import { ActivityIcon, ChartPieIcon, PlusIcon } from "vue-tabler-icons";
 import { _t } from "@/translation";
-import { inject, ref } from "vue";
+import { ref } from "vue";
 import { IonSegmentCustomEvent } from "@ionic/core";
 import FinanceOverview from "@/components/HouseholdView/FinancesView/FinanceOverview.vue";
 import ExpensesView from "@/components/HouseholdView/FinancesView/ExpensesView.vue";
-import AddExpenseModal from "@/modals/AddExpenseModal.vue";
-import { isFinanceTransaction } from "@/components/HouseholdView/FinancesView/finance-types.guard";
-import { householdClientSymbol, stateSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
-import { error, showThrownError, success } from "@/toast";
+import { openExpenseFormModal } from "@/components/HouseholdView/FinancesView/finance-modal";
 
 type FinanceView = 'overview' | 'expenses';
 function isFinanceView(value: any): value is FinanceView {
   return value === 'overview' || value === 'expenses';
 }
-
-const householdClient = inject(householdClientSymbol)!;
-const store = inject(storeSymbol)!;
-const state = inject(stateSymbol)!;
 
 const financeView = ref<FinanceView>('overview');
 
@@ -75,42 +67,6 @@ function changeView(event: IonSegmentCustomEvent<SegmentChangeEventDetail>) {
     return;
   }
   financeView.value = event.detail.value;
-}
-
-async function openAddExpenseModal() {
-  const resultReceiver = new EventTarget();
-  let receivedEvent: unknown = null;
-  resultReceiver.addEventListener('select', (event) => {
-    receivedEvent = event;
-  });
-  const addExpenseModal = await modalController.create({
-    component: AddExpenseModal,
-    componentProps: {
-      resultReceiver,
-    }
-  });
-  await addExpenseModal.present();
-  await addExpenseModal.onDidDismiss();
-
-  if (!(receivedEvent instanceof CustomEvent)) {
-    return;
-  }
-  if (!isFinanceTransaction(receivedEvent.detail)) {
-    void error('Add Expense - Invalid transaction received:', receivedEvent.detail);
-    return;
-  }
-  if (null === state.viewedHousehold) {
-    void error('Add Expense - No household selected!');
-    return;
-  }
-  const transaction = receivedEvent.detail;
-  const householdId = state.viewedHousehold;
-  householdClient.addTransaction(householdId, transaction)
-    .then(() => {
-      store.addTransaction(householdId, transaction);
-      void success(_t('Transaction added successfully'));
-    })
-    .catch((err) => void showThrownError(err, 'adding expense'));
 }
 
 

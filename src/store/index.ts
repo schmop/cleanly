@@ -26,6 +26,7 @@ export class State {
         notifyInvites: true,
         notifyTaskDone: true,
         notifyTaskDue: true,
+        notifyNewTransactions: true,
         swipeToFinishTasks: true,
         language: 'de',
     };
@@ -239,9 +240,15 @@ export class Store {
         this.state.financeTransactions[householdId] = transactions;
     }
 
+    removeTransaction(householdId: HouseholdId, transactionId: string) {
+        const transactions = this.state.financeTransactions[householdId] ?? [];
+        this.state.financeTransactions[householdId] = transactions.filter(t => t.uuid !== transactionId);
+    }
+
     addTransaction(householdId: HouseholdId, transaction: FinanceTransaction) {
         const transactions = this.state.financeTransactions[householdId] ?? [];
         transactions.push(transaction);
+        transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         this.state.financeTransactions[householdId] = transactions;
     }
 

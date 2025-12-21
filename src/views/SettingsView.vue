@@ -90,6 +90,18 @@
                 </ion-label>
               </ion-toggle>
             </ion-item>
+            <ion-item>
+              <ion-toggle
+                :enable-on-off-labels="true"
+                :label="_t('Finance transaction was added')"
+                :checked="notifyNewTransactions"
+                @ionChange="toggleNotifyNewTransactions"
+              >
+                <ion-label>
+                  {{ _t('Finance transaction was added') }}
+                </ion-label>
+              </ion-toggle>
+            </ion-item>
           </ion-item-group>
         </ion-card-content>
       </ion-card>
@@ -143,6 +155,7 @@ const router = useRouter();
 const notifyTaskDue = ref(true);
 const notifyTaskDone = ref(true);
 const notifyInvites = ref(true);
+const notifyNewTransactions = ref(true);
 const swipeToFinishTasks = ref(false);
 const language = ref<Language>('de');
 
@@ -151,6 +164,7 @@ function resetUiToStore() {
   notifyTaskDue.value = settings.notifyTaskDue;
   notifyTaskDone.value = settings.notifyTaskDone;
   notifyInvites.value = settings.notifyInvites;
+  notifyNewTransactions.value = settings.notifyNewTransactions;
   swipeToFinishTasks.value = settings.swipeToFinishTasks;
   language.value = settings.language;
 }
@@ -175,6 +189,10 @@ function toggleSwipeToFinishTasks() {
   swipeToFinishTasks.value = !swipeToFinishTasks.value;
 }
 
+function toggleNotifyNewTransactions() {
+  notifyNewTransactions.value = !notifyNewTransactions.value;
+}
+
 function changeLanguage(event: SelectCustomEvent<Language>) {
   language.value = event.detail.value;
 }
@@ -185,6 +203,7 @@ async function save() {
       notifyInvites: notifyInvites.value,
       notifyTaskDone: notifyTaskDone.value,
       notifyTaskDue: notifyTaskDue.value,
+      notifyNewTransactions: notifyNewTransactions.value,
       swipeToFinishTasks: swipeToFinishTasks.value,
       language: language.value,
     };

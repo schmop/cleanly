@@ -1,8 +1,11 @@
 {
-	"appId": "io.ionic.starter",
+	"appId": "de.schmoppo.cleanly",
 	"appName": "cleanly",
+	"server": {
+		"hostname": "deeplink.cleanly.schmoppo.de",
+		"androidScheme": "https"
+	},
 	"webDir": "dist",
-	"bundledWebRuntime": false,
 	"plugins": {
 		"Keyboard": {
 			"resizeOnFullScreen": true

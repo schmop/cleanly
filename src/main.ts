@@ -1,4 +1,4 @@
-import { IonicVue } from '@ionic/vue';
+import { InputChangeEventDetail, IonicVue } from '@ionic/vue';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -22,12 +22,31 @@ import router from './router';
 
 /* Theme variables */
 import './theme/variables.css';
+import { ionicConfig } from "@/ionic-config";
+import { Capacitor } from "@capacitor/core";
+import { IonInputCustomEvent } from "@ionic/core";
 
 const app = createApp(App)
-    .use(IonicVue)
+    .use(IonicVue, ionicConfig)
     .use(router)
     .use(container.getStore())
     .use(container);
+
+app.directive("autofillpatch", {
+    mounted: (el) => {
+        if (Capacitor.getPlatform() === "ios") {
+            setTimeout(() => {
+                try {
+                    el.nativeElement.children[0].addEventListener("change", (e: IonInputCustomEvent<InputChangeEventDetail>) => {
+                        el.nativeElement.value = e.target.value;
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            }, 100); // Need some time for the ion-input to create the input element
+        }
+    },
+});
 
 router.isReady()
     .then(() => app.mount('#app'))

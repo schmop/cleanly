@@ -1,4 +1,4 @@
-import { ISODateString, UserId } from "@/types";
+import { HouseholdId, ISODateString, UserId } from "@/types";
 import { Uuid } from "@/common/uuid";
 import { computed } from "vue";
 import { _t } from "@/translation";
@@ -17,7 +17,6 @@ export const imgMap: Record<TransactionType, string> = {
     expense: expenseImg,
     income: incomeImg,
 };
-export const CURRENCY = "€";
 export const CURRENCY_CODE = "EUR";
 
 /** @see {isFinanceTransaction} ts-auto-guard:type-guard */
@@ -29,6 +28,7 @@ export type FinanceTransaction = {
     amount: number, // number in cents
     type: TransactionType,
     date: ISODateString,
+    createdAt: ISODateString,
 };
 
 /** @see {isTransactionShare} ts-auto-guard:type-guard */
@@ -58,6 +58,13 @@ export type Debt = {
     fromUserId: UserId;
     toUserId: UserId;
     amount: number; // in cents
+}
+
+/** @see {isFinanceEvent} ts-auto-guard:type-guard */
+export type FinanceEvent = {
+    type: 'create' | 'update' | 'delete',
+    transaction: FinanceTransaction,
+    household_id: HouseholdId,
 }
 
 export function getTransactionLabel(type: TransactionType): string {

@@ -2,7 +2,7 @@
   <ion-header>
     <ion-toolbar color="medium">
       <ion-title>
-        {{ _t('Add Transaction') }}
+        {{ modalTitle }}
         <CircleXIcon
           style="float: right"
           @click="dismiss()"
@@ -250,6 +250,7 @@ const getters = inject(gettersSymbol)!;
 
 const props = defineProps<{
   resultReceiver: EventTarget,
+  transaction?: FinanceTransaction,
 }>();
 
 const datetimeModal = ref<ComponentInstance<typeof IonModal>>();
@@ -262,6 +263,8 @@ const amount = ref<number>(0);
 const date = ref<string>((new Date()).toISOString());
 const shares = ref<TransactionShare[]>([]);
 
+const isEditing = computed(() => undefined !== props.transaction);
+const modalTitle = computed(() => isEditing.value ? _t('Edit Transaction') : _t('Add Transaction'));
 const members = computed(() => {
   const myId = state.user?.id;
   const members = getters.household.value?.users ?? [];
@@ -338,11 +341,12 @@ async function dismiss() {
 
 async function finalizeExpense() {
   const transaction: FinanceTransaction = {
-    uuid: uuid4(),
+    uuid: props.transaction?.uuid ?? uuid4(), // do not override existing uuids
     title: title.value,
     type: transactionType.value,
     amount: floor(amount.value),
     date: date.value,
+    createdAt: (new Date()).toISOString(), // even when editing, update to now
     sender: sender.value,
     shares: shares.value,
   }
@@ -392,7 +396,17 @@ watch([transferReceiver, transactionType], () => {
   }
 })
 
-splitEquallyBetweenEveryone();
+if (props.transaction !== undefined) {
+  transactionType.value = props.transaction.type;
+  sender.value = props.transaction.sender;
+  title.value = props.transaction.title;
+  amount.value = props.transaction.amount;
+  date.value = props.transaction.date;
+  shares.value = props.transaction.shares.concat();
+} else {
+  splitEquallyBetweenEveryone();
+}
+
 </script>
 
 <style>

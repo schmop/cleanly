@@ -57,6 +57,14 @@
             <WalletIcon />
             {{ formatOweString(debt) }}
           </p>
+          <ion-button
+            size="small"
+            fill="outline"
+            @click="settleUp(debt)"
+          >
+            <HeartHandshakeIcon />
+            {{ _t('Settle up') }}
+          </ion-button>
         </div>
       </ion-card-content>
     </ion-card>
@@ -70,8 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { WalletIcon } from "vue-tabler-icons";
+import { WalletIcon, HeartHandshakeIcon } from "vue-tabler-icons";
 import {
+  IonButton,
   IonCard,
   IonCardContent,
   IonCardHeader,
@@ -79,14 +88,16 @@ import {
   IonContent,
   IonRefresher,
   IonRefresherContent,
-  IonSpinner,
-  RefresherCustomEvent
+  IonSpinner
 } from "@ionic/vue";
 import { __t, _t } from "@/translation";
 import { householdClientSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
 import { computed, inject } from "vue";
-import { Debt, formatMoney, userName } from "@/components/HouseholdView/FinancesView/finance-types";
-import { error, showThrownError } from "@/toast";
+import { Debt, FinanceTransaction, formatMoney, userName } from "@/components/HouseholdView/FinancesView/finance-types";
+import { fetchFinanceSummary } from "@/components/HouseholdView/FinancesView/finance-data-refresher";
+import { uuid4 } from "@/common/uuid";
+import { confirmablePrompt } from "@/alert/prompt";
+import { error, showThrownError, success } from "@/toast";
 
 const store = inject(storeSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
@@ -98,6 +109,46 @@ const financeSummary = computed(() => {
   return store.state.financeSummaries[store.state.viewedHousehold];
 })
 
+async function settleUp(debt: Debt) {
+  const householdId = store.state.viewedHousehold;
+  if (householdId === null) {
+    await error(_t('No household selected, cannot settle debt.'));
+    return;
+  }
+  const confirmMessage = __t(
+    'Do you want to settle the debt between {0} and {1} for {2}?',
+    userName(debt.fromUserId),
+    userName(debt.toUserId),
+    formatMoney(debt.amount),
+  );
+  if (await confirmablePrompt(confirmMessage, _t('Settle debt'))) {
+    const settlingTransaction: FinanceTransaction = {
+      uuid: uuid4(),
+      title: _t('Debt settlement'),
+      sender: debt.fromUserId,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      amount: debt.amount,
+      type: 'transfer',
+      shares: [
+        {
+          userId: debt.toUserId,
+          share: 1,
+          uuid: uuid4(),
+        },
+      ],
+    };
+    try {
+      await householdClient.addTransaction(householdId, settlingTransaction);
+      store.addTransaction(householdId, settlingTransaction);
+      void success(_t('Debt settled successfully.'));
+      await fetchFinanceSummary();
+    } catch (e) {
+      void showThrownError(e);
+    }
+  }
+}
+
 function formatOweString(debt: Debt) {
   if (debt.fromUserId === store.state.user?.id) {
     return __t('You owe {0} {1}', userName(debt.toUserId), formatMoney(debt.amount));
@@ -106,24 +157,6 @@ function formatOweString(debt: Debt) {
     return __t('{0} owes you {1}', userName(debt.fromUserId), formatMoney(debt.amount));
   }
   return __t('{0} owes {1} {2}', userName(debt.fromUserId), userName(debt.toUserId), formatMoney(debt.amount));
-}
-
-async function fetchFinanceSummary(event?: RefresherCustomEvent) {
-  if (store.state.viewedHousehold === null) {
-    void error('Could not fetch finance summary, no household selected!');
-    return;
-  }
-  try {
-    store.setFinanceSummary(
-      store.state.viewedHousehold,
-      await householdClient.fetchFinanceSummary(store.state.viewedHousehold),
-    );
-  } catch (err) {
-    void showThrownError(err, 'fetching the finance summary');
-  }
-  if (event != null) {
-    await event.target.complete();
-  }
 }
 
 void fetchFinanceSummary();
@@ -135,6 +168,7 @@ void fetchFinanceSummary();
   flex-direction: row;
   justify-content: space-between;
   padding: 8px;
+  gap: 4px;
 }
 .center {
   position: fixed;
