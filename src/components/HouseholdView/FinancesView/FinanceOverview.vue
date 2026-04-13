@@ -62,8 +62,8 @@
             fill="outline"
             @click="settleUp(debt)"
           >
-            <HeartHandshakeIcon />
-            {{ _t('Settle up') }}
+            <HeartHandshakeIcon slot="start" />
+            <span class="pl-2">{{ _t('Settle up') }}</span>
           </ion-button>
         </div>
       </ion-card-content>
@@ -115,11 +115,18 @@ async function settleUp(debt: Debt) {
     await error(_t('No household selected, cannot settle debt.'));
     return;
   }
-  const confirmMessage = __t(
-    'Do you want to settle the debt between {0} and {1} for {2}?',
-    userName(debt.fromUserId),
-    userName(debt.toUserId),
-    formatMoney(debt.amount),
+  const confirmMessage = (debt.fromUserId === store.state.user?.id || debt.toUserId === store.state.user?.id
+      ? __t(
+        'Do you want to settle the debt between you and {0} for {1}?',
+        debt.fromUserId === store.state.user?.id ? userName(debt.toUserId) : userName(debt.fromUserId),
+        formatMoney(debt.amount),
+      )
+      : __t(
+        'Do you want to settle the debt between {0} and {1} for {2}?',
+        userName(debt.fromUserId),
+        userName(debt.toUserId),
+        formatMoney(debt.amount),
+      )
   );
   if (await confirmablePrompt(confirmMessage, _t('Settle debt'))) {
     const settlingTransaction: FinanceTransaction = {
@@ -174,6 +181,10 @@ void fetchFinanceSummary();
   position: fixed;
   top: 50%;
   left: 50%;
+}
+
+.pl-2 {
+  padding-left: 4px;
 }
 .center-row {
   display: flex;

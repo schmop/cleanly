@@ -1,7 +1,7 @@
 import { HouseholdId, ISODateString, UserId } from "@/types";
 import { Uuid } from "@/common/uuid";
 import { computed } from "vue";
-import { _t } from "@/translation";
+import { _t, language } from "@/translation";
 import transferImg from '@img/transfer.png';
 import expenseImg from '@img/expense.png';
 import incomeImg from '@img/income.png';
@@ -91,7 +91,7 @@ export function userName(userId: UserId): string {
 
 export function formatMoney(amountInCents: number): string {
     const amountInEuros = amountInCents / 100;
-    return amountInEuros.toLocaleString(undefined, {
+    return amountInEuros.toLocaleString(language(), {
         style: 'currency',
         currency: CURRENCY_CODE,
         minimumFractionDigits: 2,

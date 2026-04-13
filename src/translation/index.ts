@@ -4,6 +4,7 @@ import { schwobi } from "@/translation/german_schwobi";
 
 const state = container.getStore().state;
 export type Language = 'en' | 'de' | 'schwobi';
+export type Locale = 'de_DE' | 'en_US';
 
 function formatString(string: string, ...args: (string|number)[]): string {
     return string.replace(/{([0-9]+)}/g, (match, index) => {
@@ -17,8 +18,15 @@ function formatString(string: string, ...args: (string|number)[]): string {
     });
 }
 
-function language(): Language {
+export function language(): Language {
     return state?.userSettings.language ?? 'de';
+}
+
+export function locale(): Locale {
+    if (language() === 'de' || language() === 'schwobi') {
+        return 'de_DE';
+    }
+    return 'en_US';
 }
 
 function languageDict(): Record<string, string> {
