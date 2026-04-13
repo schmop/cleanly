@@ -10,16 +10,15 @@
     </ion-toolbar>
   </ion-header>
   <ion-content color="light">
+    <div class="type-header">
+      <img
+        :src="imgMap[transaction.type]"
+        class="type-img"
+        :alt="getTransactionLabel(transaction.type)"
+      >
+      <span class="type-label">{{ getTransactionLabel(transaction.type) }}</span>
+    </div>
     <ion-list :inset="true">
-      <ion-item lines="full">
-        <img
-          slot="start"
-          :src="imgMap[transaction.type]"
-          class="type-img"
-          :alt="getTransactionLabel(transaction.type)"
-        >
-        <ion-label>{{ getTransactionLabel(transaction.type) }}</ion-label>
-      </ion-item>
       <ion-item lines="full">
         <CashIcon slot="start" />
         <ion-label>
@@ -49,9 +48,12 @@
       >
         <UsersIcon slot="start" />
         <ion-label>{{ userName(share.userId) }}</ion-label>
-        <ion-note slot="end">
+        <ion-label
+          slot="end"
+          class="money-end"
+        >
           {{ formatMoney(share.amount) }}
-        </ion-note>
+        </ion-label>
       </ion-item>
     </ion-list>
     <ion-list :inset="true">
@@ -63,22 +65,32 @@
       </ion-item>
     </ion-list>
   </ion-content>
-  <ion-footer v-if="canDelete">
+  <ion-footer>
     <ion-toolbar>
-      <ion-button
-        slot="start"
-        @click="edit()"
-      >
-        <PencilIcon slot="start" />
-        {{ _t('Edit') }}
-      </ion-button>
+      <template v-if="withinEditWindow">
+        <ion-button
+          slot="start"
+          @click="edit()"
+        >
+          <PencilIcon slot="start" />
+          {{ _t('Edit') }}
+        </ion-button>
+        <ion-button
+          slot="start"
+          color="danger"
+          @click="doDelete()"
+        >
+          <TrashXIcon slot="start" />
+          {{ _t('Delete') }}
+        </ion-button>
+      </template>
       <ion-button
         slot="end"
-        color="danger"
-        @click="doDelete()"
+        color="medium"
+        @click="dismiss()"
       >
-        <TrashXIcon slot="start" />
-        {{ _t('Delete') }}
+        <CircleXIcon slot="start" />
+        {{ _t('Close') }}
       </ion-button>
     </ion-toolbar>
   </ion-footer>
@@ -95,7 +107,6 @@ import {
   IonLabel,
   IonList,
   IonListHeader,
-  IonNote,
   IonTitle,
   IonToolbar,
   modalController,
@@ -112,7 +123,7 @@ import {
 } from 'vue-tabler-icons';
 import { computed, inject } from 'vue';
 import { householdClientSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
-import { _t } from '@/translation';
+import { _t, locale } from '@/translation';
 import {
   FinanceTransaction,
   formatMoney,
@@ -120,7 +131,6 @@ import {
   imgMap,
   userName,
 } from '@/components/HouseholdView/FinancesView/finance-types';
-import { formatDate } from '@/common/time';
 import { confirmablePrompt } from '@/alert/prompt';
 import { error, showThrownError, success } from '@/toast';
 import { openExpenseFormModal } from '@/components/HouseholdView/FinancesView/finance-modal';
@@ -131,8 +141,22 @@ const householdClient = inject(householdClientSymbol)!;
 const props = defineProps<{ transaction: FinanceTransaction }>();
 
 const amountString = computed(() => formatMoney(props.transaction.amount));
-const dateString = computed(() => formatDate(new Date(props.transaction.date)));
-const createdAtString = computed(() => formatDate(new Date(props.transaction.createdAt)));
+
+const dateString = computed(() => {
+  const d = new Date(props.transaction.date);
+  return d.toLocaleString(locale().replace('_', '-'), {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+});
+
+const createdAtString = computed(() => {
+  const d = new Date(props.transaction.createdAt);
+  return d.toLocaleString(locale().replace('_', '-'), {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+});
 
 const senderString = computed(() => {
   if (props.transaction.sender === store.state.user?.id) {
@@ -149,10 +173,7 @@ const shareDetails = computed(() => {
   }));
 });
 
-const canDelete = computed(() => {
-  if (props.transaction.sender !== store.state.user?.id) {
-    return false;
-  }
+const withinEditWindow = computed(() => {
   const diffInMs = new Date().getTime() - new Date(props.transaction.createdAt).getTime();
   return diffInMs <= 2 * 60 * 60 * 1000;
 });
@@ -187,8 +208,27 @@ async function doDelete() {
 </script>
 
 <style scoped>
+.type-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 8px;
+  gap: 8px;
+}
+
 .type-img {
-  width: 48px;
-  padding: 8px;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.type-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+}
+
+.money-end {
+  text-align: end;
 }
 </style>

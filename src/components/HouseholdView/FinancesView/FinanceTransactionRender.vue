@@ -1,5 +1,9 @@
 <template>
-  <ion-card :class="transaction.type">
+  <ion-card
+    :class="transaction.type"
+    button
+    @click="openDetails"
+  >
     <div class="row padding">
       <div class="align-left">
         <ion-card-title>{{ transaction.title }}</ion-card-title>
@@ -21,46 +25,22 @@
         >
           {{ yourShareString }}
         </ion-card-subtitle>
-        <ion-card-subtitle
-          v-if="recentEnoughYouCanEditAndDelete"
-          class="align-right"
-        >
-          <ion-button
-            color="medium"
-            size="small"
-            shape="round"
-            @click="openEditModal"
-          >
-            <PencilIcon slot="icon-only" />
-          </ion-button>
-          <ion-button
-            color="danger"
-            size="small"
-            shape="round"
-            @click="deleteTransaction"
-          >
-            <TrashXIcon slot="icon-only" />
-          </ion-button>
-        </ion-card-subtitle>
       </div>
     </div>
   </ion-card>
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonCard, IonCardSubtitle, IonCardTitle } from '@ionic/vue'
-import { CalendarIcon, PencilIcon, TrashXIcon, UsersIcon } from 'vue-tabler-icons';
+import { IonCard, IonCardSubtitle, IonCardTitle, modalController } from '@ionic/vue'
+import { CalendarIcon, UsersIcon } from 'vue-tabler-icons';
 import { computed, inject } from "vue";
-import { householdClientSymbol, storeSymbol } from "@/dependency-injection/injection-keys";
+import { storeSymbol } from "@/dependency-injection/injection-keys";
 import { __t, _t } from "@/translation";
 import { FinanceTransaction, formatMoney, userName } from "@/components/HouseholdView/FinancesView/finance-types";
 import { formatDate } from "@/common/time";
-import { confirmablePrompt } from "@/alert/prompt";
-import { error, showThrownError, success } from "@/toast";
-import { openExpenseFormModal } from "@/components/HouseholdView/FinancesView/finance-modal";
+import FinanceTransactionDetailModal from "@/modals/FinanceTransactionDetailModal.vue";
 
 const store = inject(storeSymbol)!;
-const householdClient = inject(householdClientSymbol)!;
 
 const props = defineProps<{transaction: FinanceTransaction}>();
 
@@ -115,16 +95,9 @@ const receiverString = computed(() => {
   }
   return props.transaction.shares.map((share) => userName(share.userId)).join(', ');
 });
+
 const dateString = computed(() => {
   return formatDate(new Date(props.transaction.date));
-});
-const recentEnoughYouCanEditAndDelete = computed(() => {
-  const transactionDate = new Date(props.transaction.createdAt);
-  const now = new Date();
-  const diffInMs = now.getTime() - transactionDate.getTime();
-  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-
-  return diffInDays <= 1;
 });
 
 const yourShareString = computed(() => {
@@ -142,24 +115,12 @@ const yourShareString = computed(() => {
   return __t('Your share: {0}', formatMoney(yourShare.share * props.transaction.amount / totalShares));
 });
 
-async function openEditModal() {
-  await openExpenseFormModal(props.transaction);
-}
-
-async function deleteTransaction() {
-  if (await confirmablePrompt(_t('Are you sure you want to delete this transaction?'), _t('Delete Transaction'))) {
-    const householdId = store.state.viewedHousehold;
-    if (householdId === null) {
-      await error(_t('No household selected, cannot delete transaction.'));
-      return;
-    }
-    try {
-      await householdClient.deleteTransaction(householdId, props.transaction);
-      void success(_t('Transaction deleted successfully.'));
-    } catch (err) {
-      void showThrownError(err, 'deleting transaction');
-    }
-  }
+async function openDetails() {
+  const modal = await modalController.create({
+    component: FinanceTransactionDetailModal,
+    componentProps: { transaction: props.transaction },
+  });
+  await modal.present();
 }
 </script>
 
