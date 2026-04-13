@@ -1,5 +1,7 @@
 <template>
-  <IonItem>
+  <IonItem
+    lines="none"
+  >
     <IonLabel
       position="stacked"
       required
@@ -201,6 +203,7 @@ function dismissModal() {
 .there-is-info-underneath-me {
   cursor: pointer;
   text-decoration: underline;
+  padding-bottom: 8px;
 }
 
 .padding {
@@ -214,4 +217,7 @@ function dismissModal() {
 ion-radio::part(label) {
   width: 100%;
 }
+/*ion-item::part(native) {
+  border: 1px solid var(--ion-color-step-300, var(--ion-background-color-step-300, #b3b3b3));
+}*/
 </style>

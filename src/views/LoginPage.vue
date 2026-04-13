@@ -26,86 +26,76 @@
             </ion-segment-button>
           </ion-segment>
         </ion-card-header>
-        <ion-card-content class="space-between">
-          <ion-item-group @keypress.enter.exact="sendForm">
-            <ServerUrlInput v-model="serverUrl" />
-            <ion-item v-if="isRegistering">
-              <ion-label
-                position="stacked"
-                required
-              >
-                {{ _t('Name') }}
-              </ion-label>
-              <ion-input
-                v-model="name"
-                :aria-label="_t('Name')"
-                type="text"
-              />
-            </ion-item>
-            <ion-item>
-              <ion-label
-                position="stacked"
-                required
-              >
-                {{ _t('Mail') }}
-              </ion-label>
-              <ion-input
-                v-model="mail"
-                v-autofillpatch
-                :aria-label="_t('Mail')"
-                autocomplete="email"
-                name="email"
-                type="email"
-                required
-              />
-            </ion-item>
-            <ion-item>
-              <ion-label
-                position="stacked"
-                required
-              >
-                {{ _t('Password') }}
-              </ion-label>
-              <ion-input
-                v-model="password"
-                v-autofillpatch
-                :aria-label="_t('Password')"
-                :autocomplete="isRegistering ? 'new-password' : 'current-password'"
-                name="password"
-                type="password"
-                required
-              />
-            </ion-item>
-            <ion-item v-if="isRegistering">
-              <ion-label
-                position="stacked"
-                required
-              >
-                {{ _t('Retype Password') }}
-              </ion-label>
-              <ion-input
-                v-model="retype"
-                :aria-label="_t('Retype Password')"
-                type="password"
-              />
-            </ion-item>
-            <ion-item
+        <ion-card-content
+          class="space-between"
+        >
+          <div
+            class="form-wrapper"
+            @keypress.enter.exact="sendForm"
+          >
+            <ServerUrlInput
+              v-model="serverUrl"
+              class="mb-1"
+            />
+            <ion-input
+              v-if="isRegistering"
+              v-model="name"
+              class="mb-2"
+              fill="outline"
+              :aria-label="_t('Name')"
+              :label="_t('Name')"
+              label-placement="floating"
+              type="text"
+            />
+            <ion-input
+              v-model="mail"
+              v-autofillpatch
+              fill="outline"
+              class="mb-2"
+              :aria-label="_t('Mail')"
+              :label="_t('Mail')"
+              label-placement="floating"
+              autocomplete="email"
+              name="email"
+              type="email"
+              required
+            />
+            <ion-input
+              v-model="password"
+              v-autofillpatch
+              fill="outline"
+              class="mb-2"
+              :aria-label="_t('Password')"
+              :label="_t('Password')"
+              label-placement="floating"
+              :autocomplete="isRegistering ? 'new-password' : 'current-password'"
+              name="password"
+              type="password"
+              required
+            />
+            <ion-input
+              v-if="isRegistering"
+              v-model="retype"
+              fill="outline"
+              :aria-label="_t('Retype Password')"
+              :label="_t('Retype Password')"
+              label-placement="floating"
+              type="password"
+            />
+
+            <ion-button
               v-if="!isRegistering"
-              lines="none"
+              slot="end"
+              class="align-right"
+              target="_blank"
+              href="https://cleanly.schmoppo.de/reset-password"
+              fill="clear"
+              size="small"
             >
-              <ion-button
-                slot="end"
-                class="align-center"
-                target="_blank"
-                href="https://cleanly.schmoppo.de/reset-password"
-                fill="clear"
-                size="small"
-              >
-                <ExternalLinkIcon class="mr-1" />
-                {{ _t('Forgot password?') }}
-              </ion-button>
-            </ion-item>
-          </ion-item-group>
+              <ExternalLinkIcon class="mr-1" />
+              {{ _t('Forgot password?') }}
+            </ion-button>
+          </div>
           <ion-button
             expand="block"
             :disabled="!formValid"
@@ -144,8 +134,6 @@ import {
   IonContent,
   IonImg,
   IonInput,
-  IonItem,
-  IonItemGroup,
   IonLabel,
   IonPage,
   IonSegment,
@@ -222,8 +210,8 @@ async function login() {
   margin-right: 4px;
 }
 
-.align-center {
-  align-self: center;
+.align-right {
+  align-self: end;
 }
 
 .full-screen {
@@ -252,4 +240,16 @@ async function login() {
   padding-bottom: 32px;
 }
 
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.mb-2 {
+  margin-bottom: 16px;
+}
+
+.mb-1 {
+  margin-bottom: 8px;
+}
 </style>
