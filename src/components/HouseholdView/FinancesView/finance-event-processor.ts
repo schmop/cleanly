@@ -20,12 +20,13 @@ export class FinanceEventProcessor {
                 void fetchFinanceSummary();
                 break;
             case 'update':
-                void error('Received unsupported finance transaction update event!');
-                console.error('Unsupported finance transaction update event payload given:', payload);
+                this.store.removeTransaction(payload.household_id, payload.transaction.uuid);
+                this.store.addTransaction(payload.household_id, payload.transaction);
+                void fetchFinanceSummary();
                 break;
             case 'delete':
-                void error('Received unsupported finance transaction delete event!');
-                console.error('Unsupported finance transaction delete event payload given:', payload);
+                this.store.removeTransaction(payload.household_id, payload.transaction.uuid);
+                void fetchFinanceSummary();
                 break;
         }
     }

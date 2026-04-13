@@ -278,10 +278,9 @@ export class HouseholdClient {
     }
 
     async deleteTransaction(householdId: number, transaction: FinanceTransaction): Promise<void> {
-        const response = await this.client.sendJsonEventually(
+        const response = await this.client.requestEventually(
             'DELETE',
-            `api/household/${householdId}/finance/transaction`,
-            {transaction},
+            `api/household/${householdId}/finance/transaction/${transaction.uuid}`,
         );
 
         if (response.status !== 200) {
@@ -292,7 +291,7 @@ export class HouseholdClient {
     async updateTransaction(householdId: number, transaction: FinanceTransaction): Promise<void> {
         const response = await this.client.sendJsonEventually(
             'PUT',
-            `api/household/${householdId}/finance/transaction/update`,
+            `api/household/${householdId}/finance/transaction/${transaction.uuid}`,
             {transaction},
         );
 
