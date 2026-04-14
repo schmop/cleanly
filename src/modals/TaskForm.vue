@@ -57,8 +57,9 @@
         <input
           slot="end"
           type="color"
-          disabled="true"
+          disabled
           :value="color"
+          style="pointer-events: none"
         >
         <PaletteIcon slot="end" />
       </ion-item>
