@@ -275,6 +275,7 @@ export const schwobi = {
     'Default Server': 'Standardserver',
     'Custom server URL': 'Benutzerdefinierte Server-URL',
     'The URL of the Cleanly server you want to connect to.': 'Die URL vom Cleanly-Server, mit dem du di verbinda witt.',
+    'Used colors': 'Verwendede Farba',
     'Finance transaction was added': 'Finanzdransakzion wurd hinzugefügd',
     'Are you sure you want to delete this transaction?': 'Bisch du sicher, dass du die Dransakzion lösche willschd?',
     'Delete Transaction': 'Dransakzion lösche',

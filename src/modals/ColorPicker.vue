@@ -8,6 +8,24 @@
   </ion-header>
   <ion-content color="light">
     <div class="content">
+      <div
+        v-if="usedHues.length > 0"
+        class="used-colors"
+      >
+        <ion-label class="used-colors-label">
+          {{ _t('Used colors') }}
+        </ion-label>
+        <div class="swatches">
+          <button
+            v-for="usedHue in usedHues"
+            :key="usedHue"
+            class="swatch"
+            :class="{ 'swatch-selected': usedHue === hue }"
+            :style="`background-color: ${swatchColor(usedHue).toHex()}`"
+            @click="selectHue(usedHue)"
+          />
+        </div>
+      </div>
       <VueColorPicker
         class="color-picker"
         :hue="color.hue"
@@ -63,7 +81,7 @@ import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
 import '@radial-color-picker/vue-color-picker/dist/vue-color-picker.min.css';
 import { stateSymbol } from '@/dependency-injection/injection-keys';
 import { __t, _t } from '@/translation';
-import { IonButton, IonContent, IonFooter, IonHeader, IonTitle, IonToolbar, modalController } from "@ionic/vue";
+import { IonButton, IonContent, IonFooter, IonHeader, IonLabel, IonTitle, IonToolbar, modalController } from "@ionic/vue";
 import VueColorPicker from '@radial-color-picker/vue-color-picker';
 import { computed, inject, ref } from 'vue';
 import { CircleXIcon, PaletteIcon } from 'vue-tabler-icons';
@@ -72,6 +90,7 @@ const emit = defineEmits(['select']);
 const props = defineProps<{
   colorReceiver: EventTarget,
   startHue: number|null,
+  usedHues?: number[],
 }>();
 
 const state = inject(stateSymbol)!;
@@ -80,6 +99,8 @@ const hue = ref(props.startHue ?? getDefaultTaskHue());
 const darkColor = computed(() => taskColorFromHue(hue.value, true));
 const lightColor = computed(() => taskColorFromHue(hue.value, false));
 const color = computed(() => state.darkmode ? darkColor.value : lightColor.value);
+const usedHues = computed(() => props.usedHues ?? []);
+const swatchColor = (h: number) => taskColorFromHue(h, state.darkmode);
 
 async function dismiss() {
   await modalController.dismiss();
@@ -94,6 +115,10 @@ async function select() {
   emit('select', hue.value);
   await dismiss();
 }
+
+function selectHue(selectedHue: number) {
+  hue.value = selectedHue;
+}
 </script>
 
 <style scoped>
@@ -103,6 +128,38 @@ async function select() {
   flex-direction: column;
   align-items: center;
   min-height: 100%;
+}
+
+.used-colors {
+  width: 100%;
+  padding: 12px 16px 0;
+}
+
+.used-colors-label {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.swatch-selected {
+  border-color: var(--ion-color-primary);
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
 }
 
 .color-picker {

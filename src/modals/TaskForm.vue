@@ -101,7 +101,7 @@
 import { getDefaultTaskHue, taskColorFromHue } from '@/common/task-colors';
 import { DURATION_SIZES, exactRecurringInterval } from '@/common/time';
 import { IconName, icons, isValidIcon } from "@/components/icons";
-import { stateSymbol, taskClientSymbol } from "@/dependency-injection/injection-keys";
+import { gettersSymbol, stateSymbol, taskClientSymbol } from "@/dependency-injection/injection-keys";
 import { Task } from '@/models/Task';
 import toast, { showThrownError } from "@/toast";
 import { __t, _t } from "@/translation";
@@ -132,6 +132,7 @@ const props = defineProps<{
   task?: Task,
 }>();
 const state = inject(stateSymbol)!;
+const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
 const durationModifiers = DURATION_SIZES;
@@ -144,6 +145,12 @@ const stars = ref('0');
 
 const color = computed(() => taskColorFromHue(hue.value, state.darkmode).toHex());
 const valid = computed(() => icon.value in icons);
+const usedHues = computed(() => {
+  const hues = getters.tasks.value
+    .filter(t => t.hue !== null)
+    .map(t => t.hue as number);
+  return [...new Set(hues)];
+});
 const calculatedDuration = computed(() => {
   if (null === duration.value) {
     return null;
@@ -165,6 +172,7 @@ async function colorPicker() {
     componentProps: {
       colorReceiver,
       startHue: hue.value,
+      usedHues: usedHues.value,
     }
   });
   await colorPicker.present();

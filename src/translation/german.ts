@@ -25,6 +25,7 @@ export const german = {
     'Cleanly': 'Cleanly',
     'Clear checked': 'Abgehakte löschen',
     'Color': 'Farbe',
+    'Used colors': 'Verwendete Farben',
     'Confirm': 'Bestätigen',
     'Copy': 'Kopieren',
     'Could not delete task': 'Konnte Aufgabe nicht löschen',
