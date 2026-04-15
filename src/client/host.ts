@@ -1,6 +1,6 @@
 function getDevHostIp() {
-    return "http://192.168.178.29";
-//    return "http://localhost";
+//    return "http://192.168.178.150";
+    return "http://localhost";
 }
 
 export function getSseHost() {
