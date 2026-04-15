@@ -136,7 +136,7 @@ const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
 const durationModifiers = DURATION_SIZES;
-const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('days');
+const durationModifier: Ref<keyof typeof DURATION_SIZES> = ref('hours');
 const duration = ref<number|null>(null);
 const icon = ref<IconName>('check');
 const hue = ref<number>(getDefaultTaskHue());
@@ -238,7 +238,7 @@ async function openDurationPicker() {
         text: _t("Nonrepeating"),
         handler: () => {
           duration.value = null;
-          durationModifier.value = 'days';
+          durationModifier.value = 'hours';
         },
       },
       {

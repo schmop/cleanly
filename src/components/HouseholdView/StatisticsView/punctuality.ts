@@ -1,6 +1,6 @@
 import { HouseholdStats, TaskStats } from "@/models/HouseholdStats";
 import { __t, _t } from "@/translation";
-import { secondsToDays } from "@/common/time";
+import { secondsToHours } from "@/common/time";
 import { Analysis } from "@/components/HouseholdView/StatisticsView/types";
 import { Task } from "@/models/Task";
 
@@ -23,12 +23,12 @@ export function getPunctualityData(task: Task|undefined, analysis: Analysis, sta
             _t("maximum"),
         ],
         datasets: [{
-            label: __t('Days to do {0}', task.name),
+            label: __t('Hours to do {0}', task.name),
             data: [
                 task.duration ?? 0,
-                secondsToDays(durations.average ?? 0),
-                secondsToDays(durations.min ?? 0),
-                secondsToDays(durations.max ?? 0),
+                secondsToHours(durations.average ?? 0),
+                secondsToHours(durations.min ?? 0),
+                secondsToHours(durations.max ?? 0),
             ],
         }],
     }

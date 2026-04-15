@@ -7,7 +7,7 @@ export type Task = {
     icon: string,
     hue: number|null,
     lastComplete?: number|null, // unix timestamp in seconds
-    duration: number|null, // in days, null if it has no due date
+    duration: number|null, // in hours, null if it has no due date
     assignee: UserId|null,
     stars: number,
 }

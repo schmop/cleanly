@@ -15,6 +15,10 @@ export function secondsToDays(seconds: number) {
     return Math.floor(seconds / DAY_IN_SECONDS);
 }
 
+export function secondsToHours(seconds: number) {
+    return Math.floor(seconds / HOUR_IN_SECONDS);
+}
+
 export const DAY_FORMATTING_SIZES = {
     days: 1,
     months: 30,
@@ -29,10 +33,11 @@ export const HOUR_FORMATTING_SIZES = {
 };
 
 export const DURATION_SIZES = {
-    days: 1,
-    weeks: 7,
-    months: 30,
-    years: 365,
+    hours: 1,
+    days: 24,
+    weeks: 7 * 24,
+    months: 30 * 24,
+    years: 365 * 24,
 };
 
 export type DurationName = keyof typeof DURATION_SIZES
@@ -83,20 +88,20 @@ function formatInterval(someTime: number, someDurations: Partial<Record<Duration
     return string;
 }
 
-export function exactRecurringInterval(days: number): {times: number, format: keyof typeof DURATION_SIZES} {
+export function exactRecurringInterval(hours: number): {times: number, format: keyof typeof DURATION_SIZES} {
     const sortedDurations = Object.entries(DURATION_SIZES).sort(([, a], [, b]) => b - a) as Entries<typeof DURATION_SIZES>;
     for (const [name, duration] of sortedDurations) {
-        if (days >= duration && days % duration === 0) {
+        if (hours >= duration && hours % duration === 0) {
             return {
-                times: days / duration,
+                times: hours / duration,
                 format: name,
             }
         }
     }
 
     return {
-        times: days,
-        format: 'days',
+        times: hours,
+        format: 'hours',
     };
 }
 
@@ -108,22 +113,21 @@ export function formatDays(days: number, maxDepth = 3): string {
     return formatInterval(days, DAY_FORMATTING_SIZES, maxDepth);
 }
 
-export function roundedRecurringInterval(days: number|null): string {
-    if (null === days) {
+export function roundedRecurringInterval(hours: number|null): string {
+    if (null === hours) {
         return _t('never');
-    }
-    if (days <= 1) {
-        return _t('everyday');
     }
 
     const sortedDurations = entries(DURATION_SIZES).sort(([, a], [, b]) => b - a);
 
     for (const [name, duration] of sortedDurations) {
-        const num = Math.floor(days / duration);
-        const rest = days % duration;
+        const num = Math.floor(hours / duration);
+        const rest = hours % duration;
         if (num > 0 && rest === 0) {
             if (num === 1) {
                 switch (name) {
+                    case 'hours':
+                        return _t('every hour');
                     case 'days':
                         return _t('everyday');
                     case 'weeks':
