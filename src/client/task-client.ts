@@ -79,6 +79,17 @@ export class TaskClient {
         }
     }
 
+    async deleteTaskLog(uuid: string) {
+        const response = await this.client.requestEventually(
+            'DELETE',
+            `api/task/log/${uuid}`,
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'deleting task log');
+        }
+    }
+
     async fetchTaskLog(householdId: number, fetchFrom: string|null): Promise<TaskLogResponse> {
         const household: undefined|Household = this.store.getters.householdById.value(householdId);
         if (null == household) {

@@ -1,25 +1,39 @@
 <template>
   <ion-card>
     <ion-card-header>
-      <ion-card-title>
-        <component :is="icon" />
-        <ion-text color="secondary">
-          <i>{{ userName }}</i>
-        </ion-text>
-        {{ _t('did') }}
-        <ion-text color="secondary">
-          <i>{{ task.name }}</i>
-        </ion-text>
-        {{ relativeInterval }}
-        <template v-if="log.stars > 0">
-          {{ _t('for') }}
-          <ion-text color="warning">
-            <i>{{ log.stars }}
-              <StarIcon size="18" />
-            </i>
+      <ion-toolbar>
+        <ion-card-title>
+          <component :is="icon" />
+          <ion-text color="secondary">
+            <i>{{ userName }}</i>
           </ion-text>
-        </template>
-      </ion-card-title>
+          {{ _t('did') }}
+          <ion-text color="secondary">
+            <i>{{ task.name }}</i>
+          </ion-text>
+          {{ relativeInterval }}
+          <template v-if="log.stars > 0">
+            {{ _t('for') }}
+            <ion-text color="warning">
+              <i>{{ log.stars }}
+                <StarIcon size="18" />
+              </i>
+            </ion-text>
+          </template>
+        </ion-card-title>
+        <ion-buttons
+          v-if="deletable"
+          slot="end"
+        >
+          <ion-button
+            color="danger"
+            fill="clear"
+            @click="$emit('delete')"
+          >
+            <TrashIcon size="20" />
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
     </ion-card-header>
   </ion-card>
 </template>
@@ -29,13 +43,19 @@ import { formatHours, HOUR_IN_SECONDS, secondsSince } from "@/common/time";
 import { isValidIcon } from '@/components/icons';
 import { TaskLog } from '@/models/TaskLog';
 import { __t, _t } from "@/translation";
-import { IonCard, IonCardHeader, IonCardTitle, IonText, } from "@ionic/vue";
+import { IonButton, IonButtons, IonCard, IonCardHeader, IonCardTitle, IonText, IonToolbar } from "@ionic/vue";
 import { computed } from "vue";
-import { StarIcon } from 'vue-tabler-icons';
+import { StarIcon, TrashIcon } from 'vue-tabler-icons';
 
 const props = defineProps<{
   log: TaskLog,
+  deletable?: boolean,
 }>();
+
+defineEmits<{
+  delete: [],
+}>();
+
 const task = computed(() => {
   if (undefined === props.log) {
     throw Error('TaskLog is mandatory in a TaskLogView');

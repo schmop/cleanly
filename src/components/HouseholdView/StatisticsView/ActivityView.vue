@@ -9,9 +9,11 @@
     </ion-card-header>
   </ion-card>
   <TaskLogView
-    v-for="(log, index) in sortedTaskLogs"
-    :key="index"
+    v-for="log in sortedTaskLogs"
+    :key="log.uuid"
     :log="log"
+    :deletable="canDelete(log)"
+    @delete="deleteLog(log)"
   />
   <ion-infinite-scroll @ionInfinite="ionInfinite">
     <ion-infinite-scroll-content />
@@ -19,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
+import { gettersSymbol, stateSymbol, taskClientSymbol } from '@/dependency-injection/injection-keys';
 import { TaskLog } from '@/models/TaskLog';
 import { error, showThrownError } from "@/toast";
 import { _t } from '@/translation';
@@ -35,7 +37,10 @@ import {
 import { computed, inject, onMounted, ref } from "vue";
 import TaskLogView from '@/components/TaskLogView.vue';
 
+const DAY_IN_SECONDS = 86400;
+
 const state = inject(stateSymbol)!;
+const getters = inject(gettersSymbol)!;
 const taskClient = inject(taskClientSymbol)!;
 
 let upToFetchId: string|null = null;
@@ -47,6 +52,23 @@ const sortedTaskLogs = computed(() => {
   const logs = taskLogs.value.concat();
   return logs.sort((a: TaskLog, b: TaskLog) => b.timestamp - a.timestamp);
 });
+
+function canDelete(log: TaskLog): boolean {
+  const withinWindow = (Date.now() / 1000 - log.timestamp) < DAY_IN_SECONDS;
+  if (!withinWindow) return false;
+  const isOwn = log.user?.id === state.user?.id;
+  return isOwn || getters.canManageTasks.value();
+}
+
+async function deleteLog(log: TaskLog) {
+  try {
+    await taskClient.deleteTaskLog(log.uuid);
+    taskLogs.value = taskLogs.value.filter((l) => l.uuid !== log.uuid);
+  } catch (err) {
+    void showThrownError(err);
+  }
+}
+
 async function fetchLogs() {
   const id = state.viewedHousehold;
   if (null === id) {
