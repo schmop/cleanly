@@ -9,6 +9,13 @@
         <ion-title>
           {{ _t('Menu') }}
         </ion-title>
+        <div
+          slot="end"
+          style="display: flex; align-items: center; gap: 4px; color: white; font-size: 0.95rem; padding-right: 12px;"
+        >
+          <UserIcon :size="16" />
+          {{ store.state.user?.name }}
+        </div>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -64,7 +71,7 @@
 
 <script setup lang="ts">
 import { openChangelogBrowser } from "@/changelog/changelog-browser";
-import { authClientSymbol, householdClientSymbol } from '@/dependency-injection/injection-keys';
+import { authClientSymbol, householdClientSymbol, storeSymbol } from '@/dependency-injection/injection-keys';
 import { _t } from "@/translation";
 import { App } from '@capacitor/app';
 import {
@@ -82,11 +89,12 @@ import {
 } from "@ionic/vue";
 import { inject, onBeforeMount, ref } from "vue";
 import { routerKey } from "vue-router";
-import { CirclePlusIcon, HomeIcon, LogoutIcon, NewsIcon, SettingsIcon } from "vue-tabler-icons";
+import { CirclePlusIcon, HomeIcon, LogoutIcon, NewsIcon, SettingsIcon, UserIcon } from "vue-tabler-icons";
 import CreateHousehold from "../modals/CreateHousehold.vue";
 
 const householdClient = inject(householdClientSymbol)!;
 const authClient = inject(authClientSymbol)!;
+const store = inject(storeSymbol)!;
 const router = inject(routerKey)!;
 
 const appVersion = ref('');
