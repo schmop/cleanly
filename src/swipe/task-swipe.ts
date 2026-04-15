@@ -5,7 +5,6 @@ import { Callback } from "@/types";
 import { ListenerBag } from "@/common/listener-bag";
 import { Position, positionFromEvent } from "@/common/input";
 
-const bag: ListenerBag = new ListenerBag();
 
 function createSwipeState(node: HTMLElement, triggerCallback: Callback) {
     let startPos: Position|null = null;
@@ -118,7 +117,8 @@ function createSwipeState(node: HTMLElement, triggerCallback: Callback) {
         endDrag
     };
 }
-export function registerTaskSwipe(node: HTMLElement, triggerCallback: Callback) {
+export function registerTaskSwipe(node: HTMLElement, triggerCallback: Callback): () => void {
+    const bag = new ListenerBag();
     const state = createSwipeState(node, triggerCallback);
     bag.add(node, 'mousedown', state.startDrag);
     bag.add(node, 'mousemove', state.drag);
@@ -127,8 +127,5 @@ export function registerTaskSwipe(node: HTMLElement, triggerCallback: Callback) 
     bag.add(node, 'touchmove', state.drag);
     bag.add(node, 'touchcancel', state.endDrag);
     bag.add(node, 'touchend', state.endDrag);
-}
-
-export function clearTaskSwipe() {
-    bag.clear();
+    return () => bag.clear();
 }
