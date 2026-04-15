@@ -75,6 +75,14 @@
                     <ion-item
                       button
                       lines="none"
+                      @click="markDoneInPast"
+                    >
+                      <HistoryIcon slot="start" />
+                      <ion-label> {{ _t('Mark done in past') }}</ion-label>
+                    </ion-item>
+                    <ion-item
+                      button
+                      lines="none"
                       @click="deleteTask"
                     >
                       <TrashXIcon slot="start" />
@@ -136,7 +144,7 @@
 import { confirmablePrompt } from "@/alert/prompt";
 import { getDefaultTaskHue, taskColorFromHue } from "@/common/task-colors";
 import { taskOverDue } from "@/common/task-priority";
-import { DAY_IN_HOURS, formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
+import { formatHours, HOUR_IN_SECONDS, roundedRecurringInterval, secondsSince } from "@/common/time";
 import { icons, isValidIcon } from "@/components/icons";
 import {
   gettersSymbol,
@@ -146,6 +154,7 @@ import {
   taskClientSymbol
 } from '@/dependency-injection/injection-keys';
 import TaskForm from "@/modals/TaskForm.vue";
+import MarkDonePastModal from "@/modals/MarkDonePastModal.vue";
 import { Household } from "@/models/Household";
 import { Task } from "@/models/Task";
 import toast, { showThrownError, success } from "@/toast";
@@ -169,9 +178,9 @@ import {
   pickerController,
 } from "@ionic/vue";
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import { DotsVerticalIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
+import { DotsVerticalIcon, HistoryIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
 import confetti from 'canvas-confetti';
-import { clearTaskSwipe, registerTaskSwipe } from "@/swipe/task-swipe";
+import { registerTaskSwipe } from "@/swipe/task-swipe";
 
 
 const props = defineProps<{
@@ -207,7 +216,7 @@ const dueInText = computed(() => {
   if (null === props.task.duration) {
     return __t('Last done {0}', formatHours(lastCompleteHours));
   }
-  const durationHours = props.task.duration * DAY_IN_HOURS;
+  const durationHours = props.task.duration;
   const hoursLeft = durationHours - lastCompleteHours;
   if (hoursLeft < 0) {
     return __t('Overdue for {0}', formatHours(-hoursLeft));
@@ -308,14 +317,14 @@ async function editTask() {
   await householdClient.dashboardInfo();
 }
 
-async function markDone(): Promise<boolean> {
+async function markDone(options?: { timestamp?: number, userId?: number }): Promise<boolean> {
   if (props.task.id == null) {
     return false;
   }
   waitingForTaskDoneResponse.value = true;
   try {
     actionsVisible.value = false;
-    const response = await taskClient.markTaskComplete(props.task.id);
+    const response = await taskClient.markTaskComplete(props.task.id, options);
     store.markTaskDone(props.household.id, props.task.id, response.timestamp);
     store.assignTask(props.household.id, props.task.id, response.assignee?.id ?? null)
     void toast.success(_t('Task done'));
@@ -330,6 +339,23 @@ async function markDone(): Promise<boolean> {
     waitingForTaskDoneResponse.value = false;
   }
   return false;
+}
+
+async function markDoneInPast() {
+  const modal = await modalController.create({
+    component: MarkDonePastModal,
+    componentProps: {
+      members: props.household.users,
+      currentUserId: state.user?.id,
+      canManageTasks: canManageTasks.value,
+    },
+  });
+  await modal.present();
+  const result = await modal.onDidDismiss();
+  if (result.role !== 'confirm' || result.data == null) {
+    return;
+  }
+  await markDone({ timestamp: result.data.timestamp, userId: result.data.userId });
 }
 
 function toggleActions(event: MouseEvent) {
@@ -356,6 +382,7 @@ function closeActions(event: FocusEvent) {
   actionsVisible.value = false;
 }
 
+let clearTaskSwipe: (() => void) | null = null;
 onMounted(() => {
   if (!props.showActions || !useSwipe.value) {
     return;
@@ -364,7 +391,7 @@ onMounted(() => {
     console.error('Could not find slider element, swipe was deactivated!');
     return;
   }
-  registerTaskSwipe(slider.value, async () => {
+  clearTaskSwipe = registerTaskSwipe(slider.value, async () => {
     if (await markDone()) {
       void confetti({
         shapes: ['star'],
@@ -377,10 +404,10 @@ onMounted(() => {
         disableForReducedMotion: true,
       });
     }
-  })
+  });
 });
 onBeforeUnmount(() => {
-  clearTaskSwipe();
+  clearTaskSwipe?.();
 })
 
 

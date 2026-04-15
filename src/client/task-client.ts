@@ -154,10 +154,14 @@ export class TaskClient {
     /**
      * @returns new timestamp of the now completed task
      */
-    async markTaskComplete(taskId: number): Promise<TaskCompleteResponse> {
-        const response = await this.client.requestEventually(
+    async markTaskComplete(taskId: number, options?: { timestamp?: number, userId?: number }): Promise<TaskCompleteResponse> {
+        const response = await this.client.sendJsonEventually(
             'POST',
-            `api/task/mark-done/${taskId}`
+            `api/task/mark-done/${taskId}`,
+            {
+                ...(options?.timestamp !== undefined ? { timestamp: options.timestamp } : {}),
+                ...(options?.userId !== undefined ? { userId: options.userId } : {}),
+            },
         );
 
         if (response.status !== 200) {
