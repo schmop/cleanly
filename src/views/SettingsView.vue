@@ -105,6 +105,22 @@
           </ion-item-group>
         </ion-card-content>
       </ion-card>
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            {{ _t('Account') }}
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-button
+            color="danger"
+            expand="block"
+            @click="deleteAccount"
+          >
+            {{ _t('Delete account') }}
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
     </ion-content>
     <ion-footer class="p-2">
       <ion-button @click="save">
@@ -123,12 +139,13 @@
 </template>
 
 <script setup lang="ts">
-import { storeSymbol, userClientSymbol } from "@/dependency-injection/injection-keys";
+import { authClientSymbol, storeSymbol, userClientSymbol } from "@/dependency-injection/injection-keys";
 import { UserSettings } from '@/models/UserSettings';
 import toast from '@/toast';
 import { _t, Language } from '@/translation';
 import { SelectCustomEvent } from "@ionic/core";
 import {
+  alertController,
   IonButton,
   IonCard,
   IonCardContent,
@@ -150,6 +167,7 @@ import { CheckIcon, CircleXIcon } from 'vue-tabler-icons';
 
 const store = inject(storeSymbol)!;
 const userClient = inject(userClientSymbol)!;
+const authClient = inject(authClientSymbol)!;
 const router = useRouter();
 
 const notifyTaskDue = ref(true);
@@ -218,6 +236,34 @@ async function save() {
 async function cancel() {
   await router.push({name: 'dashboard'});
   resetUiToStore();
+}
+
+async function deleteAccount() {
+  const alert = await alertController.create({
+    header: _t('Delete account'),
+    message: _t('A confirmation link will be sent to your email address. Click it to permanently delete your account.'),
+    buttons: [
+      {
+        text: _t('Send confirmation email'),
+        role: 'confirm',
+        handler: async () => {
+          try {
+            const { deleted } = await userClient.requestAccountDeletion();
+            if (deleted) {
+              authClient.logout();
+              await router.replace({name: 'login'});
+            } else {
+              await toast.success(_t('Confirmation email sent. Check your inbox.'));
+            }
+          } catch (error) {
+            await toast.error((error as Error).message);
+          }
+        },
+      },
+      _t('Cancel'),
+    ],
+  });
+  await alert.present();
 }
 
 </script>

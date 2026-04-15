@@ -17,4 +17,15 @@ export class UserClient {
             throw new Error('Could not save user settings, ' + response.statusText);
         }
     }
+
+    async requestAccountDeletion(): Promise<{ deleted: boolean }> {
+        const response = await this.client.requestImmediately('POST', 'api/user/account/delete-request');
+
+        if (response.status !== 200) {
+            console.error('Could not request account deletion', response.statusText);
+            throw new Error('Could not request account deletion, ' + response.statusText);
+        }
+
+        return response.json();
+    }
 }
