@@ -2,11 +2,27 @@
  * Generated type guards for "Household.ts".
  * WARNING: Do not manually change this file.
  */
+import { isTodo } from "./Todo.guard";
+import { Checklist, Household } from "./Household";
 import { isUser } from "./User.guard";
 import { isTask } from "./Task.guard";
 import { isHouseholdPrivilege } from "./HouseholdPrivilege.guard";
-import { isTodo } from "./Todo.guard";
-import { Household } from "./Household";
+
+export function isChecklist(obj: unknown): obj is Checklist {
+    const typedObj = obj as Checklist
+    return (
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        typeof typedObj["name"] === "string" &&
+        typeof typedObj["uuid"] === "string" &&
+        Array.isArray(typedObj["checklist"]) &&
+        typedObj["checklist"].every((e: any) =>
+            isTodo(e) as boolean
+        ) &&
+        typeof typedObj["rank"] === "string"
+    )
+}
 
 export function isHousehold(obj: unknown): obj is Household {
     const typedObj = obj as Household
@@ -32,16 +48,7 @@ export function isHousehold(obj: unknown): obj is Household {
         ) &&
         Array.isArray(typedObj["checklists"]) &&
         typedObj["checklists"].every((e: any) =>
-            (e !== null &&
-                typeof e === "object" ||
-                typeof e === "function") &&
-            typeof e["name"] === "string" &&
-            typeof e["uuid"] === "string" &&
-            Array.isArray(e["checklist"]) &&
-            e["checklist"].every((e: any) =>
-                isTodo(e) as boolean
-            ) &&
-            typeof e["rank"] === "string"
+            isChecklist(e) as boolean
         ) &&
         typeof typedObj["reassignmentStrategy"] === "string"
     )

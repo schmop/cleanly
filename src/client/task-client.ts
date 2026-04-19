@@ -4,7 +4,7 @@ import { isTaskCompleteResponse } from "@/client/response/TaskCompleteResponse.g
 import { Household } from '@/models/Household';
 import { HouseholdStats } from '@/models/HouseholdStats';
 import { isHouseholdStats } from '@/models/HouseholdStats.guard';
-import { Task } from '@/models/Task';
+import { Task, TaskReminder } from '@/models/Task';
 import { TaskLog } from '@/models/TaskLog';
 import { isTaskLog } from '@/models/TaskLog.guard';
 import { Store } from '@/store';
@@ -17,7 +17,7 @@ export class TaskClient {
     constructor(private readonly client: AuthClient, private readonly store: Store) {
     }
 
-    async addNewTask(householdId: number, name: string, icon: string, hue: number|null, duration: number|null, stars: number) {
+    async addNewTask(householdId: number, name: string, icon: string, hue: number|null, duration: number|null, stars: number, reminder: TaskReminder|null = null) {
         const response = await this.client.sendJsonEventually(
             'POST',
             'api/task/create',
@@ -28,6 +28,7 @@ export class TaskClient {
                 hue,
                 duration,
                 stars,
+                reminder,
             },
         );
 
@@ -36,7 +37,7 @@ export class TaskClient {
         }
     }
 
-    async editTask(task: Task, name: string, icon: string, hue: number|null, duration: number|null, stars: number) {
+    async editTask(task: Task, name: string, icon: string, hue: number|null, duration: number|null, stars: number, reminder: TaskReminder|null = null) {
         const response = await this.client.sendJsonEventually(
             'POST',
             `api/task/edit/${task.id}`,
@@ -46,6 +47,7 @@ export class TaskClient {
                 hue,
                 duration,
                 stars,
+                reminder,
             },
         );
 

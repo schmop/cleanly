@@ -64,6 +64,7 @@ function createTestTask(name: string, duration: number|null, lastComplete: numbe
         hue: 0,
         lastComplete,
         duration,
-        stars: 0
+        stars: 0,
+        reminder: null,
     };
 }

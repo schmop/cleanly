@@ -3,6 +3,7 @@ import { User } from "@/models/User";
 import { HouseholdPrivilege } from './HouseholdPrivilege';
 import { Todo } from "./Todo";
 
+/** @see {isChecklist} ts-auto-guard:type-guard */
 export type Checklist = {
     name: string,
     uuid: string,
