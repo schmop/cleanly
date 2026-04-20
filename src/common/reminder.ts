@@ -157,7 +157,36 @@ export function reminderIntervalLabel(enabled: boolean, interval: number, unit: 
 export function monthlyWeekdayShortLabel(weekOccurrence: number, weekDay: number): string {
     const occ = WEEK_OCCURRENCE_OPTIONS.find(o => o.value === weekOccurrence);
     const day = DOW_OPTIONS.find(d => d.value === weekDay);
-    return `${_t(occ?.key ?? '1st')} ${_t(day?.shortKey ?? 'Mon')}`;
+    return `${occLabel(occ?.key ?? '1st')} ${dowShortLabel(day?.shortKey ?? 'Mon')}`;
+}
+
+// Switch resolvers below: the translation checker scans _t() call sites for
+// literal string arguments. Passing a dynamic key would be invisible to it,
+// so we expand the finite `as const` union into explicit literal calls.
+
+function occLabel(key: typeof WEEK_OCCURRENCE_OPTIONS[number]['key']): string {
+    switch (key) {
+        case '1st':      return _t('1st');
+        case '2nd':      return _t('2nd');
+        case '3rd':      return _t('3rd');
+        case '4th':      return _t('4th');
+        case 'last':     return _t('last');
+        case '2nd last': return _t('2nd last');
+        case '3rd last': return _t('3rd last');
+        case '4th last': return _t('4th last');
+    }
+}
+
+function dowShortLabel(key: typeof DOW_OPTIONS[number]['shortKey']): string {
+    switch (key) {
+        case 'Mon': return _t('Mon');
+        case 'Tue': return _t('Tue');
+        case 'Wed': return _t('Wed');
+        case 'Thu': return _t('Thu');
+        case 'Fri': return _t('Fri');
+        case 'Sat': return _t('Sat');
+        case 'Sun': return _t('Sun');
+    }
 }
 
 function parseYearDatePart(yearDate: string, index: 1 | 2): number {
