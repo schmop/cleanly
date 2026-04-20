@@ -177,7 +177,7 @@ import {
   PickerColumnOption,
   pickerController,
 } from "@ionic/vue";
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { DotsVerticalIcon, HistoryIcon, PencilIcon, StarIcon, TrashXIcon, UserCheckIcon, UserIcon } from 'vue-tabler-icons';
 import confetti from 'canvas-confetti';
 import { registerTaskSwipe } from "@/swipe/task-swipe";
@@ -393,7 +393,9 @@ function closeActions(event: FocusEvent) {
 }
 
 let clearTaskSwipe: (() => void) | null = null;
-onMounted(() => {
+function setupSwipe() {
+  clearTaskSwipe?.();
+  clearTaskSwipe = null;
   if (!props.showActions || !useSwipe.value) {
     return;
   }
@@ -417,7 +419,12 @@ onMounted(() => {
       setTimeout(() => fireStars.reset(), 3000);
     }
   });
-});
+}
+onMounted(setupSwipe);
+// Flipping the useSwipe setting at runtime renders a new slider element that
+// onMounted never sees; re-register here so it becomes swipeable without a
+// page reload. `flush: 'post'` waits for the v-if branch to finish rendering.
+watch(() => props.showActions && useSwipe.value, setupSwipe, { flush: 'post' });
 onBeforeUnmount(() => {
   clearTaskSwipe?.();
 })
