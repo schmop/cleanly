@@ -3,6 +3,7 @@
     <ion-card-header v-if="household">
       <ion-toolbar color="none">
         <ion-card-title>{{ household.name }}</ion-card-title>
+        <slot name="actions" />
       </ion-toolbar>
     </ion-card-header>
     <ion-card-content>

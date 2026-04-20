@@ -127,6 +127,18 @@ export class HouseholdClient {
         }
     }
 
+    async moveHousehold(householdId: HouseholdId, moveAfterId: HouseholdId | null) {
+        const response = await this.client.sendJsonEventually(
+            'POST',
+            `api/household/${householdId}/move`,
+            {moveAfterId},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, "reordering households");
+        }
+    }
+
     async retrieveStars(householdId: HouseholdId) {
         const response = await this.client.requestImmediately(
             'GET',

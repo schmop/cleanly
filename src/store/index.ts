@@ -260,6 +260,10 @@ export class Store {
         this.state.households.push(household);
     }
 
+    reorderHouseholds(households: Household[]) {
+        this.state.households = households;
+    }
+
     setSettings(settings: UserSettings) {
         this.state.userSettings = settings;
     }

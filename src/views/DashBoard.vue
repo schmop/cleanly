@@ -1,12 +1,24 @@
 <template>
   <ion-page>
     <ion-content id="dashboard">
-      <HouseholdPreview
-        v-for="(household, index) in households"
-        :key="index"
-        :household="household"
-        @click="openHousehold(household)"
-      />
+      <ion-reorder-group
+        :disabled="households.length < 2"
+        @ionItemReorder="reorder"
+      >
+        <HouseholdPreview
+          v-for="household in households"
+          :key="household.id"
+          :household="household"
+          @click="openHousehold(household)"
+        >
+          <template #actions>
+            <ion-reorder
+              slot="end"
+              @click.stop
+            />
+          </template>
+        </HouseholdPreview>
+      </ion-reorder-group>
       <ion-card v-if="households.length === 0">
         <ion-card-header>
           <ion-card-title> {{ _t('No households yet...') }}</ion-card-title>
@@ -44,6 +56,7 @@ import {
 import CreateHousehold from "@/modals/CreateHousehold.vue";
 import { Household } from "@/models/Household";
 import router from "@/router";
+import { showThrownError, warning } from "@/toast";
 import { _t } from "@/translation";
 import {
     IonButton,
@@ -55,6 +68,9 @@ import {
     IonPage,
     IonRefresher,
     IonRefresherContent,
+    IonReorder,
+    IonReorderGroup,
+    ItemReorderCustomEvent,
     menuController,
     modalController
 } from "@ionic/vue";
@@ -81,6 +97,25 @@ async function openCreateHouseholdModal() {
 async function openHousehold(household: Household) {
     store.viewHousehold(household.id);
     await router.push({name: 'household-view'});
+}
+
+async function reorder(event: ItemReorderCustomEvent) {
+    const current = households.value;
+    const movingId = current[event.detail.from]?.id;
+    if (null == movingId) {
+        void warning(_t('You just resorted nonexistent households!'));
+        return;
+    }
+    const moveAfterId = event.detail.from < event.detail.to
+        ? current[event.detail.to]?.id
+        : current[event.detail.to - 1]?.id;
+    const reordered = event.detail.complete(current.slice()) as Household[];
+    store.reorderHouseholds(reordered);
+    try {
+        await householdClient.moveHousehold(movingId, moveAfterId ?? null);
+    } catch (err) {
+        await showThrownError(err);
+    }
 }
 </script>
 
