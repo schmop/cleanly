@@ -66,7 +66,7 @@ export class TodoEventProcessor {
             uuid: event.uuid,
             content: event.data ?? '',
             checked_at: null,
-        } as Todo);
+        });
     }
 
     private update(event: TodoEvent, checklist: Checklist) {
