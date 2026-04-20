@@ -182,6 +182,16 @@ import { DotsVerticalIcon, HistoryIcon, PencilIcon, StarIcon, TrashXIcon, UserCh
 import confetti from 'canvas-confetti';
 import { registerTaskSwipe } from "@/swipe/task-swipe";
 
+// canvas-confetti's default export uses a Web Worker + OffscreenCanvas. On
+// Android WebView that path occasionally loses its "done" message (backgrounding,
+// GC), leaving the canvas frozen on-screen. A plain main-thread instance avoids
+// the worker round-trip entirely.
+const fireStars = confetti.create(undefined, {
+  useWorker: false,
+  resize: true,
+  disableForReducedMotion: true,
+});
+
 
 const props = defineProps<{
   task: Task,
@@ -393,7 +403,7 @@ onMounted(() => {
   }
   clearTaskSwipe = registerTaskSwipe(slider.value, async () => {
     if (await markDone()) {
-      void confetti({
+      void fireStars({
         shapes: ['star'],
         colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8'],
         spread: 360,
@@ -401,8 +411,10 @@ onMounted(() => {
         gravity: 1,
         decay: 0.94,
         startVelocity: 15,
-        disableForReducedMotion: true,
       });
+      // Safety net: the animation lasts ~1s (ticks:50 @ ~60fps). If anything
+      // interrupts it (tab hidden, rAF throttled), force-clear the canvas.
+      setTimeout(() => fireStars.reset(), 3000);
     }
   });
 });
