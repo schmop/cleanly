@@ -16,7 +16,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Lint
+        # Runs vue-tsc + eslint in isolation so the Build step doesn't have to
+        # hold all three tools in the same Node heap on a 2 GB runner.
+        run: yarn lint
       - name: Build
+        # VITE_SKIP_CHECKS=1 drops the inline vue-tsc + eslint Vite plugins
+        # since Lint already covered them — keeps peak build memory under 2 GB.
+        env:
+          VITE_SKIP_CHECKS: '1'
         run: yarn build
       - name: Unit tests
         run: yarn test:unit
