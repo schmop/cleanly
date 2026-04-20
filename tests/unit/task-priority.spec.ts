@@ -12,10 +12,12 @@ describe('task-priority', () => {
     const noDurationUncompleted = createTestTask("noDurationUncompleted", null, null);
     const smallDurationUncompleted = createTestTask("smallDurationUncompleted", 1, null);
     const noDurationJustCompleted = createTestTask("noDurationJustCompleted", null, NOW_IN_SECONDS - 10);
-    const doneTask = createTestTask("doneTask", 1, NOW_IN_SECONDS - 5);
-    const justDoneTask = createTestTask("justDoneTask", 1, NOW_IN_SECONDS - 1);
-    const dueTask = createTestTask("dueTask", 1, NOW_IN_SECONDS - DAY_IN_SECONDS - 20);
-    const duerTask = createTestTask("duerTask", 1, NOW_IN_SECONDS - DAY_IN_SECONDS * 2);
+    // `duration` is measured in hours (see task-priority.ts: `duration * HOUR_IN_SECONDS`).
+    // 24 hours = 1 day makes the DAY_IN_SECONDS expectations below line up.
+    const doneTask = createTestTask("doneTask", 24, NOW_IN_SECONDS - 5);
+    const justDoneTask = createTestTask("justDoneTask", 24, NOW_IN_SECONDS - 1);
+    const dueTask = createTestTask("dueTask", 24, NOW_IN_SECONDS - DAY_IN_SECONDS - 20);
+    const duerTask = createTestTask("duerTask", 24, NOW_IN_SECONDS - DAY_IN_SECONDS * 2);
 
     it('secondsSince', () => {
         expect(Date.now()).toBe(1000000);

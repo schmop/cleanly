@@ -15,9 +15,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: yarn --immutable
+        run: yarn install --frozen-lockfile
       - name: Build
         run: yarn build
+      - name: Unit tests
+        run: yarn test:unit
       - name: Check Translations
         run: yarn translations
       - name: Check ts-auto-guard up to date
