@@ -9,6 +9,7 @@ import { TaskClient } from '@/client/task-client';
 import { UserClient } from '@/client/user-client';
 import { InviteEventProcessor } from '@/invite/invite-event-processor';
 import { PushService } from '@/push';
+import router from '@/router';
 import { Store, store } from '@/store';
 import { App } from 'vue';
 import {
@@ -68,7 +69,7 @@ class Container {
     }
 
     getPush(): PushService {
-        return this.push ??= new PushService();
+        return this.push ??= new PushService(store, router);
     }
 
     getSseClient(): SseClient {

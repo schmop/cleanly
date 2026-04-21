@@ -48,6 +48,7 @@ import {
   colorschemeListenerSymbol,
   foregroundListenerSymbol,
   householdClientSymbol,
+  pushSymbol,
   stateSymbol,
   storeSymbol
 } from '@/dependency-injection/injection-keys';
@@ -80,6 +81,7 @@ const authClient = inject(authClientSymbol)!;
 const householdClient = inject(householdClientSymbol)!;
 const foregroundListener = inject(foregroundListenerSymbol)!;
 const colorschemeListener = inject(colorschemeListenerSymbol)!;
+const pushService = inject(pushSymbol)!;
 
 const isLoginPage = computed(() => route.name === 'login');
 const loggedIn = computed(() => state.loggedIn);
@@ -104,6 +106,7 @@ async function restoreSession() {
   authClient.restoreState();
   if (!authClient.isAuthenticated()) {
     await router.replace({name: 'login'});
+    pushService.markReady();
     return;
   }
   const dashboardInfoPromise = householdClient.dashboardInfo();
@@ -119,6 +122,7 @@ async function restoreSession() {
   } else {
     await router.replace({name: 'dashboard'});
   }
+  pushService.markReady();
 }
 
 async function showInvites() {
