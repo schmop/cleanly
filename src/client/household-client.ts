@@ -258,6 +258,18 @@ export class HouseholdClient {
         }
     }
 
+    async renameHousehold(householdId: HouseholdId, name: string) {
+        const response = await this.client.sendJsonEventually(
+            'POST',
+            `api/household/rename/${householdId}`,
+            {name},
+        );
+
+        if (response.status !== 200) {
+            await handleErrorResponse(response, 'renaming the household');
+        }
+    }
+
     async setWebhook(householdId: HouseholdId, url: string): Promise<WebhookResponse> {
         const response = await this.client.sendJsonEventually(
             'POST',

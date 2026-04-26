@@ -272,6 +272,10 @@ export class Store {
         household.reassignmentStrategy = reassignmentStrategy;
     }
 
+    renameHousehold(household: Household, name: string) {
+        household.name = name;
+    }
+
     setDarkmode(darkmode: boolean) {
         this.state.darkmode = darkmode;
     }

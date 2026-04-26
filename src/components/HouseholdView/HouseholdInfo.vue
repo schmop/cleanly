@@ -42,6 +42,14 @@
           {{ _t('Send invite') }}
         </ion-item>
         <ion-item
+          v-if="canManageHousehold"
+          button
+          @click="openRenameHouseholdPrompt"
+        >
+          <EditIcon slot="start" />
+          {{ _t('Rename household') }}
+        </ion-item>
+        <ion-item
           button
           @click="openLeaveHouseholdPrompt"
         >
@@ -135,6 +143,7 @@ import { computed, inject, watch } from 'vue';
 import {
     ChefHatIcon,
     CirclePlusIcon,
+    EditIcon,
     RotateIcon,
     StarIcon,
     TrashXIcon,
@@ -232,6 +241,30 @@ async function showSecretToast(secret: string) {
     }
 }
 
+async function openRenameHouseholdPrompt() {
+    if (!canManageHousehold.value || undefined === household.value) {
+        console.error("Tried to rename household, but couldn't!");
+        return;
+    }
+    const newName = await stringPrompt(
+        _t('Rename household'),
+        _t('Choose a new name for this household.'),
+        _t('Household name'),
+        { value: household.value.name },
+    );
+    if (false === newName || newName.trim() === '' || newName.trim() === household.value.name) {
+        return;
+    }
+    const trimmed = newName.trim();
+    try {
+        await householdClient.renameHousehold(household.value.id, trimmed);
+        store.renameHousehold(household.value, trimmed);
+        await success(_t('Household renamed successfully!'));
+    } catch (err) {
+        await showThrownError(err);
+    }
+}
+
 async function openSetWebhookPrompt() {
     if (!canManageHousehold.value || undefined === household.value) {
         console.error("Tried to set webhook, but couldn't!");
@@ -242,6 +275,7 @@ async function openSetWebhookPrompt() {
         _t('Please enter the domain of your webhook endpoint, starting with "https://"'),
         _t('You can read more about webhooks in cleanly at <a href="https://cleanly.schmoppo.de/webhook/doc">https://cleanly.schmoppo.de/webhook/doc</a>'),
         _t('URL'),
+        { type: 'url' },
     );
 
     if (false === url) {
