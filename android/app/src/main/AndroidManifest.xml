@@ -17,7 +17,7 @@
 
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
-            android:name="de.schmoppo.cleanly.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
@@ -47,7 +47,7 @@
 
         <!-- Replace Capacitor's MessagingService so we can build grouped notifications ourselves. -->
         <service
-            android:name="de.schmoppo.cleanly.CleanlyMessagingService"
+            android:name=".CleanlyMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

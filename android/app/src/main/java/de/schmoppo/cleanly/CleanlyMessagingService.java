@@ -1,11 +1,13 @@
 package de.schmoppo.cleanly;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.service.notification.StatusBarNotification;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,6 +36,14 @@ public class CleanlyMessagingService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
 
         Map<String, String> data = remoteMessage.getData();
+
+        String revokeGroupKey = data.get("revokeGroupKey");
+        String revokeEntityId = data.get("revokeEntityId");
+        if (revokeGroupKey != null && revokeEntityId != null) {
+            revokeGrouped(revokeGroupKey, revokeEntityId);
+            return;
+        }
+
         String title = data.get("title");
         String body = data.get("body");
         String groupKey = data.get("groupKey");
@@ -44,6 +54,29 @@ public class CleanlyMessagingService extends FirebaseMessagingService {
 
         // Forward to Capacitor so JS-side `pushNotificationReceived` listeners still fire.
         PushNotificationsPlugin.sendRemoteMessage(remoteMessage);
+    }
+
+    private void revokeGrouped(String groupKey, String entityId) {
+        NotificationManagerCompat manager = NotificationManagerCompat.from(this);
+        int notificationId = (groupKey + ":" + entityId).hashCode();
+        manager.cancel(notificationId);
+
+        // Explicit-group summaries aren't auto-dismissed when the last child goes away — do it ourselves.
+        int summaryId = groupSummaryId(groupKey);
+        NotificationManager system = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (system == null) {
+            return;
+        }
+        for (StatusBarNotification sbn : system.getActiveNotifications()) {
+            if (sbn.getId() == summaryId) {
+                continue;
+            }
+            Notification n = sbn.getNotification();
+            if (n != null && groupKey.equals(n.getGroup())) {
+                return;
+            }
+        }
+        manager.cancel(summaryId);
     }
 
     private void displayGrouped(
