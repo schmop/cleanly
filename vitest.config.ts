@@ -14,7 +14,7 @@ export default defineConfig({
         environment: 'jsdom',
         setupFiles: ['./tests/setup.ts'],
         include: ['tests/unit/**/*.spec.ts', 'tests/component/**/*.spec.ts'],
-        // Single-thread keeps RSS under ~400 MB on the 2 GB CI runner.
+        // Single-thread keeps resident memory under ~400 MB on the 2 GB CI runner.
         // (Vitest 4 flattened poolOptions; --no-file-parallelism is the simplest equivalent.)
         fileParallelism: false,
     },
