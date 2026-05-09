@@ -76,10 +76,19 @@ End-to-end tests use [Playwright](https://playwright.dev) and are
 **manual-only** — they are not run in CI because the self-hosted runner
 cannot host a browser plus the full stack. Specs live in `tests/e2e/`.
 
+The backend URL and test credentials come from env vars (no hardcoded
+host IPs in the specs). Either export them in your shell or copy the
+example file:
+
 ```
-ionic serve                 # in one terminal
-yarn test:e2e               # in another (uses the test account in tests/e2e/*.spec.ts)
+cp .env.e2e.example .env.e2e   # then edit values; .env.e2e is gitignored
+ionic serve                    # in one terminal
+yarn test:e2e                  # in another
 ```
+
+Required vars: `E2E_BACKEND_URL`, `E2E_USERNAME`, `E2E_PASSWORD`.
+`playwright.config.ts` loads `.env.e2e` automatically via Node's
+`process.loadEnvFile`.
 
 ## Enabling Firebase-Cloud-Messaging in Android-Apps
 
