@@ -9,9 +9,9 @@ test('moderator marks a task done as another member at a custom time', async ({ 
     }, { key: STORE_KEY, url: BACKEND_URL });
 
     await page.goto('/');
-    await page.getByPlaceholder(/E-?Mail|Email/i).fill(USERNAME);
-    await page.getByPlaceholder(/Pass(wort|word)/i).fill(PASSWORD);
-    await page.getByRole('button', { name: /(Anmelden|Sign in|Login)/i }).click();
+    await page.getByRole('textbox', { name: /E-?Mail|Email/i }).fill(USERNAME);
+    await page.getByRole('textbox', { name: /Pass(wort|word)/i }).fill(PASSWORD);
+    await page.getByRole('button', { name: /^(Anmelden|Sign in|Login)$/i }).click();
 
     // Read the logged-in user's id from the store so we can assert the modal
     // didn't silently re-credit the moderator after they picked someone else.
@@ -31,8 +31,11 @@ test('moderator marks a task done as another member at a custom time', async ({ 
         return parsed.user.id;
     }, STORE_KEY);
 
-    // Open the first household and wait for the per-task three-dot menu to render.
-    await page.locator('ion-card').first().click();
+    // The per-task three-dot menu is gated on `showActions` — only renders
+    // after the task card is tapped. Tap the first task card to toggle it.
+    const firstTaskCard = page.locator('ion-card').first();
+    await expect(firstTaskCard).toBeVisible({ timeout: 10_000 });
+    await firstTaskCard.click();
     const contextMenuButton = page.locator('[id^="task-contextmenu-"]').first();
     await expect(contextMenuButton).toBeVisible({ timeout: 10_000 });
 
@@ -42,9 +45,11 @@ test('moderator marks a task done as another member at a custom time', async ({ 
         hasText: /Nachträglich erledigen|Mark done in past/i,
     }).click();
 
-    // The MarkDonePastModal renders with the user picker (action-sheet style)
-    // and the datetime button. Switch the credited user to a different member.
-    const userSelect = page.locator('ion-modal').last().locator('ion-select');
+    // The MarkDonePastModal renders an ion-select labelled "Erledigt von"
+    // (Completed by). Targeting by label avoids `.last()` picking the inner
+    // datetime ion-modal (which is mounted but not presented).
+    const presentedModal = page.locator('ion-modal.show-modal').last();
+    const userSelect = presentedModal.locator('ion-select');
     await expect(userSelect).toBeVisible();
     await userSelect.click();
 
@@ -67,7 +72,7 @@ test('moderator marks a task done as another member at a custom time', async ({ 
         resp.url().includes('/api/task/mark-done/'),
     );
 
-    await page.locator('ion-modal').last().getByRole('button', { name: /^(Ok|OK)$/ }).click();
+    await presentedModal.getByRole('button', { name: /^(Ok|OK)$/ }).click();
 
     const request = await requestPromise;
     const response = await responsePromise;

@@ -12,9 +12,9 @@ test('logs in with the test account', async ({ page }) => {
     await seedStore(page);
     await page.goto('/');
 
-    await page.getByPlaceholder(/E-?Mail|Email/i).fill(USERNAME);
-    await page.getByPlaceholder(/Pass(wort|word)/i).fill(PASSWORD);
-    await page.getByRole('button', { name: /(Anmelden|Sign in|Login)/i }).click();
+    await page.getByRole('textbox', { name: /E-?Mail|Email/i }).fill(USERNAME);
+    await page.getByRole('textbox', { name: /Pass(wort|word)/i }).fill(PASSWORD);
+    await page.getByRole('button', { name: /^(Anmelden|Sign in|Login)$/i }).click();
 
     // After login, the dashboard renders the household list.
     await expect(page.getByRole('heading')).toBeVisible({ timeout: 10_000 });
