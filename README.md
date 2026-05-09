@@ -76,6 +76,12 @@ ionic serve                    # in one terminal
 yarn test:e2e                  # in another
 ```
 
+To run unit and end-to-end tests in sequence:
+
+```
+yarn test                      # unit + e2e (requires the env vars above)
+```
+
 ## Enabling Firebase-Cloud-Messaging in Android-Apps
 
 Add the google-services.json in `android/app/google-services.json` with the configuration of your Firebase-Account.
