@@ -18,6 +18,7 @@
         label-placement="floating"
         interface="action-sheet"
         fill="outline"
+        :compare-with="compareUserIds"
         :disabled="!canManageTasks"
       >
         <ion-select-option
@@ -111,13 +112,25 @@ async function dismiss() {
   await modalController.dismiss(null, 'cancel');
 }
 
+// Numeric ids round-trip through ion-select's action-sheet interface as
+// string attributes; without an explicit comparator the picker can drop the
+// v-model update and silently leave `selectedUserId` at the initial value.
+function compareUserIds(a: unknown, b: unknown): boolean {
+  return Number(a) === Number(b);
+}
+
 async function confirm() {
   const timestamp = Math.floor(new Date(selectedDatetime.value).getTime() / 1000);
+  // Only forward `userId` when the moderator actually changed the picker.
+  // Sending the moderator's own id is equivalent to omitting the field
+  // (the server credits the logged-in user either way), but omitting it
+  // makes "did the user really pick someone else?" observable in the wire
+  // payload — which is what the bug report hinged on.
+  const userId = selectedUserId.value !== props.currentUserId
+    ? selectedUserId.value
+    : undefined;
   await modalController.dismiss(
-    {
-      timestamp,
-      userId: selectedUserId.value,
-    },
+    { timestamp, userId },
     'confirm',
   );
 }
