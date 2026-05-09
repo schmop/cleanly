@@ -55,16 +55,11 @@ Create a dev-server using:
 ```
 ionic serve
 ```
-It will tell you your local ip aswell, please change `getDevHostIp()` in `client/src/client/host.ts`.
+It will tell you your local ip as well, please change `getDevHostIp()` in `client/src/client/host.ts`.
 
 ### Testing
 
-Unit tests use [Vitest](https://vitest.dev) (JSDOM environment, single-fork
-pool to keep CI memory under 2 GB). They live under `tests/unit/` and are
-mirrored to source modules — e.g. `tests/unit/common/reminder.spec.ts`
-covers `src/common/reminder.ts`. Helpers (`mountWithIonic`, `mockFetch`,
-`storeFixture`) live in `tests/helpers/`. The Ionic web components are
-stubbed globally in `tests/setup.ts` to avoid JSDOM shadow-DOM flakiness.
+To run vitest, use these commands:
 
 ```
 yarn test:unit              # one-shot run (used by CI)
@@ -72,23 +67,14 @@ yarn test:watch             # interactive watch mode
 yarn test:unit reminder     # filter by file/test name
 ```
 
-End-to-end tests use [Playwright](https://playwright.dev) and are
-**manual-only** — they are not run in CI because the self-hosted runner
-cannot host a browser plus the full stack. Specs live in `tests/e2e/`.
-
-The backend URL and test credentials come from env vars (no hardcoded
-host IPs in the specs). Either export them in your shell or copy the
-example file:
+Before running end-to-end tests ([Playwright](https://playwright.dev)), one must configure the backend URL and test credentials in the env vars.
+Either export them in your shell or copy the example file:
 
 ```
 cp .env.e2e.example .env.e2e   # then edit values; .env.e2e is gitignored
 ionic serve                    # in one terminal
 yarn test:e2e                  # in another
 ```
-
-Required vars: `E2E_BACKEND_URL`, `E2E_USERNAME`, `E2E_PASSWORD`.
-`playwright.config.ts` loads `.env.e2e` automatically via Node's
-`process.loadEnvFile`.
 
 ## Enabling Firebase-Cloud-Messaging in Android-Apps
 
