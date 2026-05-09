@@ -1,6 +1,23 @@
 import { config } from '@vue/test-utils';
 import { vi } from 'vitest';
 
+// Node 22+ ships a built-in localStorage that is a non-functional stub unless
+// started with --localstorage-file. That stub shadows whatever jsdom would
+// otherwise provide, so install a Map-backed Storage replacement.
+{
+    class MapStorage implements Storage {
+        private map = new Map<string, string>();
+        get length() { return this.map.size; }
+        clear(): void { this.map.clear(); }
+        getItem(key: string): string | null { return this.map.get(key) ?? null; }
+        key(index: number): string | null { return Array.from(this.map.keys())[index] ?? null; }
+        removeItem(key: string): void { this.map.delete(key); }
+        setItem(key: string, value: string): void { this.map.set(key, String(value)); }
+    }
+    Object.defineProperty(globalThis, 'localStorage', { value: new MapStorage(), configurable: true, writable: true });
+    Object.defineProperty(globalThis, 'sessionStorage', { value: new MapStorage(), configurable: true, writable: true });
+}
+
 // Identity-pass translation: tests don't care about locale, only that the
 // surface is callable and returns the input. The real module pulls
 // `container.getStore()` which has heavy side effects.
