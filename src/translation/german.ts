@@ -215,6 +215,7 @@ export const german = {
     'You gave {0} money': 'Du hast {0} Geld gegeben',
     'You have no checklists': 'Du hast keine Checklisten',
     'You just resorted nonexistent checklists!': 'Du hast gerade nicht existierende Checklisten sortiert!',
+    'You just resorted nonexistent households!': 'Du hast gerade nicht existierende Haushalte sortiert!',
     'You owe {0} {1}': 'Du schuldest {0} {1}',
     '{0} owes you {1}': '{0} schuldet dir {1}',
     'You paid': 'Du hast bezahlt',

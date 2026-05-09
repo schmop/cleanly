@@ -170,6 +170,7 @@ export const schwobi = {
     "You can read more about webhooks in cleanly at <a href=\"https://cleanly.schmoppo.de/webhook/doc\">https://cleanly.schmoppo.de/webhook/doc</a>": "Du kannschd mehr übr die Webhooks bei Cleanly dord erfahra: <a href=\"hddbs://cleanly",
     "You have no checklists": "Du haschd koi Chegglischda",
     "You just resorted nonexistent checklists!": "Du haschd grad ned exischdierend Chegglischda sordierd",
+    "You just resorted nonexistent households!": "Du haschd grad ned exischdierend Haushalde sordierd",
     "Your passwords need to match!": "Die Basswördr müssa übereinschdimma",
     "admin": "Admin",
     "alarm": "Weggr",
