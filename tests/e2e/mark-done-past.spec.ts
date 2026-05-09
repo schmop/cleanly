@@ -15,6 +15,24 @@ test('moderator marks a task done as another member at a custom time', async ({ 
     await page.getByPlaceholder(/Pass(wort|word)/i).fill('nopass');
     await page.getByRole('button', { name: /(Anmelden|Sign in|Login)/i }).click();
 
+    // Read the logged-in user's id from the store so we can assert the modal
+    // didn't silently re-credit the moderator after they picked someone else.
+    await page.waitForFunction((key) => {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw != null && (JSON.parse(raw) as { user?: { id?: number } }).user?.id != null;
+        } catch {
+            return false;
+        }
+    }, STORE_KEY, { timeout: 10_000 });
+    const currentUserId = await page.evaluate((key) => {
+        const raw = localStorage.getItem(key);
+        if (raw == null) throw new Error('store missing');
+        const parsed = JSON.parse(raw) as { user?: { id?: number } };
+        if (parsed.user?.id == null) throw new Error('user.id missing');
+        return parsed.user.id;
+    }, STORE_KEY);
+
     // Open the first household and wait for the per-task three-dot menu to render.
     await page.locator('ion-card').first().click();
     const contextMenuButton = page.locator('[id^="task-contextmenu-"]').first();
@@ -38,6 +56,8 @@ test('moderator marks a task done as another member at a custom time', async ({ 
     const otherMemberButton = actionSheet
         .locator('button.action-sheet-button:not(.action-sheet-selected):not(.action-sheet-cancel)')
         .first();
+    const pickedDisplayName = (await otherMemberButton.textContent())?.trim();
+    expect(pickedDisplayName, 'picker must contain at least one non-self option').toBeTruthy();
     await otherMemberButton.click();
 
     // Confirm — capture both the request payload and the response so we can
@@ -58,5 +78,10 @@ test('moderator marks a task done as another member at a custom time', async ({ 
 
     const body = request.postDataJSON() as { timestamp?: number, userId?: number };
     expect(typeof body.timestamp).toBe('number');
+    // The exact bug we're guarding against: the picker visually showed another
+    // member but the request still carried the moderator's own id. The wire
+    // payload must either omit `userId` (caller defaulted to self) or carry an
+    // id that differs from the logged-in user — never the logged-in user's id.
+    expect(body.userId, 'modal must not silently credit the logged-in user').not.toBe(currentUserId);
     expect(typeof body.userId).toBe('number');
 });
