@@ -1,21 +1,19 @@
 import { test, expect } from '@playwright/test';
-
-const BACKEND = 'http://192.168.178.150:8000';
-const STORE_KEY = 'Cleanly.Store';
+import { BACKEND_URL, PASSWORD, STORE_KEY, USERNAME } from './config';
 
 // Pre-seed the server URL so the login page skips the "Custom server" modal.
 async function seedStore(page: import('@playwright/test').Page) {
     await page.addInitScript((args) => {
         localStorage.setItem(args.key, JSON.stringify({ serverUrl: args.url }));
-    }, { key: STORE_KEY, url: BACKEND });
+    }, { key: STORE_KEY, url: BACKEND_URL });
 }
 
 test('logs in with the test account', async ({ page }) => {
     await seedStore(page);
     await page.goto('/');
 
-    await page.getByPlaceholder(/E-?Mail|Email/i).fill('lars.richard@rocketmail.com');
-    await page.getByPlaceholder(/Pass(wort|word)/i).fill('nopass');
+    await page.getByPlaceholder(/E-?Mail|Email/i).fill(USERNAME);
+    await page.getByPlaceholder(/Pass(wort|word)/i).fill(PASSWORD);
     await page.getByRole('button', { name: /(Anmelden|Sign in|Login)/i }).click();
 
     // After login, the dashboard renders the household list.

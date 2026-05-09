@@ -1,18 +1,16 @@
 import { test, expect } from '@playwright/test';
-
-const BACKEND = 'http://192.168.178.150:8000';
-const STORE_KEY = 'Cleanly.Store';
+import { BACKEND_URL, PASSWORD, STORE_KEY, USERNAME } from './config';
 
 // Manual-only E2E. Prerequisite: the test account is a moderator/admin in
 // at least one household that has another member and at least one task.
 test('moderator marks a task done as another member at a custom time', async ({ page }) => {
     await page.addInitScript((args) => {
         localStorage.setItem(args.key, JSON.stringify({ serverUrl: args.url }));
-    }, { key: STORE_KEY, url: BACKEND });
+    }, { key: STORE_KEY, url: BACKEND_URL });
 
     await page.goto('/');
-    await page.getByPlaceholder(/E-?Mail|Email/i).fill('lars.richard@rocketmail.com');
-    await page.getByPlaceholder(/Pass(wort|word)/i).fill('nopass');
+    await page.getByPlaceholder(/E-?Mail|Email/i).fill(USERNAME);
+    await page.getByPlaceholder(/Pass(wort|word)/i).fill(PASSWORD);
     await page.getByRole('button', { name: /(Anmelden|Sign in|Login)/i }).click();
 
     // Read the logged-in user's id from the store so we can assert the modal

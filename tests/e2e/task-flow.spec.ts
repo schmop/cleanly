@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const BACKEND = 'http://192.168.178.150:8000';
-const STORE_KEY = 'Cleanly.Store';
+import { BACKEND_URL, PASSWORD, STORE_KEY, USERNAME } from './config';
 
 // Smoke flow: log in, open the first household, verify the task list renders.
 // Kept minimal — the goal is to detect "the app no longer boots" regressions,
@@ -9,11 +7,11 @@ const STORE_KEY = 'Cleanly.Store';
 test('login → first household task list visible', async ({ page }) => {
     await page.addInitScript((args) => {
         localStorage.setItem(args.key, JSON.stringify({ serverUrl: args.url }));
-    }, { key: STORE_KEY, url: BACKEND });
+    }, { key: STORE_KEY, url: BACKEND_URL });
 
     await page.goto('/');
-    await page.getByPlaceholder(/E-?Mail|Email/i).fill('lars.richard@rocketmail.com');
-    await page.getByPlaceholder(/Pass(wort|word)/i).fill('nopass');
+    await page.getByPlaceholder(/E-?Mail|Email/i).fill(USERNAME);
+    await page.getByPlaceholder(/Pass(wort|word)/i).fill(PASSWORD);
     await page.getByRole('button', { name: /(Anmelden|Sign in|Login)/i }).click();
 
     // Open the first household card; an Ionic ion-list of tasks should render.
