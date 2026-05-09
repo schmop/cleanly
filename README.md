@@ -57,6 +57,30 @@ ionic serve
 ```
 It will tell you your local ip aswell, please change `getDevHostIp()` in `client/src/client/host.ts`.
 
+### Testing
+
+Unit tests use [Vitest](https://vitest.dev) (JSDOM environment, single-fork
+pool to keep CI memory under 2 GB). They live under `tests/unit/` and are
+mirrored to source modules — e.g. `tests/unit/common/reminder.spec.ts`
+covers `src/common/reminder.ts`. Helpers (`mountWithIonic`, `mockFetch`,
+`storeFixture`) live in `tests/helpers/`. The Ionic web components are
+stubbed globally in `tests/setup.ts` to avoid JSDOM shadow-DOM flakiness.
+
+```
+yarn test:unit              # one-shot run (used by CI)
+yarn test:watch             # interactive watch mode
+yarn test:unit reminder     # filter by file/test name
+```
+
+End-to-end tests use [Playwright](https://playwright.dev) and are
+**manual-only** — they are not run in CI because the self-hosted runner
+cannot host a browser plus the full stack. Specs live in `tests/e2e/`.
+
+```
+ionic serve                 # in one terminal
+yarn test:e2e               # in another (uses the test account in tests/e2e/*.spec.ts)
+```
+
 ## Enabling Firebase-Cloud-Messaging in Android-Apps
 
 Add the google-services.json in `android/app/google-services.json` with the configuration of your Firebase-Account.
