@@ -12,6 +12,7 @@
     "sync:dev": "NODE_ENV='development' cap sync android",
     "preview": "vite preview",
     "translations": "tsx ./bin/check-translation.ts",
+    "test": "yarn test:unit && yarn test:e2e",
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
