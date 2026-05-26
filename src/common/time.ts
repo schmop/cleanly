@@ -19,6 +19,17 @@ export function secondsToHours(seconds: number) {
     return Math.floor(seconds / HOUR_IN_SECONDS);
 }
 
+export function getTimezonedIsoString(date: Date): string {
+    // Sweden hack to add the timezone offset to the time and display as ISO format. Works accidentally.
+    // @link https://stackoverflow.com/a/65758103
+    const isoDateString = date.toLocaleString('sv').replace(" ", "T");
+    const tzOffset = -date.getTimezoneOffset();
+    const sign = tzOffset >= 0 ? "+" : "-";
+    const hours = `${Math.floor(Math.abs(date.getTimezoneOffset()) / 60)}`.padStart(2, "0");
+    const minutes = `${Math.floor(Math.abs(date.getTimezoneOffset()) % 60)}`.padStart(2, "0");
+    return `${isoDateString}${sign}${hours}:${minutes}`;
+}
+
 export const DAY_FORMATTING_SIZES = {
     days: 1,
     months: 30,

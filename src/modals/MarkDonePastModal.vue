@@ -95,6 +95,7 @@ import {
 } from '@ionic/vue';
 import { ComponentInstance, ref } from 'vue';
 import { User } from '@/models/User';
+import { getTimezonedIsoString } from '@/common/time';
 
 const props = defineProps<{
   members: User[],
@@ -105,8 +106,8 @@ const props = defineProps<{
 const datetimeModal = ref<ComponentInstance<typeof IonModal>>();
 
 const selectedUserId = ref<number>(props.currentUserId);
-const selectedDatetime = ref<string>(new Date().toISOString());
-const maxDatetime = new Date().toISOString();
+const selectedDatetime = ref<string>(getTimezonedIsoString(new Date()));
+const maxDatetime = getTimezonedIsoString(new Date());
 
 async function dismiss() {
   await modalController.dismiss(null, 'cancel');
