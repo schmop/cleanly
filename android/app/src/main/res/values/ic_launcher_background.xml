@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the logo's outer ring, so square-ish launcher masks blend into the artwork. -->
+    <color name="ic_launcher_background">#2F2F2F</color>
+</resources>
