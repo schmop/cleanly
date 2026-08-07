@@ -3,8 +3,7 @@
 	"appName": "cleanly",
 	"server": {
 		"hostname": "deeplink.cleanly.schmoppo.de",
-		"cleartext": true,
-		"androidScheme": "http"
+		"androidScheme": "https"
 	},
 	"webDir": "dist",
 	"plugins": {
@@ -20,9 +19,9 @@
 				"sound",
 				"alert"
 			]
+		},
+		"SystemBars": {
+			"insetsHandling": "css"
 		}
-	},
-	"android": {
-		"adjustMarginsForEdgeToEdge": "force"
 	}
 }

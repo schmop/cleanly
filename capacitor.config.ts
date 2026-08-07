@@ -18,10 +18,12 @@ const config: CapacitorConfig = {
         PushNotifications: {
             presentationOptions: ["badge", "sound", "alert"]
         },
+        // Replaces android.adjustMarginsForEdgeToEdge, which Capacitor 8 dropped. Insets now
+        // arrive as --safe-area-inset-* CSS variables, which Ionic's --ion-safe-area-* read.
+        SystemBars: {
+            insetsHandling: 'css',
+        },
     },
-    android: {
-        adjustMarginsForEdgeToEdge: "force",
-    }
 };
 if (process.env.NODE_ENV === 'development') {
     config.server = {
