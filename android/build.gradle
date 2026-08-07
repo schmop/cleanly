@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:9.1.1'
+        classpath 'com.android.tools.build:gradle:9.3.1'
         classpath 'com.google.gms:google-services:4.3.15'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -16,6 +16,24 @@ buildscript {
 }
 
 apply from: "variables.gradle"
+
+// AGP 9 removed the non-optimising default ProGuard file. Some bundled plugins still
+// ask for 'proguard-android.txt' by name and blow up while their build script is being
+// evaluated, so rewrite the request rather than forking every plugin.
+// Can go once every plugin ships the fix; Capacitor 8 already has it everywhere.
+def proguardShimmed = new HashSet<String>()
+gradle.beforeProject { project ->
+    project.plugins.whenPluginAdded {
+        def androidExt = project.extensions.findByName('android')
+        if (androidExt == null || !proguardShimmed.add(project.path)) {
+            return
+        }
+        def original = androidExt.metaClass.getMetaMethod('getDefaultProguardFile', String)
+        androidExt.metaClass.getDefaultProguardFile = { String name ->
+            original.invoke(delegate, 'proguard-android.txt' == name ? 'proguard-android-optimize.txt' : name)
+        }
+    }
+}
 
 allprojects {
     repositories {
