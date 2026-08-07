@@ -5,19 +5,18 @@
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "baseUrl": ".",
     "types": [
       "vite/client",
     ],
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "lib": [

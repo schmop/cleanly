@@ -70,7 +70,7 @@
     "ts-auto-guard": "^5.0.1",
     "ts-morph": "^28",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.2",
+    "typescript": "^6.0.3",
     "vite": "^8",
     "vite-plugin-checker": "^0.14",
     "vite-plugin-eslint": "^1.8.1",
