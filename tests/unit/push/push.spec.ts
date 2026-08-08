@@ -24,7 +24,7 @@ vi.mock('@capacitor/device', () => ({
 
 import { reactive } from 'vue';
 import { PushService } from '@/push';
-import { State, Store } from '@/store';
+import { makeGetters, State, Store } from '@/store';
 import type { Router } from 'vue-router';
 import type { Household } from '@/models/Household';
 
@@ -33,7 +33,7 @@ import type { Household } from '@/models/Household';
 // a plain object, so this file builds its own.
 function createReactiveStore(): Store {
     const state = reactive(new State());
-    return new Store(state, {} as never);
+    return new Store(state, makeGetters);
 }
 
 interface RouterMock { push: ReturnType<typeof vi.fn>; }

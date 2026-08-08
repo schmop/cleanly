@@ -61,67 +61,6 @@ function makeGettersReactive(getters: GetterFunctions): ComputedGetters {
     ) as ComputedGetters;
 }
 
-const getters: GetterFunctions = {
-    checklists: () => (householdId: number): Checklist[]|undefined => {
-        return store.state.households.find((household: Household) => household.id === householdId)?.checklists;
-    },
-    householdById: () => (householdId: number): undefined|Household => {
-        return store.state.households.find((household: Household) => household.id === householdId);
-    },
-    household: (): undefined|Household => {
-        const {viewedHousehold} = store.state;
-        if (null === viewedHousehold) {
-            return undefined;
-        }
-
-        return store.getters.householdById.value(viewedHousehold);
-    },
-    privileges: () => (household?: Household): Record<UserId, PrivilegeLevel> => {
-        const usedHousehold = household ?? store.getters.household.value;
-        if (undefined === usedHousehold) {
-            return {};
-        }
-
-        return usedHousehold.privileges.reduce((accumulator, privilege: HouseholdPrivilege) => {
-            return Object.assign(accumulator, {[privilege.user]: privilege.privilege});
-        }, {});
-    },
-    privilege: () => (userId?: UserId, household?: Household): PrivilegeLevel => {
-        const user = userId ?? store.state.user?.id;
-        if (!user) {
-            return PrivilegeLevel.USER;
-        }
-
-        return store.getters.privileges.value(household)[user] ?? PrivilegeLevel.USER;
-    },
-    canManageTasks: () => (userId?: UserId, household?: Household): boolean => {
-        const privilege = store.getters.privilege.value(userId, household);
-
-        return privilege >= PrivilegeLevel.MODERATOR;
-    },
-    canManageChecklists: () => (userId?: UserId, household?: Household): boolean => {
-        const privilege = store.getters.privilege.value(userId, household);
-
-        return privilege >= PrivilegeLevel.MODERATOR;
-    },
-    canManageHousehold: () => (userId?: UserId, household?: Household): boolean => {
-        const privilege = store.getters.privilege.value(userId, household);
-
-        return privilege === PrivilegeLevel.ADMIN;
-    },
-    stars: (): StarsRecord => {
-        const {viewedHousehold} = store.state;
-        if (null === viewedHousehold) {
-            return {};
-        }
-
-        return store.state.stars[viewedHousehold] ?? {};
-    },
-    tasks: (): Task[] => {
-        return store.getters.household.value?.tasks ?? [];
-    },
-};
-
 export class Store {
     private _state: State;
     public get state() {
@@ -136,10 +75,12 @@ export class Store {
 
     constructor(
         state: State,
-        getters: GetterFunctions,
+        makeGetters: (store: Store) => GetterFunctions,
     ) {
         this._state = state;
-        this.getters = makeGettersReactive(getters);
+        // The getter bodies close over `store`, but `computed` only runs them on
+        // first `.value` access, so referencing `this` mid-construction is safe.
+        this.getters = makeGettersReactive(makeGetters(this));
     }
 
     /** Used to register as a Vue Plugin */
@@ -303,11 +244,79 @@ export class Store {
     }
 }
 
+/**
+ * Builds the getter set bound to one specific store. Taking the store as a
+ * parameter (rather than closing over the singleton) is what lets tests run
+ * these exact getters against a throwaway store.
+ */
+export function makeGetters(store: Store): GetterFunctions {
+    return {
+        checklists: () => (householdId: number): Checklist[]|undefined => {
+            return store.state.households.find((household: Household) => household.id === householdId)?.checklists;
+        },
+        householdById: () => (householdId: number): undefined|Household => {
+            return store.state.households.find((household: Household) => household.id === householdId);
+        },
+        household: (): undefined|Household => {
+            const {viewedHousehold} = store.state;
+            if (null === viewedHousehold) {
+                return undefined;
+            }
+
+            return store.getters.householdById.value(viewedHousehold);
+        },
+        privileges: () => (household?: Household): Record<UserId, PrivilegeLevel> => {
+            const usedHousehold = household ?? store.getters.household.value;
+            if (undefined === usedHousehold) {
+                return {};
+            }
+
+            return usedHousehold.privileges.reduce((accumulator, privilege: HouseholdPrivilege) => {
+                return Object.assign(accumulator, {[privilege.user]: privilege.privilege});
+            }, {});
+        },
+        privilege: () => (userId?: UserId, household?: Household): PrivilegeLevel => {
+            const user = userId ?? store.state.user?.id;
+            if (!user) {
+                return PrivilegeLevel.USER;
+            }
+
+            return store.getters.privileges.value(household)[user] ?? PrivilegeLevel.USER;
+        },
+        canManageTasks: () => (userId?: UserId, household?: Household): boolean => {
+            const privilege = store.getters.privilege.value(userId, household);
+
+            return privilege >= PrivilegeLevel.MODERATOR;
+        },
+        canManageChecklists: () => (userId?: UserId, household?: Household): boolean => {
+            const privilege = store.getters.privilege.value(userId, household);
+
+            return privilege >= PrivilegeLevel.MODERATOR;
+        },
+        canManageHousehold: () => (userId?: UserId, household?: Household): boolean => {
+            const privilege = store.getters.privilege.value(userId, household);
+
+            return privilege === PrivilegeLevel.ADMIN;
+        },
+        stars: (): StarsRecord => {
+            const {viewedHousehold} = store.state;
+            if (null === viewedHousehold) {
+                return {};
+            }
+
+            return store.state.stars[viewedHousehold] ?? {};
+        },
+        tasks: (): Task[] => {
+            return store.getters.household.value?.tasks ?? [];
+        },
+    };
+}
+
 const state = reactive(new State());
 
 export const store = new Store(
     state,
-    getters,
+    makeGetters,
 );
 
 export const localstore = new Localstore(store);

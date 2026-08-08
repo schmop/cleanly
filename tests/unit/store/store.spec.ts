@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/toast', () => ({ error: vi.fn(), warning: vi.fn() }));
 
 import { reactive } from 'vue';
-import { State, Store, type GetterFunctions } from '@/store';
+import { makeGetters, State, Store } from '@/store';
 import { Household } from '@/models/Household';
 import { HouseholdPrivilege, PrivilegeLevel } from '@/models/HouseholdPrivilege';
 import { Task } from '@/models/Task';
@@ -12,43 +12,10 @@ import { FinanceTransaction } from '@/components/HouseholdView/FinancesView/fina
 
 let store: Store;
 
-// Mirror the getters in src/store/index.ts; closes over the module-level
-// `store` so each beforeEach can swap in a fresh Store instance.
-const getters: GetterFunctions = {
-    checklists: () => (id) => store.state.households.find(h => h.id === id)?.checklists,
-    householdById: () => (id) => store.state.households.find(h => h.id === id),
-    household: () => {
-        const v = store.state.viewedHousehold;
-        return v == null ? undefined : store.getters.householdById.value(v);
-    },
-    privileges: () => (household) => {
-        const used = household ?? store.getters.household.value;
-        if (!used) return {};
-        return used.privileges.reduce<Record<number, PrivilegeLevel>>(
-            (acc, p) => Object.assign(acc, { [p.user]: p.privilege }),
-            {},
-        );
-    },
-    privilege: () => (userId, household) => {
-        const u = userId ?? store.state.user?.id;
-        if (!u) return PrivilegeLevel.USER;
-        return store.getters.privileges.value(household)[u] ?? PrivilegeLevel.USER;
-    },
-    canManageTasks: () => (userId, household) =>
-        store.getters.privilege.value(userId, household) >= PrivilegeLevel.MODERATOR,
-    canManageChecklists: () => (userId, household) =>
-        store.getters.privilege.value(userId, household) >= PrivilegeLevel.MODERATOR,
-    canManageHousehold: () => (userId, household) =>
-        store.getters.privilege.value(userId, household) === PrivilegeLevel.ADMIN,
-    stars: () => {
-        const v = store.state.viewedHousehold;
-        return v == null ? {} : store.state.stars[v] ?? {};
-    },
-    tasks: () => store.getters.household.value?.tasks ?? [],
-};
-
 beforeEach(() => {
-    store = new Store(reactive(new State()), getters);
+    // Real production getters, bound to a throwaway store. Re-implementing them
+    // here would mean the assertions never touch src/store/index.ts.
+    store = new Store(reactive(new State()), makeGetters);
 });
 
 function makeUser(id: number): User {
