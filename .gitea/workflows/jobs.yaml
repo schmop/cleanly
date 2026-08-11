@@ -9,7 +9,8 @@ jobs:
       - name: Install npm
         uses: actions/setup-node@v4
         with:
-            node-version: 25
+            # jsdom (via Vitest) refuses the whole 25.x line: ^22.22.2 || ^24.15.0 || >=26.0.0
+            node-version: 26
       - name: Install yarn
         run: npm install -g yarn
       - name: Check out repository code
